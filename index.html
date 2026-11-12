@@ -4,184 +4,128 @@ html = r'''<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wildlife Rescue: The Lost Jungle Expedition</title>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 <style>
-:root{--gold:#f6c453;--leaf:#65c987;--ink:#10251d;--panel:rgba(8,25,20,.88);--cream:#fff8e7}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#142c24;color:var(--cream);font-family:system-ui,Segoe UI,Arial,sans-serif}
-canvas{display:block;touch-action:none}
-#game{position:fixed;inset:0}
-.panel{background:var(--panel);border:1px solid rgba(246,196,83,.5);border-radius:16px;box-shadow:0 12px 35px #0007;backdrop-filter:blur(8px)}
-#hud{position:fixed;inset:14px 14px auto;display:none;pointer-events:none;z-index:5;gap:10px;align-items:flex-start;justify-content:space-between}
-#brand{padding:10px 14px;min-width:210px}#brand strong{display:block;letter-spacing:1.5px;color:var(--gold);font-size:13px}#brand span{font-size:12px;color:#d5e5d8}
-#progress{padding:10px 14px;min-width:190px;text-align:right}#progress b{color:var(--gold)}#progress small{display:block;color:#d5e5d8}
-#mission{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:6;padding:10px 16px;max-width:min(440px,60vw);text-align:center;display:none}
-#mission strong{color:var(--gold);font-size:13px;letter-spacing:1px}#mission div{font-size:12px;margin-top:3px}
-#hint{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:6;padding:10px 16px;display:none;text-align:center;font-size:13px;max-width:90vw}
-#overlay{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:18px;background:linear-gradient(120deg,rgba(4,20,15,.84),rgba(6,25,20,.62)),url('') center/cover}
-#menu{width:min(700px,100%);padding:clamp(20px,4vw,38px);text-align:center}
-.kicker{color:var(--gold);font-size:12px;letter-spacing:3px;font-weight:800}
-h1{font-size:clamp(32px,7vw,62px);line-height:.98;margin:12px 0;color:#fff7df;text-shadow:0 4px 0 #254c37,0 8px 22px #0008}
-.subtitle{color:#d5e5d8;max-width:520px;margin:0 auto 22px;line-height:1.5}
-.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:14px 0}
-.choice{border:1px solid #668b70;background:#173b2d;color:#fff8e7;border-radius:12px;padding:11px 16px;cursor:pointer;font-weight:700}
-.choice.active{border:2px solid var(--gold);background:#315c3d;box-shadow:0 0 0 3px #f6c45322}
-button.primary{background:linear-gradient(#f7d477,#d99b31);border:0;border-radius:13px;padding:14px 28px;font-weight:900;color:#26351f;font-size:16px;cursor:pointer;box-shadow:0 5px 0 #8a5d1c}
-button:active{transform:translateY(2px)}
-.note{font-size:12px;color:#b9cdbd;margin-top:18px}
-#quizWrap{position:fixed;inset:0;z-index:15;display:none;place-items:center;padding:18px;background:#06130fbb}
-#quiz{width:min(510px,100%);padding:24px}
-#quiz h2{margin:5px 0 8px;color:var(--gold)}#quiz p{line-height:1.5}
-.answers{display:grid;gap:9px;margin-top:16px}.answer{padding:12px;text-align:left;background:#214734;border:1px solid #5d8b69;border-radius:10px;color:white;font-weight:700;cursor:pointer}
-.answer:hover{background:#326346}
-#feedback{min-height:24px;color:#f7d477;font-weight:700;margin-top:12px}
-#mobile{position:fixed;inset:auto 0 16px;z-index:8;display:none;justify-content:space-between;align-items:end;padding:0 18px;pointer-events:none}
-#stick{width:128px;height:128px;border-radius:50%;background:#d9f0df22;border:2px solid #e4f3df88;position:relative;pointer-events:auto;touch-action:none}
-#knob{position:absolute;width:48px;height:48px;left:38px;top:38px;border-radius:50%;background:#f6c453dd;border:2px solid white;box-shadow:0 3px 12px #0008}
-#actions{display:grid;grid-template-columns:repeat(2,64px);gap:9px;pointer-events:auto}
-.action{height:58px;border-radius:50%;border:2px solid #fff9;background:#173b2dcc;color:white;font-weight:900;font-size:12px;touch-action:none}
-#toast{position:fixed;z-index:9;top:85px;left:50%;transform:translateX(-50%);background:#f6c453;color:#203321;padding:9px 16px;border-radius:20px;font-weight:900;display:none}
-@media(max-width:700px){#hud{inset:8px 8px auto}#brand{min-width:0;padding:8px 10px}#progress{min-width:0;padding:8px 10px}#mission{top:76px;max-width:90vw}#mobile{display:flex}#hint{bottom:158px;font-size:12px}#brand span{font-size:10px}#progress small{font-size:10px}}
+:root{--ink:#203c32;--leaf:#367653;--lime:#cce58a;--cream:#fff8e8;--coral:#ed876b}
+*{box-sizing:border-box}body{margin:0;background:#e9f1d8;color:var(--ink);font-family:Trebuchet MS,Arial,sans-serif}
+#page{max-width:1120px;margin:auto;padding:14px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+h1{font-size:clamp(22px,4vw,34px);margin:4px 0;color:#244d38}
+#status{font-weight:bold;background:#fff8e8;border:2px solid #b7cf91;border-radius:14px;padding:9px 13px}
+#game-wrap{background:#fff8e8;border:4px solid #315f43;border-radius:22px;overflow:hidden;box-shadow:0 10px 25px #385a3522}
+#game{width:100%;min-height:500px}#game canvas{display:block;width:100%!important;height:auto!important;touch-action:none}
+.note{font-size:14px;line-height:1.5;margin:10px 3px}
+.overlay{position:fixed;inset:0;background:#10291dcc;display:flex;align-items:center;justify-content:center;padding:16px;z-index:5}
+.panel{width:min(460px,100%);background:var(--cream);border:4px solid #47734c;border-radius:22px;padding:24px;box-shadow:0 12px 35px #0004}
+.panel h2{margin-top:0}.panel label{display:block;font-weight:bold;margin:13px 0 5px}
+.panel input{width:100%;padding:13px;border:2px solid #9dbb83;border-radius:10px;font-size:17px}
+button{border:0;border-radius:12px;background:#367653;color:white;font-weight:bold;padding:13px 18px;font-size:16px;cursor:pointer}
+button:hover{background:#244d38}button:disabled{opacity:.45;cursor:not-allowed}
+#startError{color:#a33;font-size:14px;min-height:18px}
+.small{font-size:13px;color:#536d53;line-height:1.5}
+@media(max-width:600px){#page{padding:8px}#game{min-height:420px}.note{font-size:12px}}
 </style>
 </head>
 <body>
-<div id="game"></div>
-<div id="hud">
-  <div id="brand" class="panel"><strong>WILDLIFE RESCUE</strong><span>THE LOST JUNGLE EXPEDITION</span></div>
-  <div id="progress" class="panel"><b id="score">0</b> / 4 relics <small id="status">Explore the jungle</small></div>
+<div id="page">
+<header><h1>Wildlife Rescue: The Lost Jungle Expedition</h1><div id="status">Explorer: Not started | Score: 0</div></header>
+<div id="game-wrap"><div id="game"></div></div>
+<p class="note">Explore the jungle, discover hidden animals, match pictures with English words, follow clues through the maze and rebuild the sanctuary. Complete each mission to earn points.</p>
 </div>
-<div id="mission" class="panel"><strong id="missionTitle">MISSION 1 · THE HIDDEN RIVER</strong><div id="missionText">Find the animal and learn its name.</div></div>
-<div id="hint" class="panel">Move with WASD or the touch joystick · Approach a glowing animal and press E / INTERACT</div>
-<div id="toast"></div>
-<div id="mobile">
-  <div id="stick"><div id="knob"></div></div>
-  <div id="actions"><button class="action" id="jumpBtn">JUMP</button><button class="action" id="interactBtn">INTERACT</button></div>
+<div class="overlay" id="entry">
+ <div class="panel">
+  <h2>Welcome, Explorer</h2>
+  <p>Your expedition is waiting. Enter your details before you begin so your mission score can be recorded.</p>
+  <form id="entryForm">
+   <label for="studentName">Your name</label><input id="studentName" maxlength="60" required placeholder="Enter your full name">
+   <label for="studentClass">Your class</label><input id="studentClass" maxlength="40" required placeholder="Example: Year 4 Bestari">
+   <p id="startError"></p><button type="submit">Start expedition</button>
+  </form>
+  <p class="small">Your name, class, score and mission progress will be submitted to your teacher's spreadsheet when you finish.</p>
+ </div>
 </div>
-<div id="quizWrap"><div id="quiz" class="panel">
-  <div class="kicker" id="quizKicker">WILDLIFE KNOWLEDGE</div>
-  <h2 id="quizTitle">A jungle challenge!</h2>
-  <p id="question">Question appears here.</p>
-  <div class="answers" id="answers"></div>
-  <div id="feedback"></div>
-  <button class="primary" id="continueBtn" style="display:none;margin-top:12px">CONTINUE EXPEDITION</button>
-</div></div>
-<div id="overlay"><div id="menu" class="panel">
-  <div class="kicker">AN INTERACTIVE ENGLISH ADVENTURE</div>
-  <h1>WILDLIFE<br>RESCUE</h1>
-  <p class="subtitle">A lost sanctuary. Four hidden relics. Can you explore the jungle, discover its animals and become a Wildlife Guardian?</p>
-  <div style="font-weight:800;color:#f6d98a">CHOOSE YOUR EXPLORER</div>
-  <div class="row"><button class="choice active" data-char="girl">♀ Explorer A</button><button class="choice" data-char="boy">♂ Explorer B</button></div>
-  <div style="font-weight:800;color:#f6d98a;margin-top:12px">HOW TO PLAY</div>
-  <p class="subtitle" style="font-size:13px;margin:8px auto">Desktop: WASD to move, mouse to look, SPACE to jump, E to interact. Mobile: use the joystick and buttons. Find the glowing wildlife markers and answer English questions.</p>
-  <button class="primary" id="startBtn">START EXPEDITION</button>
-  <div class="note">Year 4 English · Animal vocabulary · Describing animals · Listening and reading</div>
-</div></div>
-<script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-
-const root=document.getElementById('game');
-const scene=new THREE.Scene(); scene.background=new THREE.Color(0x9bc7a0); scene.fog=new THREE.Fog(0x9bc7a0,24,95);
-const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,180);
-const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight); renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap; root.appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xdff5ff,0x35502c,2.0));
-const sun=new THREE.DirectionalLight(0xfff0c9,2.3); sun.position.set(-18,30,12); sun.castShadow=true; sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.left=-45;sun.shadow.camera.right=45;sun.shadow.camera.top=45;sun.shadow.camera.bottom=-45;scene.add(sun);
-const mat=(color,rough=.9)=>new THREE.MeshStandardMaterial({color,roughness:rough});
-const materials={grass:mat(0x477d43),dark:mat(0x244c32),leaf:mat(0x2d713e),stone:mat(0x77796a),sand:mat(0xc6aa70),water: new THREE.MeshStandardMaterial({color:0x3b9caa,roughness:.25,metalness:.1}),gold:new THREE.MeshStandardMaterial({color:0xf6c453,metalness:.65,roughness:.28}),wood:mat(0x60412b),bark:mat(0x553c29)};
-function box(w,h,d,m,x,y,z){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);return o}
-function sphere(r,m,x,y,z,sx=1,sy=1,sz=1){const o=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;scene.add(o);return o}
-function cylinder(rt,rb,h,m,x,y,z,seg=10){const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg),m);o.position.set(x,y,z);o.castShadow=true;scene.add(o);return o}
-// Procedural jungle floor and winding trail
-const floor=new THREE.Mesh(new THREE.PlaneGeometry(120,120),materials.grass);floor.rotation.x=-Math.PI/2;floor.position.y=-.12;floor.receiveShadow=true;scene.add(floor);
-const pathMat=mat(0xb49a65);const path=new THREE.Mesh(new THREE.PlaneGeometry(5,78),pathMat);path.rotation.x=-Math.PI/2;path.position.set(0,-.095,-22);scene.add(path);
-// river
-const river=new THREE.Mesh(new THREE.PlaneGeometry(12,75),materials.water);river.rotation.x=-Math.PI/2;river.position.set(17,-.07,-22);scene.add(river);
-for(let i=0;i<10;i++){const rock=sphere(.8,materials.stone,12+i%2*1.1,.05,-8-i*3,.9,.35,.7);}
-// ancient temple at far end
-for(let x of [-5,5]){box(1.4,7,1.5,materials.stone,x,3.4,-52);for(let y=0;y<4;y++)box(1.8,.35,1.8,materials.sand,x,1+y*1.8,-52)}
-box(13,1.2,2,materials.stone,0,7,-52);box(9,.6,1.5,materials.sand,0,7.8,-52);
-for(let x=-4;x<=4;x+=2)box(.35,3,.4,materials.dark,x,4.5,-51.8);
-// jungle trees, ferns and stones
-for(let i=0;i<65;i++){let x=(Math.random()-.5)*82,z=-58+Math.random()*76;if(Math.abs(x)<4&&z<5)continue;if(x>10&&x<24)continue;let h=4+Math.random()*5;cylinder(.35,.55,h,materials.bark,x,h/2,z);for(let j=0;j<4;j++){const crown=sphere(1.6,mat([0x24653a,0x347d42,0x3e8846][j%3]),x+(Math.random()-.5)*1.8,h*.72+Math.random()*1.3,z+(Math.random()-.5)*1.8,1.2,.75,1.1);crown.castShadow=true;}}
-for(let i=0;i<45;i++){let x=(Math.random()-.5)*55,z=-55+Math.random()*65;if(Math.abs(x)<4)continue;for(let j=0;j<3;j++){let leaf=sphere(.22,materials.leaf,x+(Math.random()-.5),.35+j*.12,z+(Math.random()-.5),.65,1.4,.4);leaf.rotation.z=(Math.random()-.5)*1.4;}}
-// temple stepping stones
-for(let i=0;i<7;i++)box(2,.25,1.5,materials.stone,-1+(i%2)*2,.1,-39-i*1.8);
-// player built from simple original geometry
-const player=new THREE.Group();scene.add(player);
-const skin=mat(0xc98c65),shirt=mat(0x315e4a),pants=mat(0x493d32),boots=mat(0x29251f),hair=mat(0x30231d),pack=mat(0x9a6332);
-function limb(parent,r1,r2,len,m,x,y,z){const o=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,len,10),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o}
-const torso= new THREE.Mesh(new THREE.CapsuleGeometry(.42,.72,4,8),shirt);torso.position.y=1.55;torso.castShadow=true;player.add(torso);
-const head=sphere(.32,skin,0,2.35,0);player.remove(head);player.add(head);
-const haircap=sphere(.33,hair,0,2.53,-.04,1,.65,1);player.add(haircap);
-const backpack=box(.48,.65,.25,pack,0,1.55,-.48);player.add(backpack);
-const arms=[],legs=[];
-for(let side of [-1,1]){const arm=limb(player,.15,.18,.82,skin,side*.55,1.55,0);arm.rotation.z=side*-.16;arms.push(arm);const leg=limb(player,.19,.22,.85,pants,side*.23,.55,0);legs.push(leg);const foot=box(.28,.18,.48,boots,side*.23,.12,.12);player.add(foot);}
-player.position.set(0,0,4);
-// swap explorer visual accent
-let chosen='girl';function setCharacter(which){chosen=which;shirt.color.set(which==='girl'?0x315e83:0x8a5935);hair.material=hair;haircap.material=which==='girl'?mat(0x30231d):mat(0x463020);}
-// animal models built from primitives
-function makeAnimal(type,x,z,color){const g=new THREE.Group();g.position.set(x,.1,z);scene.add(g);const bodyMat=mat(color);const white=mat(0xf3e9d3),black=mat(0x1b211d);
- const body=sphere(type==='snake'?.28:.48,bodyMat,0,.55,0,type==='snake'?1.7:1.25,.8,type==='snake'?.65:.8);g.add(body);
- if(type!=='snake'){const head=sphere(.27,bodyMat,0,.95,.45,1,1,1);g.add(head);for(let s of [-1,1]){const eye=sphere(.045,black,s*.12,1.02,.68);g.add(eye)}}
- if(type==='rabbit'){for(let s of [-1,1]){const ear=sphere(.12,bodyMat,s*.16,1.38,.42,.55,2.2,.5);g.add(ear)}}
- if(type==='panda'){for(let s of [-1,1]){const patch=sphere(.09,black,s*.13,1.02,.69,.7,1.1,.4);g.add(patch)}}
- if(type==='fish'||type==='shark'||type==='dolphin'){const tail=sphere(.2,bodyMat,0,.55,-.65,.5,1.5,.5);tail.rotation.x=.5;g.add(tail);const fin=sphere(.12,bodyMat,0,.9,-.05,.5,.25,1.5);g.add(fin);}
- if(type==='snake'){const coil=sphere(.22,bodyMat,-.55,.35,-.2,2.4,.45,1);g.add(coil);const tongue=box(.04,.03,.35,mat(0xd94c45),0,.55,.5);g.add(tongue);}
- const ring=new THREE.Mesh(new THREE.TorusGeometry(.85,.045,8,32),materials.gold);ring.rotation.x=Math.PI/2;ring.position.y=.08;g.add(ring);
- const beam=new THREE.Mesh(new THREE.CylinderGeometry(.015,.35,2.5,16,1,true),new THREE.MeshBasicMaterial({color:0xf6c453,transparent:true,opacity:.12,side:THREE.DoubleSide}));beam.position.y=1.25;g.add(beam);
- g.userData={type,found:false,ring,beam};return g;
+<script>
+const SHEETS_WEB_APP_URL = ""; // Paste your Google Apps Script Web App URL here.
+let learner={name:"",studentClass:""}, score=0, completed=0, saved=false;
+const statusEl=document.getElementById("status");
+function updateStatus(){statusEl.textContent=`Explorer: ${learner.name} | Score: ${score} | Missions: ${completed}/4`;}
+function saveResult(){
+ if(saved)return; saved=true;
+ const payload={name:learner.name,studentClass:learner.studentClass,activity:"Wildlife Rescue: The Lost Jungle Expedition",score,missionsCompleted:completed,status:"Completed",submittedAt:new Date().toISOString()};
+ try{localStorage.setItem("wildlifeRescueLastResult",JSON.stringify(payload));}catch(e){}
+ if(SHEETS_WEB_APP_URL){
+  fetch(SHEETS_WEB_APP_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)}).catch(()=>{});
+ }
 }
-const animals=[
- {type:'dolphin',name:'DOLPHIN',x:12,z:-8,question:'Which animal lives in the ocean and can jump out of the water?',options:['Dolphin','Rabbit','Panda'],correct:0,learn:'A dolphin is a clever sea animal.'},
- {type:'rabbit',name:'RABBIT',x:-7,z:-19,question:'Which animal has long ears and can hop?',options:['Shark','Rabbit','Snake'],correct:1,learn:'A rabbit has long ears. It can hop.'},
- {type:'panda',name:'PANDA',x:7,z:-32,question:'Which animal is black and white and eats bamboo?',options:['Fish','Panda','Snail'],correct:1,learn:'A panda is black and white. It eats bamboo.'},
- {type:'snake',name:'SNAKE',x:-3,z:-45,question:'Which animal has a long body and no legs?',options:['Snake','Dolphin','Rabbit'],correct:0,learn:'A snake has a long body. It can slither.'}
-];
-animals.forEach(a=>a.object=makeAnimal(a.type,a.x,a.z,({dolphin:0x4b9dbb,rabbit:0xc6b7a3,panda:0xf0eee4,snake:0x8da34c})[a.type]));
-// simple environmental signposts
-for(const [z,label] of [[-8,'RIVER'],[-19,'HABITAT'],[-32,'TEMPLE'],[-45,'SANCTUARY']]){box(1.4,1.3,.18,materials.wood,-2,1,z);const canvas=document.createElement('canvas');canvas.width=256;canvas.height=96;const c=canvas.getContext('2d');c.fillStyle='#f6d88e';c.font='bold 36px Arial';c.textAlign='center';c.fillText(label,128,60);const tex=new THREE.CanvasTexture(canvas);const sign=new THREE.Mesh(new THREE.PlaneGeometry(1.25,.46),new THREE.MeshBasicMaterial({map:tex,transparent:true}));sign.position.set(-2,1.25,z+.11);scene.add(sign)}
-// controls
-const keys={};let joy={x:0,y:0};let yaw=0,pitch=.12,velocityY=0,onGround=true,paused=true,quizOpen=false,found=0,activeAnimal=null,moveSpeed=7;
-addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown'].includes(e.code))e.preventDefault();if(e.code==='KeyE'&&!paused&&!quizOpen)interact();if(e.code==='Space'&&onGround&&!paused&&!quizOpen){velocityY=7;onGround=false;}});
-addEventListener('keyup',e=>keys[e.code]=false);
-renderer.domElement.addEventListener('click',()=>{if(!paused&&!quizOpen&&innerWidth>700)renderer.domElement.requestPointerLock?.()});
-addEventListener('mousemove',e=>{if(document.pointerLockElement===renderer.domElement){yaw-=e.movementX*.0025;pitch=Math.max(-.35,Math.min(.65,pitch-e.movementY*.0018));}});
-addEventListener('contextmenu',e=>e.preventDefault());
-const stick=document.getElementById('stick'),knob=document.getElementById('knob');let stickId=null;
-stick.addEventListener('pointerdown',e=>{stickId=e.pointerId;stick.setPointerCapture(stickId);moveStick(e)});
-stick.addEventListener('pointermove',e=>{if(e.pointerId===stickId)moveStick(e)});
-function moveStick(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=e.clientX-cx,dy=e.clientY-cy,len=Math.min(42,Math.hypot(dx,dy)),a=Math.atan2(dy,dx);joy.x=Math.cos(a)*len/42;joy.y=Math.sin(a)*len/42;knob.style.transform=`translate(${Math.cos(a)*len}px,${Math.sin(a)*len}px)`;}
-function resetStick(){stickId=null;joy.x=joy.y=0;knob.style.transform='translate(0,0)'}
-stick.addEventListener('pointerup',resetStick);stick.addEventListener('pointercancel',resetStick);
-document.getElementById('jumpBtn').addEventListener('pointerdown',()=>{if(onGround&&!paused&&!quizOpen){velocityY=7;onGround=false}});
-document.getElementById('interactBtn').addEventListener('pointerdown',()=>{if(!paused&&!quizOpen)interact()});
-const overlay=document.getElementById('overlay'),hud=document.getElementById('hud'),mission=document.getElementById('mission'),hint=document.getElementById('hint');
-document.querySelectorAll('[data-char]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-char]').forEach(x=>x.classList.remove('active'));b.classList.add('active');setCharacter(b.dataset.char)});
-document.getElementById('startBtn').onclick=()=>{overlay.style.display='none';hud.style.display='flex';mission.style.display='block';hint.style.display='block';paused=false;toast('Expedition started! Find the glowing wildlife markers.');};
-function toast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.style.display='none',2600)}
-function interact(){let nearest=null,dist=3.2;animals.forEach(a=>{if(!a.object.userData.found){const d=player.position.distanceTo(a.object.position);if(d<dist){dist=d;nearest=a}}});if(nearest){activeAnimal=nearest;openQuiz(nearest)}else toast('Explore nearby to find a glowing animal!')}
-function openQuiz(a){quizOpen=true;document.exitPointerLock?.();document.getElementById('quizWrap').style.display='grid';document.getElementById('quizKicker').textContent='WILDLIFE DISCOVERY · '+a.name;document.getElementById('quizTitle').textContent='Who am I?';document.getElementById('question').textContent=a.question;document.getElementById('feedback').textContent='Choose the correct answer.';document.getElementById('continueBtn').style.display='none';const box=document.getElementById('answers');box.innerHTML='';a.options.forEach((op,i)=>{const b=document.createElement('button');b.className='answer';b.textContent=op;b.onclick=()=>answer(a,i);box.appendChild(b)});}
-function answer(a,i){const fb=document.getElementById('feedback'),buttons=[...document.querySelectorAll('.answer')];buttons.forEach(b=>b.disabled=true);if(i===a.correct){fb.textContent='Correct! '+a.learn;a.object.userData.found=true;a.object.visible=false;found++;document.getElementById('score').textContent=found;document.getElementById('status').textContent=found===4?'Sanctuary restored!':'Relics discovered: '+found+'/4';document.getElementById('quizTitle').textContent='Wildlife rescued!';}else{fb.textContent='Not quite. The correct answer is '+a.options[a.correct]+'. Try to remember it!';buttons[a.correct].style.borderColor='#f6c453';}
-document.getElementById('continueBtn').style.display='inline-block';}
-document.getElementById('continueBtn').onclick=()=>{document.getElementById('quizWrap').style.display='none';quizOpen=false;if(found===4)finish();else toast('Keep exploring. '+(4-found)+' wildlife discoveries remain!');};
-function finish(){paused=true;document.getElementById('quizWrap').style.display='grid';document.getElementById('quizKicker').textContent='MISSION COMPLETE';document.getElementById('quizTitle').textContent='You are a Wildlife Guardian!';document.getElementById('question').textContent='Amazing work, explorer! You discovered all four animals and completed your English expedition.';document.getElementById('answers').innerHTML='<div style="padding:14px;background:#244c32;border-radius:10px">🌿 4 animals rescued · English vocabulary champion</div>';document.getElementById('feedback').textContent='Your jungle adventure is complete.';document.getElementById('continueBtn').textContent='PLAY AGAIN';document.getElementById('continueBtn').style.display='inline-block';document.getElementById('continueBtn').onclick=()=>location.reload();}
-function update(dt){if(paused||quizOpen)return;
- const forward=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)-joy.y;
- const sideways=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+joy.x;
- const len=Math.hypot(forward,sideways);if(len>.05){const f=forward/Math.max(1,len),s=sideways/Math.max(1,len);const dx=Math.sin(yaw)*f+Math.cos(yaw)*s,dz=-Math.cos(yaw)*f+Math.sin(yaw)*s;player.position.x+=dx*moveSpeed*dt;player.position.z+=dz*moveSpeed*dt;player.rotation.y=Math.atan2(dx,dz);torso.position.y=1.55+Math.sin(performance.now()*.012)*.035;arms.forEach((a,i)=>a.rotation.x=Math.sin(performance.now()*.012+i*Math.PI)*.5);legs.forEach((a,i)=>a.rotation.x=Math.sin(performance.now()*.012+i*Math.PI)*.55);}
- velocityY-=18*dt;player.position.y+=velocityY*dt;if(player.position.y<=0){player.position.y=0;velocityY=0;onGround=true;}
- player.position.x=THREE.MathUtils.clamp(player.position.x,-38,38);player.position.z=THREE.MathUtils.clamp(player.position.z,-58,12);
- const desired=new THREE.Vector3(player.position.x+Math.sin(yaw)*7,player.position.y+4.1,player.position.z+Math.cos(yaw)*7);camera.position.lerp(desired,1-Math.pow(.001,dt));const look=new THREE.Vector3(player.position.x,player.position.y+1.45,player.position.z);camera.lookAt(look);
- animals.forEach(a=>{if(!a.object.userData.found){a.object.rotation.y+=dt*.45;a.object.position.y=.1+Math.sin(performance.now()*.002+a.x)*.12;a.object.userData.ring.rotation.z+=dt*.6;}});
- let near=animals.find(a=>!a.object.userData.found&&player.position.distanceTo(a.object.position)<3.2);hint.textContent=near?'Press E / INTERACT to discover the '+near.name+'.':'Explore with WASD or the touch joystick · Find the glowing wildlife markers.';
- document.getElementById('missionTitle').textContent=found<4?['MISSION 1 · THE HIDDEN RIVER','MISSION 2 · THE LOST HABITAT','MISSION 3 · THE TEMPLE PUZZLE','MISSION 4 · WILDLIFE RESCUE'][found]:'MISSION COMPLETE';
- document.getElementById('missionText').textContent=found<4?'Discover animals and answer the English clue to rescue them.':'All animals have been rescued!';
+function addPoints(n){score+=n;updateStatus();}
+function finishMission(scene){completed++;updateStatus();scene.showMessage("Mission complete","You have earned points. The next jungle area is ready.",()=>scene.scene.start("Map"));}
+const W=960,H=600;
+const palette={deep:0x234c39,leaf:0x4d8a52,light:0xa9c978,cream:0xfff5d9,water:0x68b9c4,coral:0xe8896c};
+function text(scene,x,y,t,size=24,color="#203c32",origin=.5){return scene.add.text(x,y,t,{fontFamily:"Trebuchet MS, Arial",fontSize:size+"px",color,fontStyle:"bold",align:"center",wordWrap:{width:800}}).setOrigin(origin);}
+function button(scene,x,y,label,fn,w=210){let r=scene.add.rectangle(x,y,w,52,0x367653).setStrokeStyle(3,0xfff5d9).setInteractive({useHandCursor:true});let t=text(scene,x,y,label,20,"#ffffff");r.on("pointerdown",fn);return [r,t];}
+function background(scene,title,sub){scene.cameras.main.setBackgroundColor("#dcebbd");scene.add.rectangle(W/2,H/2,W,H,0xdcebbd);for(let i=0;i<15;i++){let x=(i*83)%W,y=90+(i*47)%470;scene.add.ellipse(x,y,95,42, i%2?0x8bb96e:0x6d9f5c,.24);}text(scene,W/2,34,title,30,"#244d38");text(scene,W/2,70,sub,16,"#365b43");}
+function animalArt(scene,x,y,kind,scale=1){
+ const g=scene.add.container(x,y);let c=({panda:0x242d2b,rabbit:0xd9d0bc,snake:0x6a9d4c,fish:0xe58a52,dolphin:0x668da9,shark:0x71828e})[kind]||0x8b9b72;
+ let body=scene.add.ellipse(0,0,kind==="snake"?100:kind==="rabbit"?72:88,kind==="snake"?34:kind==="rabbit"?65:55,c);
+ g.add(body);
+ if(kind==="panda"){g.add([scene.add.ellipse(-17,-8,22,28,0x202827),scene.add.ellipse(17,-8,22,28,0x202827),scene.add.circle(-17,-8,5,0xffffff),scene.add.circle(17,-8,5,0xffffff),scene.add.circle(0,9,6,0x202827)]);}
+ else if(kind==="rabbit"){g.add([scene.add.ellipse(-17,-47,17,48,c),scene.add.ellipse(17,-47,17,48,c),scene.add.circle(-14,-5,4,0x202827),scene.add.circle(14,-5,4,0x202827)]);}
+ else if(kind==="snake"){g.add([scene.add.circle(48,-5,18,c),scene.add.circle(54,-10,3,0xffffff),scene.add.circle(55,-10,1.5,0x202827)]);}
+ else if(kind==="fish"||kind==="dolphin"||kind==="shark"){g.add([scene.add.triangle(-53,0,0,-20,0,20,-30,0,c),scene.add.circle(22,-8,4,0xffffff),scene.add.circle(23,-8,2,0x202827)]);}
+ else{g.add([scene.add.circle(-18,-8,4,0xffffff),scene.add.circle(18,-8,4,0xffffff)]);}
+ g.setScale(scale);return g;
 }
-let last=performance.now();function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000,.04);last=now;update(dt);renderer.render(scene,camera)}requestAnimationFrame(loop);
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+class Base extends Phaser.Scene{
+ showMessage(title,body,done){let shade=this.add.rectangle(W/2,H/2,W,H,0x173526,.78).setDepth(50);let box=this.add.rectangle(W/2,H/2,600,260,0xfff5d9).setStrokeStyle(5,0x47734c).setDepth(51);let a=text(this,W/2,H/2-70,title,30,"#244d38").setDepth(52);let b=text(this,W/2,H/2-10,body,19,"#365b43").setDepth(52);let [r,t]=button(this,W/2,H/2+75,"Continue",()=>{shade.destroy();box.destroy();a.destroy();b.destroy();r.destroy();t.destroy();done();},180);r.setDepth(53);t.setDepth(54);}
+}
+class MapScene extends Base{
+ constructor(){super("Map")}
+ create(){background(this,"Jungle Expedition Map","Choose an unlocked area and continue your rescue mission.");let areas=[["The Forgotten River","Find the hidden animals","Find"],["Animal Rescue Camp","Match animal pictures and words","Match"],["The Lost Temple Maze","Follow the English clues","Maze"],["The Secret Sanctuary","Place animals in their habitats","Habitat"]];areas.forEach((a,i)=>{let x=250+(i%2)*460,y=205+Math.floor(i/2)*190;this.add.rectangle(x,y,370,130,0xf8f1d7).setStrokeStyle(4,0x73945a);text(this,x,y-38,a[0],22);text(this,x,y-4,a[1],15,"#536d53");button(this,x,y+42,"Enter area",()=>this.scene.start(a[2]),160);});text(this,W/2,555,`Explorer: ${learner.name}   Score: ${score}`,18);}}
+class FindScene extends Base{
+ constructor(){super("Find")}
+ create(){background(this,"Mission 1: The Forgotten River","Find all four animals hidden around the river. Select each animal when you spot it.");this.add.rectangle(W/2,355,850,390,0x79b9a0).setStrokeStyle(6,0x47734c);for(let i=0;i<9;i++){let x=100+i*95;this.add.ellipse(x,210+(i%3)*45,100,55,0x39754c,.9);this.add.rectangle(x,455,18,90,0x77563c);}let targets=[["dolphin",185,350],["fish",390,435],["rabbit",650,300],["panda",790,430]];let found=new Set();targets.forEach(([k,x,y])=>{let a=animalArt(this,x,y,k,.9).setInteractive(new Phaser.Geom.Rectangle(-65,-65,130,130),Phaser.Geom.Rectangle.Contains);a.on("pointerdown",()=>{if(found.has(k))return;found.add(k);a.setAlpha(.35);text(this,x,y-65,k.toUpperCase(),16,"#173526");addPoints(10);if(found.size===4)finishMission(this);});});text(this,480,535,"Animals found: 0 / 4",19).setName("counter");this.input.on("pointerdown",()=>{});this.time.addEvent({delay:100,loop:true,callback:()=>{let c=this.children.getByName("counter");if(c)c.setText(`Animals found: ${found.size} / 4`);}});button(this,850,555,"Back to map",()=>this.scene.start("Map"),160);}}
+class MatchScene extends Base{
+ constructor(){super("Match")}
+ create(){background(this,"Mission 2: Animal Rescue Camp","Drag each animal picture onto its correct English word.");let items=[["rabbit",160,220],["panda",160,370],["snake",160,500]];let words=[["PANDA",720,220],["SNAKE",720,370],["RABBIT",720,500]];let matched=new Set();let zones={};words.forEach(([w,x,y])=>{let box=this.add.rectangle(x,y,220,88,0xfff8e8).setStrokeStyle(4,0x71965a).setInteractive();text(this,x,y,w,24);zones[w]=box;});items.forEach(([k,x,y])=>{let art=animalArt(this,x,y,k,.8);art.setSize(130,100).setInteractive(new Phaser.Geom.Rectangle(-65,-50,130,100),Phaser.Geom.Rectangle.Contains);this.input.setDraggable(art);art.kind=k;});this.input.on("drag",(p,obj,dx,dy)=>obj.setPosition(dx,dy));this.input.on("dragend",(p,obj)=>{let key=obj.kind.toUpperCase(),z=zones[key];if(Phaser.Geom.Intersects.RectangleToRectangle(obj.getBounds(),z.getBounds())&&!matched.has(key)){matched.add(key);obj.disableInteractive();obj.setPosition(z.x,z.y);addPoints(15);if(matched.size===3)finishMission(this);}else{let orig={rabbit:[160,220],panda:[160,370],snake:[160,500]}[obj.kind];this.tweens.add({targets:obj,x:orig[0],y:orig[1],duration:250});}});button(this,850,555,"Back to map",()=>this.scene.start("Map"),160);}}
+class MazeScene extends Base{
+ constructor(){super("Maze")}
+ create(){background(this,"Mission 3: The Lost Temple Maze","Read each clue and choose the path to the animal. You can try again if you take the wrong path.");this.add.rectangle(480,330,760,390,0xd2c69b).setStrokeStyle(8,0x806e49);for(let i=0;i<5;i++){this.add.rectangle(250+i*115,330,18,390,0x8a7957);this.add.rectangle(480,150+i*85,760,16,0x8a7957);}let steps=[{q:"I have long ears. I can hop. Who am I?",a:"RABBIT",opts:["RABBIT","PANDA","SNAKE"]},{q:"I have black and white fur. Who am I?",a:"PANDA",opts:["FISH","PANDA","DOLPHIN"]},{q:"I have no legs and I can slither. Who am I?",a:"SNAKE",opts:["SHARK","RABBIT","SNAKE"]}];let index=0;let q=text(this,480,130,steps[0].q,21);let choices=[];function draw(){choices.forEach(o=>o.forEach(z=>z.destroy()));choices=[];q.setText(steps[index].q);steps[index].opts.forEach((v,i)=>{choices.push(button(this,300+i*180,475,v,()=>{if(v===steps[index].a){addPoints(15);index++;if(index===steps.length)finishMission(this);else draw();}else this.showMessage("Dead end","Read the clue again and try another path.",()=>{});},150));});}draw();button(this,850,555,"Back to map",()=>this.scene.start("Map"),160);}}
+class HabitatScene extends Base{
+ constructor(){super("Habitat")}
+ create(){background(this,"Mission 4: The Secret Sanctuary","Drag each animal into a suitable habitat to complete the rescue.");let habitats=[["RIVER",260,350,0x75c2cf],["FOREST",700,350,0x86ad68]];let boxes={};habitats.forEach(([n,x,y,c])=>{let b=this.add.rectangle(x,y,300,190,c).setStrokeStyle(5,0x47734c).setInteractive();text(this,x,y-75,n,24);boxes[n]=b;});let animals=[["dolphin",160,180,"RIVER"],["fish",360,180,"RIVER"],["rabbit",600,180,"FOREST"],["panda",800,180,"FOREST"]];let done=new Set();animals.forEach(([k,x,y,home])=>{let a=animalArt(this,x,y,k,.65);a.setSize(110,90).setInteractive(new Phaser.Geom.Rectangle(-55,-45,110,90),Phaser.Geom.Rectangle.Contains);a.kind=k;a.home=home;this.input.setDraggable(a);});this.input.on("drag",(p,o,dx,dy)=>o.setPosition(dx,dy));this.input.on("dragend",(p,o)=>{let b=boxes[o.home];if(Phaser.Geom.Intersects.RectangleToRectangle(o.getBounds(),b.getBounds())&&!done.has(o.kind)){done.add(o.kind);o.disableInteractive();addPoints(10);if(done.size===4){finishMission(this);saveResult();}}else{let pos={dolphin:[160,180],fish:[360,180],rabbit:[600,180],panda:[800,180]}[o.kind];this.tweens.add({targets:o,x:pos[0],y:pos[1],duration:250});}});button(this,850,555,"Back to map",()=>this.scene.start("Map"),160);}}
+const config={type:Phaser.AUTO,parent:"game",width:W,height:H,backgroundColor:"#dcebbd",scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},scene:[MapScene,FindScene,MatchScene,MazeScene,HabitatScene]};
+document.getElementById("entryForm").addEventListener("submit",e=>{e.preventDefault();let n=document.getElementById("studentName").value.trim(),c=document.getElementById("studentClass").value.trim();if(!n||!c){document.getElementById("startError").textContent="Please enter both your name and class.";return;}learner={name:n,studentClass:c};document.getElementById("entry").style.display="none";updateStatus();new Phaser.Game(config);});
+window.addEventListener("beforeunload",()=>{if(completed>0)saveResult();});
 </script>
 </body>
 </html>'''
 
-path = Path("/mnt/data/wildlife_rescue_prototype.html")
-path.write_text(html, encoding="utf-8")
-print(f"Created {path} ({path.stat().st_size:,} bytes)")
+gas = r'''function doPost(e) {
+  const sheetName = "Wildlife Rescue Scores";
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+    sheet.appendRow(["Timestamp", "Student Name", "Class", "Activity", "Score", "Missions Completed", "Status"]);
+  }
+  const data = JSON.parse(e.postData.contents);
+  sheet.appendRow([
+    new Date(),
+    data.name || "",
+    data.studentClass || "",
+    data.activity || "Wildlife Rescue",
+    data.score || 0,
+    data.missionsCompleted || 0,
+    data.status || ""
+  ]);
+  return ContentService.createTextOutput(JSON.stringify({ success: true }))
+    .setMimeType(ContentService.MimeType.JSON);
+}'''
+
+base = Path("/mnt/data")
+(base / "wildlife_rescue_2d_prototype.html").write_text(html, encoding="utf-8")
+(base / "wildlife_rescue_google_sheets.gs").write_text(gas, encoding="utf-8")
+print("Created:", base / "wildlife_rescue_2d_prototype.html")
+print("Created:", base / "wildlife_rescue_google_sheets.gs")
