@@ -1,0 +1,187 @@
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Wildlife Rescue: The Lost Jungle Expedition</title>
+<style>
+:root{--gold:#f6c453;--leaf:#65c987;--ink:#10251d;--panel:rgba(8,25,20,.88);--cream:#fff8e7}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#142c24;color:var(--cream);font-family:system-ui,Segoe UI,Arial,sans-serif}
+canvas{display:block;touch-action:none}
+#game{position:fixed;inset:0}
+.panel{background:var(--panel);border:1px solid rgba(246,196,83,.5);border-radius:16px;box-shadow:0 12px 35px #0007;backdrop-filter:blur(8px)}
+#hud{position:fixed;inset:14px 14px auto;display:none;pointer-events:none;z-index:5;gap:10px;align-items:flex-start;justify-content:space-between}
+#brand{padding:10px 14px;min-width:210px}#brand strong{display:block;letter-spacing:1.5px;color:var(--gold);font-size:13px}#brand span{font-size:12px;color:#d5e5d8}
+#progress{padding:10px 14px;min-width:190px;text-align:right}#progress b{color:var(--gold)}#progress small{display:block;color:#d5e5d8}
+#mission{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:6;padding:10px 16px;max-width:min(440px,60vw);text-align:center;display:none}
+#mission strong{color:var(--gold);font-size:13px;letter-spacing:1px}#mission div{font-size:12px;margin-top:3px}
+#hint{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:6;padding:10px 16px;display:none;text-align:center;font-size:13px;max-width:90vw}
+#overlay{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:18px;background:linear-gradient(120deg,rgba(4,20,15,.84),rgba(6,25,20,.62)),url('') center/cover}
+#menu{width:min(700px,100%);padding:clamp(20px,4vw,38px);text-align:center}
+.kicker{color:var(--gold);font-size:12px;letter-spacing:3px;font-weight:800}
+h1{font-size:clamp(32px,7vw,62px);line-height:.98;margin:12px 0;color:#fff7df;text-shadow:0 4px 0 #254c37,0 8px 22px #0008}
+.subtitle{color:#d5e5d8;max-width:520px;margin:0 auto 22px;line-height:1.5}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.choice{border:1px solid #668b70;background:#173b2d;color:#fff8e7;border-radius:12px;padding:11px 16px;cursor:pointer;font-weight:700}
+.choice.active{border:2px solid var(--gold);background:#315c3d;box-shadow:0 0 0 3px #f6c45322}
+button.primary{background:linear-gradient(#f7d477,#d99b31);border:0;border-radius:13px;padding:14px 28px;font-weight:900;color:#26351f;font-size:16px;cursor:pointer;box-shadow:0 5px 0 #8a5d1c}
+button:active{transform:translateY(2px)}
+.note{font-size:12px;color:#b9cdbd;margin-top:18px}
+#quizWrap{position:fixed;inset:0;z-index:15;display:none;place-items:center;padding:18px;background:#06130fbb}
+#quiz{width:min(510px,100%);padding:24px}
+#quiz h2{margin:5px 0 8px;color:var(--gold)}#quiz p{line-height:1.5}
+.answers{display:grid;gap:9px;margin-top:16px}.answer{padding:12px;text-align:left;background:#214734;border:1px solid #5d8b69;border-radius:10px;color:white;font-weight:700;cursor:pointer}
+.answer:hover{background:#326346}
+#feedback{min-height:24px;color:#f7d477;font-weight:700;margin-top:12px}
+#mobile{position:fixed;inset:auto 0 16px;z-index:8;display:none;justify-content:space-between;align-items:end;padding:0 18px;pointer-events:none}
+#stick{width:128px;height:128px;border-radius:50%;background:#d9f0df22;border:2px solid #e4f3df88;position:relative;pointer-events:auto;touch-action:none}
+#knob{position:absolute;width:48px;height:48px;left:38px;top:38px;border-radius:50%;background:#f6c453dd;border:2px solid white;box-shadow:0 3px 12px #0008}
+#actions{display:grid;grid-template-columns:repeat(2,64px);gap:9px;pointer-events:auto}
+.action{height:58px;border-radius:50%;border:2px solid #fff9;background:#173b2dcc;color:white;font-weight:900;font-size:12px;touch-action:none}
+#toast{position:fixed;z-index:9;top:85px;left:50%;transform:translateX(-50%);background:#f6c453;color:#203321;padding:9px 16px;border-radius:20px;font-weight:900;display:none}
+@media(max-width:700px){#hud{inset:8px 8px auto}#brand{min-width:0;padding:8px 10px}#progress{min-width:0;padding:8px 10px}#mission{top:76px;max-width:90vw}#mobile{display:flex}#hint{bottom:158px;font-size:12px}#brand span{font-size:10px}#progress small{font-size:10px}}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="hud">
+  <div id="brand" class="panel"><strong>WILDLIFE RESCUE</strong><span>THE LOST JUNGLE EXPEDITION</span></div>
+  <div id="progress" class="panel"><b id="score">0</b> / 4 relics <small id="status">Explore the jungle</small></div>
+</div>
+<div id="mission" class="panel"><strong id="missionTitle">MISSION 1 · THE HIDDEN RIVER</strong><div id="missionText">Find the animal and learn its name.</div></div>
+<div id="hint" class="panel">Move with WASD or the touch joystick · Approach a glowing animal and press E / INTERACT</div>
+<div id="toast"></div>
+<div id="mobile">
+  <div id="stick"><div id="knob"></div></div>
+  <div id="actions"><button class="action" id="jumpBtn">JUMP</button><button class="action" id="interactBtn">INTERACT</button></div>
+</div>
+<div id="quizWrap"><div id="quiz" class="panel">
+  <div class="kicker" id="quizKicker">WILDLIFE KNOWLEDGE</div>
+  <h2 id="quizTitle">A jungle challenge!</h2>
+  <p id="question">Question appears here.</p>
+  <div class="answers" id="answers"></div>
+  <div id="feedback"></div>
+  <button class="primary" id="continueBtn" style="display:none;margin-top:12px">CONTINUE EXPEDITION</button>
+</div></div>
+<div id="overlay"><div id="menu" class="panel">
+  <div class="kicker">AN INTERACTIVE ENGLISH ADVENTURE</div>
+  <h1>WILDLIFE<br>RESCUE</h1>
+  <p class="subtitle">A lost sanctuary. Four hidden relics. Can you explore the jungle, discover its animals and become a Wildlife Guardian?</p>
+  <div style="font-weight:800;color:#f6d98a">CHOOSE YOUR EXPLORER</div>
+  <div class="row"><button class="choice active" data-char="girl">♀ Explorer A</button><button class="choice" data-char="boy">♂ Explorer B</button></div>
+  <div style="font-weight:800;color:#f6d98a;margin-top:12px">HOW TO PLAY</div>
+  <p class="subtitle" style="font-size:13px;margin:8px auto">Desktop: WASD to move, mouse to look, SPACE to jump, E to interact. Mobile: use the joystick and buttons. Find the glowing wildlife markers and answer English questions.</p>
+  <button class="primary" id="startBtn">START EXPEDITION</button>
+  <div class="note">Year 4 English · Animal vocabulary · Describing animals · Listening and reading</div>
+</div></div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+const root=document.getElementById('game');
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x9bc7a0); scene.fog=new THREE.Fog(0x9bc7a0,24,95);
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,180);
+const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight); renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap; root.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xdff5ff,0x35502c,2.0));
+const sun=new THREE.DirectionalLight(0xfff0c9,2.3); sun.position.set(-18,30,12); sun.castShadow=true; sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.left=-45;sun.shadow.camera.right=45;sun.shadow.camera.top=45;sun.shadow.camera.bottom=-45;scene.add(sun);
+const mat=(color,rough=.9)=>new THREE.MeshStandardMaterial({color,roughness:rough});
+const materials={grass:mat(0x477d43),dark:mat(0x244c32),leaf:mat(0x2d713e),stone:mat(0x77796a),sand:mat(0xc6aa70),water: new THREE.MeshStandardMaterial({color:0x3b9caa,roughness:.25,metalness:.1}),gold:new THREE.MeshStandardMaterial({color:0xf6c453,metalness:.65,roughness:.28}),wood:mat(0x60412b),bark:mat(0x553c29)};
+function box(w,h,d,m,x,y,z){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);return o}
+function sphere(r,m,x,y,z,sx=1,sy=1,sz=1){const o=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.castShadow=true;scene.add(o);return o}
+function cylinder(rt,rb,h,m,x,y,z,seg=10){const o=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg),m);o.position.set(x,y,z);o.castShadow=true;scene.add(o);return o}
+// Procedural jungle floor and winding trail
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(120,120),materials.grass);floor.rotation.x=-Math.PI/2;floor.position.y=-.12;floor.receiveShadow=true;scene.add(floor);
+const pathMat=mat(0xb49a65);const path=new THREE.Mesh(new THREE.PlaneGeometry(5,78),pathMat);path.rotation.x=-Math.PI/2;path.position.set(0,-.095,-22);scene.add(path);
+// river
+const river=new THREE.Mesh(new THREE.PlaneGeometry(12,75),materials.water);river.rotation.x=-Math.PI/2;river.position.set(17,-.07,-22);scene.add(river);
+for(let i=0;i<10;i++){const rock=sphere(.8,materials.stone,12+i%2*1.1,.05,-8-i*3,.9,.35,.7);}
+// ancient temple at far end
+for(let x of [-5,5]){box(1.4,7,1.5,materials.stone,x,3.4,-52);for(let y=0;y<4;y++)box(1.8,.35,1.8,materials.sand,x,1+y*1.8,-52)}
+box(13,1.2,2,materials.stone,0,7,-52);box(9,.6,1.5,materials.sand,0,7.8,-52);
+for(let x=-4;x<=4;x+=2)box(.35,3,.4,materials.dark,x,4.5,-51.8);
+// jungle trees, ferns and stones
+for(let i=0;i<65;i++){let x=(Math.random()-.5)*82,z=-58+Math.random()*76;if(Math.abs(x)<4&&z<5)continue;if(x>10&&x<24)continue;let h=4+Math.random()*5;cylinder(.35,.55,h,materials.bark,x,h/2,z);for(let j=0;j<4;j++){const crown=sphere(1.6,mat([0x24653a,0x347d42,0x3e8846][j%3]),x+(Math.random()-.5)*1.8,h*.72+Math.random()*1.3,z+(Math.random()-.5)*1.8,1.2,.75,1.1);crown.castShadow=true;}}
+for(let i=0;i<45;i++){let x=(Math.random()-.5)*55,z=-55+Math.random()*65;if(Math.abs(x)<4)continue;for(let j=0;j<3;j++){let leaf=sphere(.22,materials.leaf,x+(Math.random()-.5),.35+j*.12,z+(Math.random()-.5),.65,1.4,.4);leaf.rotation.z=(Math.random()-.5)*1.4;}}
+// temple stepping stones
+for(let i=0;i<7;i++)box(2,.25,1.5,materials.stone,-1+(i%2)*2,.1,-39-i*1.8);
+// player built from simple original geometry
+const player=new THREE.Group();scene.add(player);
+const skin=mat(0xc98c65),shirt=mat(0x315e4a),pants=mat(0x493d32),boots=mat(0x29251f),hair=mat(0x30231d),pack=mat(0x9a6332);
+function limb(parent,r1,r2,len,m,x,y,z){const o=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,len,10),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o}
+const torso= new THREE.Mesh(new THREE.CapsuleGeometry(.42,.72,4,8),shirt);torso.position.y=1.55;torso.castShadow=true;player.add(torso);
+const head=sphere(.32,skin,0,2.35,0);player.remove(head);player.add(head);
+const haircap=sphere(.33,hair,0,2.53,-.04,1,.65,1);player.add(haircap);
+const backpack=box(.48,.65,.25,pack,0,1.55,-.48);player.add(backpack);
+const arms=[],legs=[];
+for(let side of [-1,1]){const arm=limb(player,.15,.18,.82,skin,side*.55,1.55,0);arm.rotation.z=side*-.16;arms.push(arm);const leg=limb(player,.19,.22,.85,pants,side*.23,.55,0);legs.push(leg);const foot=box(.28,.18,.48,boots,side*.23,.12,.12);player.add(foot);}
+player.position.set(0,0,4);
+// swap explorer visual accent
+let chosen='girl';function setCharacter(which){chosen=which;shirt.color.set(which==='girl'?0x315e83:0x8a5935);hair.material=hair;haircap.material=which==='girl'?mat(0x30231d):mat(0x463020);}
+// animal models built from primitives
+function makeAnimal(type,x,z,color){const g=new THREE.Group();g.position.set(x,.1,z);scene.add(g);const bodyMat=mat(color);const white=mat(0xf3e9d3),black=mat(0x1b211d);
+ const body=sphere(type==='snake'?.28:.48,bodyMat,0,.55,0,type==='snake'?1.7:1.25,.8,type==='snake'?.65:.8);g.add(body);
+ if(type!=='snake'){const head=sphere(.27,bodyMat,0,.95,.45,1,1,1);g.add(head);for(let s of [-1,1]){const eye=sphere(.045,black,s*.12,1.02,.68);g.add(eye)}}
+ if(type==='rabbit'){for(let s of [-1,1]){const ear=sphere(.12,bodyMat,s*.16,1.38,.42,.55,2.2,.5);g.add(ear)}}
+ if(type==='panda'){for(let s of [-1,1]){const patch=sphere(.09,black,s*.13,1.02,.69,.7,1.1,.4);g.add(patch)}}
+ if(type==='fish'||type==='shark'||type==='dolphin'){const tail=sphere(.2,bodyMat,0,.55,-.65,.5,1.5,.5);tail.rotation.x=.5;g.add(tail);const fin=sphere(.12,bodyMat,0,.9,-.05,.5,.25,1.5);g.add(fin);}
+ if(type==='snake'){const coil=sphere(.22,bodyMat,-.55,.35,-.2,2.4,.45,1);g.add(coil);const tongue=box(.04,.03,.35,mat(0xd94c45),0,.55,.5);g.add(tongue);}
+ const ring=new THREE.Mesh(new THREE.TorusGeometry(.85,.045,8,32),materials.gold);ring.rotation.x=Math.PI/2;ring.position.y=.08;g.add(ring);
+ const beam=new THREE.Mesh(new THREE.CylinderGeometry(.015,.35,2.5,16,1,true),new THREE.MeshBasicMaterial({color:0xf6c453,transparent:true,opacity:.12,side:THREE.DoubleSide}));beam.position.y=1.25;g.add(beam);
+ g.userData={type,found:false,ring,beam};return g;
+}
+const animals=[
+ {type:'dolphin',name:'DOLPHIN',x:12,z:-8,question:'Which animal lives in the ocean and can jump out of the water?',options:['Dolphin','Rabbit','Panda'],correct:0,learn:'A dolphin is a clever sea animal.'},
+ {type:'rabbit',name:'RABBIT',x:-7,z:-19,question:'Which animal has long ears and can hop?',options:['Shark','Rabbit','Snake'],correct:1,learn:'A rabbit has long ears. It can hop.'},
+ {type:'panda',name:'PANDA',x:7,z:-32,question:'Which animal is black and white and eats bamboo?',options:['Fish','Panda','Snail'],correct:1,learn:'A panda is black and white. It eats bamboo.'},
+ {type:'snake',name:'SNAKE',x:-3,z:-45,question:'Which animal has a long body and no legs?',options:['Snake','Dolphin','Rabbit'],correct:0,learn:'A snake has a long body. It can slither.'}
+];
+animals.forEach(a=>a.object=makeAnimal(a.type,a.x,a.z,({dolphin:0x4b9dbb,rabbit:0xc6b7a3,panda:0xf0eee4,snake:0x8da34c})[a.type]));
+// simple environmental signposts
+for(const [z,label] of [[-8,'RIVER'],[-19,'HABITAT'],[-32,'TEMPLE'],[-45,'SANCTUARY']]){box(1.4,1.3,.18,materials.wood,-2,1,z);const canvas=document.createElement('canvas');canvas.width=256;canvas.height=96;const c=canvas.getContext('2d');c.fillStyle='#f6d88e';c.font='bold 36px Arial';c.textAlign='center';c.fillText(label,128,60);const tex=new THREE.CanvasTexture(canvas);const sign=new THREE.Mesh(new THREE.PlaneGeometry(1.25,.46),new THREE.MeshBasicMaterial({map:tex,transparent:true}));sign.position.set(-2,1.25,z+.11);scene.add(sign)}
+// controls
+const keys={};let joy={x:0,y:0};let yaw=0,pitch=.12,velocityY=0,onGround=true,paused=true,quizOpen=false,found=0,activeAnimal=null,moveSpeed=7;
+addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown'].includes(e.code))e.preventDefault();if(e.code==='KeyE'&&!paused&&!quizOpen)interact();if(e.code==='Space'&&onGround&&!paused&&!quizOpen){velocityY=7;onGround=false;}});
+addEventListener('keyup',e=>keys[e.code]=false);
+renderer.domElement.addEventListener('click',()=>{if(!paused&&!quizOpen&&innerWidth>700)renderer.domElement.requestPointerLock?.()});
+addEventListener('mousemove',e=>{if(document.pointerLockElement===renderer.domElement){yaw-=e.movementX*.0025;pitch=Math.max(-.35,Math.min(.65,pitch-e.movementY*.0018));}});
+addEventListener('contextmenu',e=>e.preventDefault());
+const stick=document.getElementById('stick'),knob=document.getElementById('knob');let stickId=null;
+stick.addEventListener('pointerdown',e=>{stickId=e.pointerId;stick.setPointerCapture(stickId);moveStick(e)});
+stick.addEventListener('pointermove',e=>{if(e.pointerId===stickId)moveStick(e)});
+function moveStick(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=e.clientX-cx,dy=e.clientY-cy,len=Math.min(42,Math.hypot(dx,dy)),a=Math.atan2(dy,dx);joy.x=Math.cos(a)*len/42;joy.y=Math.sin(a)*len/42;knob.style.transform=`translate(${Math.cos(a)*len}px,${Math.sin(a)*len}px)`;}
+function resetStick(){stickId=null;joy.x=joy.y=0;knob.style.transform='translate(0,0)'}
+stick.addEventListener('pointerup',resetStick);stick.addEventListener('pointercancel',resetStick);
+document.getElementById('jumpBtn').addEventListener('pointerdown',()=>{if(onGround&&!paused&&!quizOpen){velocityY=7;onGround=false}});
+document.getElementById('interactBtn').addEventListener('pointerdown',()=>{if(!paused&&!quizOpen)interact()});
+const overlay=document.getElementById('overlay'),hud=document.getElementById('hud'),mission=document.getElementById('mission'),hint=document.getElementById('hint');
+document.querySelectorAll('[data-char]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-char]').forEach(x=>x.classList.remove('active'));b.classList.add('active');setCharacter(b.dataset.char)});
+document.getElementById('startBtn').onclick=()=>{overlay.style.display='none';hud.style.display='flex';mission.style.display='block';hint.style.display='block';paused=false;toast('Expedition started! Find the glowing wildlife markers.');};
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.style.display='block';clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.style.display='none',2600)}
+function interact(){let nearest=null,dist=3.2;animals.forEach(a=>{if(!a.object.userData.found){const d=player.position.distanceTo(a.object.position);if(d<dist){dist=d;nearest=a}}});if(nearest){activeAnimal=nearest;openQuiz(nearest)}else toast('Explore nearby to find a glowing animal!')}
+function openQuiz(a){quizOpen=true;document.exitPointerLock?.();document.getElementById('quizWrap').style.display='grid';document.getElementById('quizKicker').textContent='WILDLIFE DISCOVERY · '+a.name;document.getElementById('quizTitle').textContent='Who am I?';document.getElementById('question').textContent=a.question;document.getElementById('feedback').textContent='Choose the correct answer.';document.getElementById('continueBtn').style.display='none';const box=document.getElementById('answers');box.innerHTML='';a.options.forEach((op,i)=>{const b=document.createElement('button');b.className='answer';b.textContent=op;b.onclick=()=>answer(a,i);box.appendChild(b)});}
+function answer(a,i){const fb=document.getElementById('feedback'),buttons=[...document.querySelectorAll('.answer')];buttons.forEach(b=>b.disabled=true);if(i===a.correct){fb.textContent='Correct! '+a.learn;a.object.userData.found=true;a.object.visible=false;found++;document.getElementById('score').textContent=found;document.getElementById('status').textContent=found===4?'Sanctuary restored!':'Relics discovered: '+found+'/4';document.getElementById('quizTitle').textContent='Wildlife rescued!';}else{fb.textContent='Not quite. The correct answer is '+a.options[a.correct]+'. Try to remember it!';buttons[a.correct].style.borderColor='#f6c453';}
+document.getElementById('continueBtn').style.display='inline-block';}
+document.getElementById('continueBtn').onclick=()=>{document.getElementById('quizWrap').style.display='none';quizOpen=false;if(found===4)finish();else toast('Keep exploring. '+(4-found)+' wildlife discoveries remain!');};
+function finish(){paused=true;document.getElementById('quizWrap').style.display='grid';document.getElementById('quizKicker').textContent='MISSION COMPLETE';document.getElementById('quizTitle').textContent='You are a Wildlife Guardian!';document.getElementById('question').textContent='Amazing work, explorer! You discovered all four animals and completed your English expedition.';document.getElementById('answers').innerHTML='<div style="padding:14px;background:#244c32;border-radius:10px">🌿 4 animals rescued · English vocabulary champion</div>';document.getElementById('feedback').textContent='Your jungle adventure is complete.';document.getElementById('continueBtn').textContent='PLAY AGAIN';document.getElementById('continueBtn').style.display='inline-block';document.getElementById('continueBtn').onclick=()=>location.reload();}
+function update(dt){if(paused||quizOpen)return;
+ const forward=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)-joy.y;
+ const sideways=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+joy.x;
+ const len=Math.hypot(forward,sideways);if(len>.05){const f=forward/Math.max(1,len),s=sideways/Math.max(1,len);const dx=Math.sin(yaw)*f+Math.cos(yaw)*s,dz=-Math.cos(yaw)*f+Math.sin(yaw)*s;player.position.x+=dx*moveSpeed*dt;player.position.z+=dz*moveSpeed*dt;player.rotation.y=Math.atan2(dx,dz);torso.position.y=1.55+Math.sin(performance.now()*.012)*.035;arms.forEach((a,i)=>a.rotation.x=Math.sin(performance.now()*.012+i*Math.PI)*.5);legs.forEach((a,i)=>a.rotation.x=Math.sin(performance.now()*.012+i*Math.PI)*.55);}
+ velocityY-=18*dt;player.position.y+=velocityY*dt;if(player.position.y<=0){player.position.y=0;velocityY=0;onGround=true;}
+ player.position.x=THREE.MathUtils.clamp(player.position.x,-38,38);player.position.z=THREE.MathUtils.clamp(player.position.z,-58,12);
+ const desired=new THREE.Vector3(player.position.x+Math.sin(yaw)*7,player.position.y+4.1,player.position.z+Math.cos(yaw)*7);camera.position.lerp(desired,1-Math.pow(.001,dt));const look=new THREE.Vector3(player.position.x,player.position.y+1.45,player.position.z);camera.lookAt(look);
+ animals.forEach(a=>{if(!a.object.userData.found){a.object.rotation.y+=dt*.45;a.object.position.y=.1+Math.sin(performance.now()*.002+a.x)*.12;a.object.userData.ring.rotation.z+=dt*.6;}});
+ let near=animals.find(a=>!a.object.userData.found&&player.position.distanceTo(a.object.position)<3.2);hint.textContent=near?'Press E / INTERACT to discover the '+near.name+'.':'Explore with WASD or the touch joystick · Find the glowing wildlife markers.';
+ document.getElementById('missionTitle').textContent=found<4?['MISSION 1 · THE HIDDEN RIVER','MISSION 2 · THE LOST HABITAT','MISSION 3 · THE TEMPLE PUZZLE','MISSION 4 · WILDLIFE RESCUE'][found]:'MISSION COMPLETE';
+ document.getElementById('missionText').textContent=found<4?'Discover animals and answer the English clue to rescue them.':'All animals have been rescued!';
+}
+let last=performance.now();function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000,.04);last=now;update(dt);renderer.render(scene,camera)}requestAnimationFrame(loop);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+</script>
+</body>
+</html>'''
+
+path = Path("/mnt/data/wildlife_rescue_prototype.html")
+path.write_text(html, encoding="utf-8")
+print(f"Created {path} ({path.stat().st_size:,} bytes)")
