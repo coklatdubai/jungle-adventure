@@ -3,662 +3,687 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Wildlife Rescue Adventure</title>
 
 <style>
 :root {
-  --forest: #244b38;
-  --green: #5e9d62;
-  --light-green: #dcebd3;
-  --cream: #fff8e9;
-  --orange: #e89b48;
-  --brown: #79543a;
-  --text: #304638;
+  --forest:#244b38;
+  --green:#659b59;
+  --light:#e6efd9;
+  --cream:#fff8e9;
+  --orange:#e7a04c;
+  --brown:#765438;
+  --text:#304638;
 }
 
 * {
-  box-sizing: border-box;
-  font-family: "Trebuchet MS", Arial, sans-serif;
+  box-sizing:border-box;
+  font-family:Trebuchet MS,Arial,sans-serif;
 }
 
 body {
-  margin: 0;
-  min-height: 100vh;
-  background: #203d30;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 12px;
-  color: var(--text);
+  margin:0;
+  min-height:100vh;
+  padding:12px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#203d30;
+  color:var(--text);
 }
 
 #game {
-  width: 100%;
-  max-width: 1050px;
-  height: min(760px, 94vh);
-  min-height: 560px;
-  background: var(--cream);
-  border: 7px solid #d4b982;
-  border-radius: 22px;
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 15px 45px #10271d99;
+  width:100%;
+  max-width:1050px;
+  height:min(780px,96vh);
+  min-height:550px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:var(--cream);
+  border:6px solid #d4b982;
+  border-radius:20px;
+  box-shadow:0 12px 35px #0005;
 }
 
-/* HEADER */
-
 header {
-  height: 68px;
-  padding: 10px 22px;
-  background: #f4e9d0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
-  border-bottom: 3px solid #d7c39b;
+  min-height:65px;
+  padding:10px 20px;
+  background:#f2e6ca;
+  border-bottom:3px solid #d4bd91;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
 }
 
 .logo {
-  font-size: 21px;
-  font-weight: 900;
-  color: var(--forest);
+  font-size:19px;
+  font-weight:900;
+  color:var(--forest);
 }
 
 #player-display {
-  font-size: 13px;
-  text-align: right;
-  font-weight: bold;
+  font-size:12px;
+  font-weight:bold;
+  text-align:right;
 }
 
 #score-display {
-  color: #b66b25;
-  font-size: 18px;
+  color:#ae702f;
+  font-size:18px;
 }
 
-/* SCREENS */
-
 .screen {
-  flex: 1;
-  min-height: 0;
-  display: none;
-  overflow: auto;
+  display:none;
+  flex:1;
+  min-height:0;
+  overflow:auto;
 }
 
 .screen.active {
-  display: flex;
+  display:flex;
 }
 
-/* START SCREEN */
-
-#start-screen {
-  background:
-    linear-gradient(#183c2b66,#183c2b99),
-    linear-gradient(120deg,#7cae72,#e4c48b);
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 25px;
+button {
+  cursor:pointer;
 }
-
-.start-card {
-  width: min(440px, 100%);
-  background: var(--cream);
-  padding: 32px;
-  border-radius: 24px;
-  border: 5px solid #d9bd85;
-  box-shadow: 0 10px 30px #0004;
-}
-
-.start-card h1 {
-  font-size: 34px;
-  color: var(--forest);
-  margin: 8px 0;
-}
-
-.start-card p {
-  line-height: 1.6;
-}
-
-input {
-  width: 100%;
-  padding: 13px;
-  margin: 7px 0 13px;
-  border: 2px solid #b8c9ae;
-  border-radius: 10px;
-  font-size: 16px;
-  background: white;
-}
-
-label {
-  display: block;
-  text-align: left;
-  font-weight: bold;
-}
-
-/* BUTTONS */
 
 .btn {
-  border: none;
-  border-radius: 12px;
-  padding: 13px 23px;
-  background: var(--green);
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: .2s;
+  padding:12px 20px;
+  border:0;
+  border-radius:10px;
+  background:var(--green);
+  color:white;
+  font-weight:bold;
+  font-size:15px;
 }
 
 .btn:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.08);
-}
-
-.btn.orange {
-  background: var(--orange);
-  color: #49311b;
+  filter:brightness(1.1);
 }
 
 .btn.dark {
-  background: var(--forest);
+  background:var(--forest);
 }
 
-.btn:disabled {
-  opacity: .5;
-  cursor: not-allowed;
-  transform: none;
+.btn.orange {
+  background:var(--orange);
+  color:#49321c;
 }
 
-/* MAP SCREEN */
+input {
+  padding:12px;
+  width:100%;
+  border:2px solid #b7c7ad;
+  border-radius:9px;
+  font-size:16px;
+  margin:6px 0 15px;
+}
+
+label {
+  display:block;
+  text-align:left;
+  font-weight:bold;
+}
+
+/* START */
+
+#start-screen {
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:20px;
+  background:
+    linear-gradient(#214c3580,#214c3580),
+    linear-gradient(130deg,#78a96d,#dfc68f);
+}
+
+.start-card {
+  width:min(430px,100%);
+  padding:30px;
+  background:var(--cream);
+  border:5px solid #d4b982;
+  border-radius:22px;
+  box-shadow:0 10px 30px #0004;
+}
+
+.start-card h1 {
+  color:var(--forest);
+  font-size:32px;
+  margin:5px;
+}
+
+/* MAP */
 
 #map-screen {
-  position: relative;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 22px;
-  overflow: hidden;
+  position:relative;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
   background:
-    radial-gradient(ellipse at 20% 20%,#a7ce85 0 12%,transparent 13%),
-    radial-gradient(ellipse at 80% 75%,#a3c97d 0 15%,transparent 16%),
-    linear-gradient(135deg,#7cae75,#c1d89a 55%,#83ae71);
-}
-
-.map-heading {
-  z-index: 2;
-  text-align: center;
-  background: #fff8e9ed;
-  padding: 12px 25px;
-  border-radius: 15px;
-  box-shadow: 0 4px 12px #344c2933;
-}
-
-.map-heading h2 {
-  margin: 0;
-  color: var(--forest);
-}
-
-.map-heading p {
-  margin: 5px 0 0;
-  font-size: 13px;
+    radial-gradient(ellipse at 15% 15%,#9fc47d 0 15%,transparent 16%),
+    radial-gradient(ellipse at 90% 80%,#a9ca82 0 18%,transparent 19%),
+    linear-gradient(135deg,#76a76b,#c4d99b);
 }
 
 .map-art {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
 }
 
-.map-decoration {
-  position: absolute;
-  font-size: 12px;
-  font-weight: bold;
-  color: #315b3e;
-  background: #f5edcfdd;
-  padding: 7px 12px;
-  border-radius: 20px;
-  pointer-events: none;
+.map-heading {
+  position:absolute;
+  top:15px;
+  z-index:3;
+  text-align:center;
+  padding:12px 20px;
+  border-radius:15px;
+  background:#fff8e9ed;
+  box-shadow:0 4px 12px #0002;
 }
 
-.map-decoration.river {
-  left: 4%;
-  bottom: 14%;
+.map-heading h2 {
+  margin:0;
+  font-size:21px;
+  color:var(--forest);
 }
 
-.map-decoration.forest {
-  right: 5%;
-  top: 20%;
+.map-heading p {
+  margin:5px 0 0;
+  font-size:12px;
 }
 
 .station {
-  position: absolute;
-  width: 155px;
-  min-height: 135px;
-  padding: 12px 8px;
-  border: 5px solid #f5e6c5;
-  border-radius: 22px;
-  background: #fff9e9;
-  box-shadow: 0 7px 15px #274b3570;
-  text-align: center;
-  cursor: pointer;
-  z-index: 3;
-  transition: .25s;
-  color: var(--text);
+  position:absolute;
+  z-index:4;
+  width:155px;
+  min-height:150px;
+  border:5px solid #f6e5c1;
+  border-radius:20px;
+  background:#fff9e9;
+  box-shadow:0 6px 14px #0004;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:8px;
+  color:var(--text);
+  transition:.2s;
 }
 
 .station:hover {
-  transform: translateY(-7px) scale(1.04);
-}
-
-.station .station-number {
-  font-size: 12px;
-  font-weight: bold;
-  color: #a66b36;
-}
-
-.station strong {
-  display: block;
-  font-size: 15px;
-  margin-top: 5px;
+  transform:translateY(-5px);
 }
 
 .station img {
-  width: 65px;
-  height: 65px;
-  object-fit: contain;
+  width:75px;
+  height:75px;
+  object-fit:contain;
+}
+
+.station small {
+  color:#a56c32;
+  font-weight:bold;
+}
+
+.station strong {
+  font-size:13px;
 }
 
 .station.done {
-  background: #d8f1ce;
-  border-color: #4c984f;
+  background:#d9edcf;
+  border-color:#4b9852;
 }
 
 .station.done::after {
-  content: "MISSION COMPLETE";
-  display: block;
-  font-size: 9px;
-  color: #286a32;
-  font-weight: bold;
-  margin-top: 5px;
+  content:"COMPLETED";
+  color:#27733b;
+  font-size:10px;
+  font-weight:bold;
 }
 
-#station-1 {
-  left: 9%;
-  top: 38%;
+#station-1 {left:8%;top:36%;}
+#station-2 {left:42%;top:58%;}
+#station-3 {right:8%;top:34%;}
+
+.map-progress {
+  position:absolute;
+  bottom:12px;
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--cream);
+  padding:10px 18px;
+  border-radius:20px;
+  z-index:4;
+  font-weight:bold;
+  font-size:13px;
+  white-space:nowrap;
 }
 
-#station-2 {
-  left: 42%;
-  top: 60%;
-}
-
-#station-3 {
-  right: 9%;
-  top: 34%;
-}
-
-#map-progress {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 3;
-  background: #fff8e9;
-  padding: 10px 18px;
-  border-radius: 30px;
-  font-weight: bold;
-  font-size: 13px;
-  white-space: nowrap;
-}
-
-/* MISSION SCREEN */
+/* MISSION SCREENS */
 
 #mission-screen {
-  flex-direction: column;
-  background: #edf3df;
+  flex-direction:column;
+  background:#edf3e4;
 }
 
 .mission-header {
-  padding: 16px 22px;
-  background: #d7e8c8;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  padding:13px 20px;
+  background:#d7e7c9;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
 }
 
 .mission-header h2 {
-  margin: 0;
-  color: var(--forest);
-  font-size: 22px;
+  margin:0;
+  color:var(--forest);
+  font-size:20px;
 }
 
 .mission-content {
-  flex: 1;
-  padding: 20px;
-  text-align: center;
-  overflow: auto;
+  flex:1;
+  overflow:auto;
+  text-align:center;
+  padding:18px;
 }
 
 .instruction {
-  max-width: 650px;
-  margin: 0 auto 20px;
-  line-height: 1.6;
-  background: #fff8e9;
-  border-radius: 12px;
-  padding: 12px;
+  max-width:680px;
+  margin:0 auto 18px;
+  padding:13px;
+  line-height:1.6;
+  border-radius:12px;
+  background:var(--cream);
+}
+
+.feedback {
+  min-height:27px;
+  font-weight:bold;
+  margin:12px;
 }
 
 /* STATION 1 */
 
 .match-grid {
-  display: grid;
-  grid-template-columns: repeat(2,minmax(0,1fr));
-  gap: 13px;
-  max-width: 570px;
-  margin: auto;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  max-width:760px;
+  margin:auto;
 }
 
 .animal-card {
-  background: white;
-  border: 3px solid #c7d7bb;
-  border-radius: 16px;
-  padding: 12px;
-  min-height: 165px;
+  background:white;
+  border:3px solid #c7d7bb;
+  border-radius:15px;
+  padding:10px;
 }
 
 .animal-card img {
-  width: 90px;
-  height: 90px;
-  object-fit: contain;
+  width:100px;
+  height:95px;
+  object-fit:contain;
 }
 
 .drop-zone {
-  background: #edf3e7;
-  border: 2px dashed #9ab48e;
-  border-radius: 9px;
-  padding: 9px;
-  min-height: 42px;
-  margin-top: 5px;
-  font-weight: bold;
+  min-height:40px;
+  padding:8px;
+  background:#edf3e7;
+  border:2px dashed #9ab48e;
+  border-radius:8px;
+  font-weight:bold;
+  font-size:13px;
 }
 
 .drop-zone.correct {
-  background: #d3efcc;
-  border: 2px solid #4b9950;
+  background:#d3efcc;
+  border:2px solid #4b9950;
 }
 
 .word-bank {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin: 20px auto;
-  max-width: 600px;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:9px;
+  margin:20px auto;
 }
 
 .word {
-  background: #d58c47;
-  color: white;
-  padding: 11px 18px;
-  border-radius: 10px;
-  cursor: grab;
-  font-weight: bold;
-  border: 2px solid #b46c31;
+  padding:10px 15px;
+  border-radius:9px;
+  background:#d58c47;
+  border:2px solid #b46c31;
+  color:white;
+  font-weight:bold;
+  cursor:grab;
 }
 
 .word.used {
-  display: none;
+  display:none;
 }
 
 /* STATION 2 */
 
-.rescue-scene {
-  max-width: 600px;
-  margin: 0 auto 18px;
-  background: linear-gradient(#c6e4df,#e1d6a7);
-  border: 4px solid #a5b98d;
-  border-radius: 18px;
-  padding: 18px;
-  position: relative;
+.rescue-order {
+  max-width:680px;
+  padding:12px;
+  margin:10px auto;
+  border-radius:12px;
+  background:var(--cream);
+  line-height:1.8;
+  font-weight:bold;
 }
 
-.rescue-scene img {
-  width: 145px;
-  height: 125px;
-  object-fit: contain;
+.rescue-world {
+  position:relative;
+  width:100%;
+  max-width:740px;
+  height:390px;
+  margin:auto;
+  overflow:hidden;
+  border:5px solid #536f45;
+  border-radius:18px;
+  background:
+    radial-gradient(ellipse at 15% 15%,#aecb7f 0 12%,transparent 13%),
+    radial-gradient(ellipse at 85% 75%,#adc97a 0 15%,transparent 16%),
+    linear-gradient(135deg,#66965a,#a6c67d);
 }
 
-.rescue-scene p {
-  margin: 5px;
-  font-weight: bold;
+.world-path {
+  position:absolute;
+  width:115%;
+  height:90px;
+  top:46%;
+  left:-5%;
+  transform:rotate(-10deg);
+  border-radius:50%;
+  background:#ddc99e;
+  border:5px solid #c7ad7d;
 }
 
-.sequence-grid {
-  display: grid;
-  grid-template-columns: repeat(2,minmax(0,1fr));
-  gap: 12px;
-  max-width: 580px;
-  margin: auto;
+.world-water {
+  position:absolute;
+  width:38%;
+  height:50px;
+  right:-5%;
+  bottom:0;
+  border-radius:50%;
+  background:#69b5c3;
 }
 
-.sequence-card {
-  border: 3px solid #d3bc8e;
-  border-radius: 13px;
-  background: #fff9e9;
-  padding: 12px;
-  min-height: 105px;
-  cursor: pointer;
-  transition: .2s;
-  font-weight: bold;
-  color: var(--text);
+.rescue-cage {
+  position:absolute;
+  z-index:2;
+  width:90px;
+  height:105px;
+  background:#b9a27e;
+  border:5px solid #70563a;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  transition:.4s;
 }
 
-.sequence-card:hover {
-  transform: translateY(-3px);
+.rescue-cage img {
+  width:58px;
+  height:58px;
+  object-fit:contain;
 }
 
-.sequence-card.selected {
-  border-color: #398c53;
-  background: #d8efcf;
+.rescue-cage span {
+  font-size:11px;
+  font-weight:bold;
+  color:#263b2d;
 }
 
-.sequence-card .number {
-  display: block;
-  color: #b47b3c;
-  font-size: 12px;
-  margin-bottom: 5px;
+.rescue-cage::after {
+  content:"";
+  position:absolute;
+  inset:4px;
+  border-left:4px solid #72563a;
+  border-right:4px solid #72563a;
+  pointer-events:none;
 }
 
-.sequence-card img {
-  width: 60px;
-  height: 48px;
-  object-fit: contain;
-  display: block;
-  margin: auto;
+.rescue-cage.open {
+  opacity:.3;
+  transform:scale(.8);
+  border-color:#4b9852;
 }
 
-.sequence-result {
-  font-weight: bold;
-  margin: 15px;
-  min-height: 25px;
+.rescue-cage.open::after {
+  display:none;
 }
 
-/* RESCUE ANIMATION */
-
-.rescue-scene.rescued {
-  background: linear-gradient(#9bd6ee,#d9e9a5);
-  animation: rescueGlow 1s infinite alternate;
+.rescuer {
+  position:absolute;
+  z-index:5;
+  width:34px;
+  height:43px;
+  border-radius:10px;
+  background:#315d9b;
+  border:3px solid white;
+  left:15px;
+  top:325px;
 }
 
-.rescue-scene.rescued img {
-  animation: animalEscape 1.2s ease-in-out infinite alternate;
+.rescuer::before {
+  content:"";
+  position:absolute;
+  width:22px;
+  height:22px;
+  left:3px;
+  top:-22px;
+  border:2px solid #76533b;
+  border-radius:50%;
+  background:#e7c09c;
 }
 
-@keyframes rescueGlow {
-  from { box-shadow: 0 0 5px #5b9d55; }
-  to { box-shadow: 0 0 28px #e8c75b; }
+.rescue-status {
+  min-height:28px;
+  font-weight:bold;
+  margin:12px;
 }
 
-@keyframes animalEscape {
-  from { transform: translateX(-15px) rotate(-5deg); }
-  to { transform: translateX(25px) rotate(5deg); }
+.mobile-controls {
+  display:grid;
+  grid-template-columns:repeat(3,55px);
+  gap:5px;
+  justify-content:center;
+  margin:10px auto;
+}
+
+.mobile-controls button {
+  border:0;
+  border-radius:10px;
+  padding:12px;
+  background:#315d48;
+  color:white;
+  font-weight:bold;
+  font-size:18px;
+  touch-action:none;
+}
+
+.mobile-controls .empty {
+  visibility:hidden;
 }
 
 /* STATION 3 */
 
 .forest-scene {
-  position: relative;
-  width: 100%;
-  max-width: 680px;
-  height: 370px;
-  margin: auto;
-  overflow: hidden;
-  border: 5px solid #526d42;
-  border-radius: 18px;
+  position:relative;
+  width:100%;
+  max-width:680px;
+  height:340px;
+  margin:auto;
+  overflow:hidden;
+  border:5px solid #536f45;
+  border-radius:17px;
   background:
-    radial-gradient(ellipse at 20% 90%,#a0b96b 0 15%,transparent 16%),
-    radial-gradient(ellipse at 80% 80%,#8aab58 0 20%,transparent 21%),
-    linear-gradient(#9ec5a0 0 35%,#668b4e 36% 100%);
+    radial-gradient(ellipse at 20% 80%,#a2bd68 0 18%,transparent 19%),
+    radial-gradient(ellipse at 80% 70%,#7da554 0 20%,transparent 21%),
+    linear-gradient(#a5c7a0 0 35%,#547d45 36% 100%);
 }
 
 .forest-tree {
-  position: absolute;
-  width: 130px;
-  height: 240px;
-  background: #456b3e;
-  border-radius: 50% 50% 10% 10%;
-  opacity: .8;
-  top: -90px;
+  position:absolute;
+  width:130px;
+  height:220px;
+  top:-100px;
+  border-radius:50%;
+  background:#315f39;
 }
 
-.forest-tree.one { left: -30px; }
-.forest-tree.two { right: -25px; top: -80px; }
-.forest-tree.three { left: 42%; top: -120px; }
+.tree-one {left:-25px;}
+.tree-two {right:-30px;}
+.tree-three {left:42%;top:-140px;}
 
-.hidden-animal {
-  position: absolute;
-  width: 65px;
-  height: 65px;
-  object-fit: contain;
-  cursor: pointer;
-  opacity: .7;
-  transition: .25s;
-  filter: brightness(.65);
+.forest-animal {
+  position:absolute;
+  width:75px;
+  height:75px;
+  object-fit:contain;
+  cursor:pointer;
+  opacity:.8;
+  filter:brightness(.7);
+  transition:.2s;
 }
 
-.hidden-animal:hover {
-  transform: scale(1.2);
-  opacity: 1;
+.forest-animal:hover {
+  transform:scale(1.15);
+  filter:brightness(1);
 }
 
-.hidden-animal.found {
-  opacity: 1;
-  filter: drop-shadow(0 0 9px #ffff77);
-  transform: scale(1.3);
-  pointer-events: none;
+.forest-animal.found {
+  opacity:1;
+  filter:drop-shadow(0 0 9px yellow);
+  transform:scale(1.2);
+  pointer-events:none;
 }
 
-.found-label {
-  position: absolute;
-  bottom: 5px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #fff8e9;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: bold;
-  z-index: 2;
+.forest-animal.wrong {
+  animation:shake .3s;
 }
 
-/* END SCREEN */
+@keyframes shake {
+  25% {transform:translateX(-5px);}
+  75% {transform:translateX(5px);}
+}
+
+.answer-area {
+  max-width:480px;
+  margin:15px auto;
+  background:var(--cream);
+  padding:15px;
+  border-radius:12px;
+}
+
+.answer-area input {
+  margin-top:10px;
+}
+
+.clue-counter {
+  color:#a66b32;
+  font-weight:bold;
+}
+
+/* ENDING */
 
 #ending-screen {
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:15px;
   background:
-    linear-gradient(#214d3588,#214d35bb),
+    linear-gradient(#244c3588,#244c3588),
     linear-gradient(130deg,#83b77b,#e7d39a);
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 20px;
 }
 
 .certificate {
-  width: min(620px,100%);
-  background: #fff9e9;
-  border: 9px double #c99b4e;
-  border-radius: 15px;
-  padding: 28px;
-  box-shadow: 0 10px 35px #0004;
+  width:min(620px,100%);
+  background:#fff9e9;
+  border:9px double #c99b4e;
+  border-radius:16px;
+  padding:25px;
+  box-shadow:0 10px 35px #0004;
 }
 
 .certificate h1 {
-  font-size: clamp(25px,5vw,39px);
-  color: #315b3e;
-  margin: 8px 0;
+  font-size:clamp(24px,5vw,38px);
+  color:#315b3e;
+  margin:10px 0;
 }
 
 .certificate img {
-  width: 110px;
-  height: 100px;
-  object-fit: contain;
+  width:100px;
+  height:90px;
+  object-fit:contain;
 }
 
 #certificate-name {
-  color: #a46b32;
-  font-size: 26px;
-  font-weight: bold;
-  border-bottom: 2px solid #c9b17f;
-  padding: 10px;
-  margin: 10px 0;
+  padding:10px;
+  border-bottom:2px solid #c9b17f;
+  font-size:26px;
+  font-weight:bold;
+  color:#a46b32;
 }
 
 .final-score {
-  font-size: 25px;
-  font-weight: bold;
-  color: #a56c30;
+  font-size:24px;
+  font-weight:bold;
+  color:#a56c30;
 }
 
-/* RESPONSIVE */
+/* SMALL SCREENS */
 
-@media(max-width:600px) {
-  body { padding: 0; }
+@media(max-width:650px) {
+  body {padding:0;}
 
   #game {
-    height: 100dvh;
-    min-height: 500px;
-    border-radius: 0;
-    border: none;
+    height:100dvh;
+    min-height:500px;
+    border:0;
+    border-radius:0;
   }
 
-  header { height: 58px; padding: 8px 12px; }
-  .logo { font-size: 16px; }
+  header {padding:8px 10px;}
+  .logo {font-size:14px;}
 
   .station {
-    width: 112px;
-    min-height: 115px;
-    padding: 7px 4px;
+    width:105px;
+    min-height:125px;
   }
 
-  .station img { width: 50px; height: 50px; }
-  .station strong { font-size: 12px; }
+  .station img {width:58px;height:58px;}
+  .station strong {font-size:11px;}
 
-  #station-1 { left: 3%; top: 35%; }
-  #station-2 { left: 50%; top: 62%; transform: translateX(-50%); }
-  #station-3 { right: 3%; top: 35%; }
+  #station-1 {left:2%;top:38%;}
+  #station-2 {left:50%;top:62%;transform:translateX(-50%);}
+  #station-3 {right:2%;top:38%;}
 
-  .map-heading h2 { font-size: 17px; }
-  .match-grid { gap: 7px; }
-  .animal-card { padding: 6px; }
-  .animal-card img { width: 70px; height: 70px; }
-  .mission-content { padding: 12px; }
-  .sequence-grid { gap: 7px; }
-  .sequence-card { padding: 7px; font-size: 12px; }
-  .forest-scene { height: 320px; }
+  .map-heading h2 {font-size:16px;}
+  .map-heading p {font-size:10px;}
+
+  .match-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+  }
+
+  .animal-card img {width:75px;height:70px;}
+  .mission-content {padding:10px;}
+
+  .rescue-world {height:360px;}
+  .rescue-cage {width:76px;height:90px;}
+  .rescue-cage img {width:48px;height:48px;}
+  .forest-scene {height:310px;}
 }
 </style>
 </head>
@@ -675,27 +700,29 @@ label {
   </div>
 </header>
 
-<!-- START -->
+<!-- START SCREEN -->
 
 <section id="start-screen" class="screen active">
   <div class="start-card">
     <h1>Wildlife Rescue Adventure</h1>
     <p>Welcome, young wildlife rescuer!</p>
-    <p>Explore the forest, discover animals and complete three exciting rescue missions.</p>
+    <p>Explore the forest, identify animals and rescue wildlife in danger.</p>
 
     <form id="start-form">
-      <label for="name-input">Your name</label>
-      <input id="name-input" placeholder="Enter your name" required maxlength="40">
+      <label for="name-input">Your Name</label>
+      <input id="name-input" required maxlength="40"
+        placeholder="Enter your name">
 
-      <label for="class-input">Your class</label>
-      <input id="class-input" placeholder="Example: Year 4 Amanah" required maxlength="40">
+      <label for="class-input">Your Class</label>
+      <input id="class-input" required maxlength="40"
+        placeholder="Example: Year 4 Amanah">
 
-      <button class="btn" type="submit">START MY ADVENTURE</button>
+      <button class="btn" type="submit">START ADVENTURE</button>
     </form>
   </div>
 </section>
 
-<!-- MAP -->
+<!-- MAP SCREEN -->
 
 <section id="map-screen" class="screen">
 
@@ -705,96 +732,79 @@ label {
   </div>
 
   <svg class="map-art" viewBox="0 0 1000 650"
-       preserveAspectRatio="none">
-
-    <path d="M100 300 C250 500 350 150 500 380 S750 500 900 250"
-      fill="none" stroke="#e4c99b" stroke-width="90"
+    preserveAspectRatio="none">
+    <path d="M80 300 C250 500 350 150 500 380 S750 500 920 240"
+      fill="none" stroke="#ddc99e" stroke-width="85"
       stroke-linecap="round"/>
-
-    <path d="M100 300 C250 500 350 150 500 380 S750 500 900 250"
-      fill="none" stroke="#f8e7c2" stroke-width="5"
-      stroke-dasharray="14 20"/>
-
+    <path d="M80 300 C250 500 350 150 500 380 S750 500 920 240"
+      fill="none" stroke="#fff0d2" stroke-width="5"
+      stroke-dasharray="15 20"/>
     <path d="M0 550 Q180 480 350 580 T700 550 T1000 600"
       fill="none" stroke="#5b9fa2" stroke-width="35"/>
-
     <g fill="#416e43">
       <circle cx="80" cy="90" r="65"/>
-      <circle cx="150" cy="85" r="45"/>
-      <circle cx="880" cy="85" r="65"/>
-      <circle cx="950" cy="130" r="55"/>
-      <circle cx="760" cy="580" r="65"/>
-      <circle cx="150" cy="590" r="65"/>
+      <circle cx="160" cy="80" r="45"/>
+      <circle cx="880" cy="90" r="65"/>
+      <circle cx="950" cy="140" r="50"/>
+      <circle cx="760" cy="580" r="60"/>
+      <circle cx="150" cy="590" r="60"/>
     </g>
-
-    <g fill="#79a65e">
-      <circle cx="80" cy="90" r="42"/>
-      <circle cx="880" cy="85" r="42"/>
-      <circle cx="760" cy="580" r="42"/>
-      <circle cx="150" cy="590" r="42"/>
+    <g fill="#83ad63">
+      <circle cx="80" cy="90" r="40"/>
+      <circle cx="880" cy="90" r="40"/>
+      <circle cx="760" cy="580" r="40"/>
     </g>
   </svg>
 
-  <div class="map-decoration forest">Emerald Forest</div>
-  <div class="map-decoration river">Crystal River</div>
-
   <button class="station" id="station-1">
-    <img id="map-animal-1" alt="Tiger illustration">
-    <span class="station-number">MISSION 01</span>
+    <img id="map-img-1" alt="Panda">
+    <small>MISSION 01</small>
     <strong>Animal Identification</strong>
   </button>
 
   <button class="station" id="station-2">
-    <img id="map-animal-2" alt="Elephant illustration">
-    <span class="station-number">MISSION 02</span>
-    <strong>Operation Rescue</strong>
+    <img id="map-img-2" alt="Rabbit">
+    <small>MISSION 02</small>
+    <strong>Wildlife Rescue</strong>
   </button>
 
   <button class="station" id="station-3">
-    <img id="map-animal-3" alt="Owl illustration">
-    <span class="station-number">MISSION 03</span>
-    <strong>Hidden Forest</strong>
+    <img id="map-img-3" alt="Owl">
+    <small>MISSION 03</small>
+    <strong>Animal Detective</strong>
   </button>
 
-  <div id="map-progress">Missions completed: 0 / 3</div>
+  <div class="map-progress" id="map-progress">
+    Missions completed: 0 / 3
+  </div>
 </section>
 
-<!-- MISSIONS -->
+<!-- MISSION SCREEN -->
 
 <section id="mission-screen" class="screen">
   <div class="mission-header">
     <h2 id="mission-title">Mission</h2>
     <button class="btn dark" id="back-map">Back to Map</button>
   </div>
-
   <div class="mission-content" id="mission-content"></div>
 </section>
 
-<!-- ENDING -->
+<!-- ENDING SCREEN -->
 
 <section id="ending-screen" class="screen">
   <div class="certificate">
-    <img id="ending-animal" alt="Wildlife hero illustration">
-
+    <img id="ending-img" alt="Wildlife hero">
     <h1>WILDLIFE RESCUE HERO</h1>
     <p>Certificate of Achievement</p>
-
-    <p>This certificate is proudly presented to</p>
-
+    <p>This certificate is proudly presented to:</p>
     <div id="certificate-name"></div>
     <p id="certificate-class"></p>
-
-    <p>For successfully completing all three wildlife rescue missions and showing great knowledge of animals!</p>
-
+    <p>For successfully completing all three wildlife missions and demonstrating excellent animal vocabulary knowledge!</p>
     <div class="final-score">
       FINAL SCORE: <span id="final-score">0</span>
     </div>
-
     <h3>Thank you for protecting wildlife!</h3>
-
-    <button class="btn orange" onclick="location.reload()">
-      PLAY AGAIN
-    </button>
+    <button class="btn orange" onclick="location.reload()">PLAY AGAIN</button>
   </div>
 </section>
 
@@ -802,164 +812,154 @@ label {
 
 <script>
 
-// ======================================
-// ORIGINAL ANIMAL ILLUSTRATIONS
-// ======================================
+/* =================================
+   ANIMAL ILLUSTRATIONS
+================================= */
 
-function animalSVG(name, colour, extra = "") {
-  const drawings = {
-    Tiger: `
-      <ellipse cx="100" cy="125" rx="58" ry="48" fill="${colour}"/>
-      <circle cx="100" cy="75" r="43" fill="${colour}"/>
-      <path d="M68 45 L60 10 L88 32 M112 32 L140 10 L132 48"
-        fill="${colour}" stroke="#563a27" stroke-width="5"/>
-      <path d="M72 50 L85 72 L73 90 M128 50 L115 72 L127 90"
-        fill="none" stroke="#402d24" stroke-width="9"/>
-      <circle cx="84" cy="72" r="5" fill="#252c22"/>
-      <circle cx="116" cy="72" r="5" fill="#252c22"/>
-      <ellipse cx="100" cy="94" rx="19" ry="13" fill="#fff0ce"/>
-      <path d="M90 90 L100 97 L110 90" fill="none" stroke="#493126" stroke-width="4"/>
-      <path d="M55 119 L78 110 M145 119 L122 110"
-        stroke="#493126" stroke-width="8"/>
-      <path d="M54 155 L35 175 M146 155 L165 175"
-        stroke="#493126" stroke-width="12" stroke-linecap="round"/>`,
+function makeAnimal(name, colour) {
+  const art = {
+    Panda: `
+      <circle cx="100" cy="105" r="65" fill="white"/>
+      <circle cx="55" cy="53" r="27" fill="#262c27"/>
+      <circle cx="145" cy="53" r="27" fill="#262c27"/>
+      <ellipse cx="75" cy="90" rx="19" ry="25" fill="#262c27" transform="rotate(25 75 90)"/>
+      <ellipse cx="125" cy="90" rx="19" ry="25" fill="#262c27" transform="rotate(-25 125 90)"/>
+      <circle cx="78" cy="90" r="7" fill="white"/>
+      <circle cx="122" cy="90" r="7" fill="white"/>
+      <circle cx="78" cy="90" r="3" fill="#222"/>
+      <circle cx="122" cy="90" r="3" fill="#222"/>
+      <ellipse cx="100" cy="125" rx="23" ry="17" fill="#e8cdb8"/>
+      <circle cx="100" cy="119" r="6" fill="#222"/>
+      <ellipse cx="100" cy="174" rx="43" ry="28" fill="#262c27"/>`,
 
-    Monkey: `
-      <circle cx="100" cy="90" r="52" fill="${colour}"/>
-      <circle cx="48" cy="88" r="20" fill="${colour}"/>
-      <circle cx="152" cy="88" r="20" fill="${colour}"/>
-      <ellipse cx="100" cy="105" rx="34" ry="30" fill="#e8bd90"/>
-      <circle cx="83" cy="80" r="7" fill="#252c22"/>
-      <circle cx="117" cy="80" r="7" fill="#252c22"/>
-      <path d="M84 115 Q100 130 116 115" fill="none" stroke="#63432e" stroke-width="4"/>
-      <path d="M135 130 Q185 145 165 175" fill="none" stroke="${colour}" stroke-width="12" stroke-linecap="round"/>
-      <ellipse cx="100" cy="163" rx="38" ry="40" fill="${colour}"/>`,
+    Dolphin: `
+      <path d="M20 112 Q60 42 145 76 Q170 82 180 60
+      L165 108 L195 135 L145 127 Q90 175 35 139 Z"
+      fill="${colour}"/>
+      <path d="M90 78 L115 35 L130 82" fill="${colour}"/>
+      <path d="M90 128 L110 165 L125 123" fill="#e8e5d6"/>
+      <circle cx="145" cy="95" r="5" fill="#222"/>
+      <path d="M150 113 Q160 120 168 112" fill="none" stroke="#234b63" stroke-width="3"/>`,
+
+    Rabbit: `
+      <ellipse cx="100" cy="140" rx="45" ry="38" fill="${colour}"/>
+      <ellipse cx="73" cy="43" rx="18" ry="48" fill="${colour}" transform="rotate(-12 73 43)"/>
+      <ellipse cx="125" cy="43" rx="18" ry="48" fill="${colour}" transform="rotate(12 125 43)"/>
+      <ellipse cx="73" cy="43" rx="8" ry="30" fill="#e6a4a5"/>
+      <ellipse cx="125" cy="43" rx="8" ry="30" fill="#e6a4a5"/>
+      <circle cx="85" cy="112" r="5" fill="#222"/>
+      <circle cx="115" cy="112" r="5" fill="#222"/>
+      <ellipse cx="100" cy="130" rx="9" ry="7" fill="#e89a9d"/>
+      <circle cx="100" cy="171" r="14" fill="white"/>`,
+
+    Shark: `
+      <path d="M10 115 Q75 38 180 110 Q125 175 35 145 Z" fill="${colour}"/>
+      <path d="M100 75 L125 15 L145 95" fill="${colour}"/>
+      <path d="M100 145 L120 180 L135 140" fill="#c7dce0"/>
+      <path d="M30 118 L5 145 L50 145" fill="${colour}"/>
+      <circle cx="145" cy="105" r="5" fill="#222"/>
+      <path d="M110 145 L120 130 L130 145 L140 132 L150 140"
+        fill="white" stroke="#555" stroke-width="2"/>`,
+
+    Fish: `
+      <ellipse cx="95" cy="105" rx="65" ry="42" fill="${colour}"/>
+      <path d="M155 105 L195 68 L195 142 Z" fill="#e8a24d"/>
+      <path d="M75 70 L105 35 L125 75" fill="#edb85c"/>
+      <path d="M75 140 L105 170 L125 140" fill="#edb85c"/>
+      <circle cx="125" cy="95" r="7" fill="white"/>
+      <circle cx="127" cy="95" r="3" fill="#222"/>
+      <path d="M55 115 Q90 145 115 112" fill="none" stroke="#e4e2ad" stroke-width="4"/>`,
+
+    Snail: `
+      <path d="M25 145 Q100 125 170 145 L175 170 L25 170 Z" fill="#a9c879"/>
+      <circle cx="95" cy="105" r="48" fill="${colour}" stroke="#79533b" stroke-width="7"/>
+      <path d="M95 65 Q145 80 115 125 Q70 140 75 95 Q85 75 105 88"
+        fill="none" stroke="#805537" stroke-width="6"/>
+      <path d="M140 140 L150 75 M165 140 L175 75"
+        stroke="#a9c879" stroke-width="7"/>
+      <circle cx="150" cy="73" r="7" fill="white"/>
+      <circle cx="175" cy="73" r="7" fill="white"/>
+      <circle cx="150" cy="73" r="3" fill="#222"/>
+      <circle cx="175" cy="73" r="3" fill="#222"/>`,
 
     Snake: `
-      <path d="M45 150 C10 120 75 95 110 120 S175 110 145 55"
-        stroke="${colour}" stroke-width="35" fill="none" stroke-linecap="round"/>
-      <circle cx="145" cy="48" r="27" fill="${colour}"/>
-      <circle cx="136" cy="43" r="5" fill="white"/>
-      <circle cx="154" cy="43" r="5" fill="white"/>
-      <circle cx="136" cy="43" r="2" fill="#222"/>
-      <circle cx="154" cy="43" r="2" fill="#222"/>
-      <path d="M140 65 Q150 75 160 65" stroke="#a43d40" stroke-width="4" fill="none"/>`,
+      <path d="M25 155 Q20 75 85 115 T145 70 Q155 40 175 55"
+        fill="none" stroke="${colour}" stroke-width="30" stroke-linecap="round"/>
+      <circle cx="175" cy="55" r="24" fill="${colour}"/>
+      <circle cx="167" cy="48" r="4" fill="white"/>
+      <circle cx="184" cy="48" r="4" fill="white"/>
+      <circle cx="167" cy="48" r="2" fill="#222"/>
+      <circle cx="184" cy="48" r="2" fill="#222"/>
+      <path d="M170 70 Q180 78 190 70" fill="none" stroke="#c75e60" stroke-width="4"/>`,
 
-    Bird: `
-      <ellipse cx="100" cy="115" rx="48" ry="43" fill="${colour}"/>
-      <circle cx="100" cy="62" r="32" fill="${colour}"/>
-      <path d="M70 105 Q25 75 45 145 Q65 130 100 130"
-        fill="#e9a74b"/>
-      <path d="M130 58 L165 72 L130 85" fill="#e5a64b"/>
-      <circle cx="89" cy="57" r="5" fill="white"/>
-      <circle cx="110" cy="57" r="5" fill="white"/>
-      <path d="M100 85 L90 145 L110 145 Z" fill="#f4d58a"/>
-      <path d="M80 153 L75 180 M120 153 L125 180"
-        stroke="#9b6339" stroke-width="5"/>`,
-
-    Elephant: `
-      <ellipse cx="100" cy="120" rx="60" ry="49" fill="${colour}"/>
-      <circle cx="100" cy="72" r="44" fill="${colour}"/>
-      <circle cx="53" cy="82" r="27" fill="#83b3b4"/>
-      <circle cx="147" cy="82" r="27" fill="#83b3b4"/>
-      <path d="M105 95 Q145 115 130 157 Q115 173 105 150"
-        fill="none" stroke="${colour}" stroke-width="25" stroke-linecap="round"/>
-      <circle cx="85" cy="70" r="5" fill="#263a34"/>
-      <circle cx="115" cy="70" r="5" fill="#263a34"/>
-      <path d="M65 157 L65 185 M135 157 L135 185"
-        stroke="${colour}" stroke-width="18" stroke-linecap="round"/>`,
-
-    Frog: `
-      <ellipse cx="100" cy="135" rx="55" ry="38" fill="${colour}"/>
-      <circle cx="72" cy="80" r="23" fill="${colour}"/>
-      <circle cx="128" cy="80" r="23" fill="${colour}"/>
-      <circle cx="72" cy="78" r="9" fill="white"/>
-      <circle cx="128" cy="78" r="9" fill="white"/>
-      <circle cx="72" cy="78" r="4" fill="#222"/>
-      <circle cx="128" cy="78" r="4" fill="#222"/>
-      <path d="M70 130 Q100 155 130 130"
-        fill="none" stroke="#285c36" stroke-width="5"/>
-      <path d="M55 155 L30 175 M145 155 L170 175"
-        stroke="${colour}" stroke-width="13" stroke-linecap="round"/>`,
-
-    Owl: `
-      <ellipse cx="100" cy="115" rx="55" ry="60" fill="${colour}"/>
-      <path d="M52 65 L48 15 L88 48 M112 48 L152 15 L148 65"
-        fill="${colour}"/>
-      <circle cx="78" cy="95" r="24" fill="#fff1cb"/>
-      <circle cx="122" cy="95" r="24" fill="#fff1cb"/>
-      <circle cx="78" cy="95" r="9" fill="#252c22"/>
-      <circle cx="122" cy="95" r="9" fill="#252c22"/>
-      <path d="M100 105 L89 119 L111 119 Z" fill="#e4a23c"/>
-      <path d="M75 165 L70 180 M125 165 L130 180"
-        stroke="#d5a34a" stroke-width="7"/>`,
-
-    Squirrel: `
-      <path d="M75 110 Q15 35 45 10 Q95 0 80 80"
-        fill="${colour}" stroke="#65432d" stroke-width="7"/>
-      <ellipse cx="105" cy="120" rx="35" ry="45" fill="${colour}"/>
-      <circle cx="100" cy="65" r="30" fill="${colour}"/>
-      <path d="M78 45 L75 15 L98 38 M108 38 L135 15 L124 50"
-        fill="${colour}"/>
-      <circle cx="90" cy="65" r="4" fill="#222"/>
-      <circle cx="110" cy="65" r="4" fill="#222"/>
-      <ellipse cx="100" cy="83" rx="14" ry="10" fill="#f5d8b0"/>`,
-
-    Butterfly: `
-      <path d="M100 100 C35 0 0 45 55 105 C0 160 50 200 100 120
-        C150 200 200 160 145 105 C200 45 165 0 100 100"
-        fill="${colour}" stroke="#573f37" stroke-width="5"/>
-      <path d="M100 65 L100 150" stroke="#49372c" stroke-width="9"/>
-      <path d="M95 65 Q70 15 60 30 M105 65 Q130 15 140 30"
-        stroke="#49372c" stroke-width="4" fill="none"/>
-      <circle cx="55" cy="95" r="10" fill="#fff4c6"/>
-      <circle cx="145" cy="95" r="10" fill="#fff4c6"/>`
+    Spider: `
+      <g stroke="${colour}" stroke-width="9" fill="none" stroke-linecap="round">
+      <path d="M78 80 L35 40 L15 25 M72 95 L25 90 L10 105
+      M75 120 L30 145 L15 170 M85 135 L55 180 L45 195
+      M122 80 L165 40 L185 25 M128 95 L175 90 L190 105
+      M125 120 L170 145 L185 170 M115 135 L145 180 L155 195"/>
+      </g>
+      <ellipse cx="100" cy="110" rx="37" ry="43" fill="${colour}"/>
+      <circle cx="100" cy="65" r="28" fill="${colour}"/>
+      <circle cx="88" cy="61" r="6" fill="white"/>
+      <circle cx="112" cy="61" r="6" fill="white"/>
+      <circle cx="88" cy="61" r="3" fill="#222"/>
+      <circle cx="112" cy="61" r="3" fill="#222"/>`
   };
 
   return `<svg xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 200 200">${drawings[name] || ""}${extra}</svg>`;
+    viewBox="0 0 200 200">${art[name]}</svg>`;
 }
 
-function animalImage(name, colour) {
+function imageFor(name) {
+  const colours = {
+    Panda:"#222",
+    Dolphin:"#73b9d0",
+    Rabbit:"#eee1d1",
+    Shark:"#7599a9",
+    Fish:"#ed9e51",
+    Snail:"#b47d49",
+    Snake:"#68a95b",
+    Spider:"#715b4b"
+  };
+
   return "data:image/svg+xml;charset=UTF-8," +
-    encodeURIComponent(animalSVG(name, colour));
+    encodeURIComponent(makeAnimal(name,colours[name]));
 }
 
-const animalPictures = {
-  Tiger: animalImage("Tiger", "#e8a13c"),
-  Monkey: animalImage("Monkey", "#9b6847"),
-  Snake: animalImage("Snake", "#66a85e"),
-  Bird: animalImage("Bird", "#69a7cb"),
-  Elephant: animalImage("Elephant", "#8aafb5"),
-  Frog: animalImage("Frog", "#7bb95b"),
-  Owl: animalImage("Owl", "#98704d"),
-  Squirrel: animalImage("Squirrel", "#bd814a"),
-  Butterfly: animalImage("Butterfly", "#e7a0c0")
-};
+const animalImages = {};
 
-// MAP IMAGES
+const animalNames = [
+  "Panda","Dolphin","Rabbit","Shark",
+  "Fish","Snail","Snake","Spider"
+];
 
-document.getElementById("map-animal-1").src = animalPictures.Tiger;
-document.getElementById("map-animal-2").src = animalPictures.Elephant;
-document.getElementById("map-animal-3").src = animalPictures.Owl;
-document.getElementById("ending-animal").src = animalPictures.Owl;
+animalNames.forEach(name => {
+  animalImages[name] = imageFor(name);
+});
 
-// ======================================
-// GAME STATE
-// ======================================
+document.getElementById("map-img-1").src = animalImages.Panda;
+document.getElementById("map-img-2").src = animalImages.Rabbit;
+document.getElementById("map-img-3").src = animalImages.Spider;
+document.getElementById("ending-img").src = animalImages.Panda;
+
+
+/* =================================
+   GAME STATE
+================================= */
 
 const state = {
-  name: "",
-  studentClass: "",
-  score: 0,
-  completed: [false, false, false],
-  currentStation: -1
+  name:"",
+  studentClass:"",
+  score:0,
+  completed:[false,false,false],
+  station:0
 };
 
 const screens = document.querySelectorAll(".screen");
 
 function showScreen(id) {
-  screens.forEach(s => s.classList.remove("active"));
+  screens.forEach(screen => screen.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
@@ -974,20 +974,20 @@ function updateMap() {
   document.getElementById("map-progress").textContent =
     `Missions completed: ${count} / 3`;
 
-  state.completed.forEach((done, i) => {
-    document.getElementById(`station-${i+1}`)
-      .classList.toggle("done", done);
+  state.completed.forEach((done,index) => {
+    document.getElementById(`station-${index+1}`)
+      .classList.toggle("done",done);
   });
 }
 
 function completeStation() {
-  state.completed[state.currentStation] = true;
+  state.completed[state.station] = true;
   updateMap();
 
   if (state.completed.every(Boolean)) {
-    setTimeout(showEnding, 900);
+    setTimeout(showEnding,1000);
   } else {
-    setTimeout(() => showScreen("map-screen"), 900);
+    setTimeout(() => showScreen("map-screen"),1000);
   }
 }
 
@@ -997,27 +997,19 @@ function startMission(index) {
     return;
   }
 
-  state.currentStation = index;
+  state.station = index;
   showScreen("mission-screen");
 
   if (index === 0) setupMatching();
   if (index === 1) setupRescue();
-  if (index === 2) setupHiddenForest();
+  if (index === 2) setupDetective();
 }
 
 document.getElementById("station-1").onclick = () => startMission(0);
 document.getElementById("station-2").onclick = () => startMission(1);
 document.getElementById("station-3").onclick = () => startMission(2);
 
-document.getElementById("back-map").onclick = () => {
-  showScreen("map-screen");
-};
-
-// ======================================
-// START GAME
-// ======================================
-
-document.getElementById("start-form").addEventListener("submit", e => {
+document.getElementById("start-form").addEventListener("submit",e => {
   e.preventDefault();
 
   state.name = document.getElementById("name-input").value.trim();
@@ -1028,341 +1020,552 @@ document.getElementById("start-form").addEventListener("submit", e => {
   document.getElementById("player-name").textContent =
     state.name + " | " + state.studentClass;
 
-  showScreen("map-screen");
   updateMap();
+  showScreen("map-screen");
 });
 
-// ======================================
-// STATION 1: ANIMAL MATCHING
-// ======================================
+
+/* =================================
+   BACK BUTTON
+================================= */
+
+let cleanupMission = () => {};
+
+document.getElementById("back-map").onclick = () => {
+  cleanupMission();
+  cleanupMission = () => {};
+  showScreen("map-screen");
+};
+
+
+/* =================================
+   STATION 1: MATCH ANIMALS
+================================= */
 
 function setupMatching() {
+  cleanupMission();
+
   document.getElementById("mission-title").textContent =
     "Mission 1: Animal Identification";
 
-  const animals = [
-    {name:"Tiger", colour:"#e8a13c"},
-    {name:"Monkey", colour:"#9b6847"},
-    {name:"Snake", colour:"#66a85e"},
-    {name:"Bird", colour:"#69a7cb"}
-  ];
-
-  const shuffledAnimals = [...animals].sort(() => Math.random() - .5);
-  const shuffledWords = [...animals].sort(() => Math.random() - .5);
-
   let matches = 0;
+
+  const shuffledPictures = [...animalNames]
+    .sort(() => Math.random()-.5);
+
+  const shuffledWords = [...animalNames]
+    .sort(() => Math.random()-.5);
 
   document.getElementById("mission-content").innerHTML = `
     <div class="instruction">
-      <strong>Animal Identification</strong><br>
-      Look at each animal carefully. Drag the correct name into its box.
-      Each correct answer earns 10 points!
+      <strong>Match the Animals!</strong><br>
+      Look at the eight animal pictures and match each one
+      with its correct English name. You earn 10 points per answer.
+      You can drag the words or tap a word and then a picture.
     </div>
 
     <div class="match-grid" id="match-grid"></div>
-
     <div class="word-bank" id="word-bank"></div>
-    <p id="match-feedback" class="sequence-result"></p>
+    <div class="feedback" id="match-feedback"></div>
   `;
 
   const grid = document.getElementById("match-grid");
   const bank = document.getElementById("word-bank");
 
-  shuffledAnimals.forEach(animal => {
-    grid.innerHTML += `
-      <div class="animal-card">
-        <img src="${animalPictures[animal.name]}" alt="${animal.name}">
-        <div class="drop-zone" data-answer="${animal.name}">
-          Drop animal name here
-        </div>
-      </div>
-    `;
-  });
+  let selectedWord = null;
 
-  shuffledWords.forEach(animal => {
-    const word = document.createElement("div");
-    word.className = "word";
-    word.draggable = true;
-    word.textContent = animal.name;
-
-    word.addEventListener("dragstart", e => {
-      e.dataTransfer.setData("text/plain", animal.name);
-    });
-
-    bank.appendChild(word);
-  });
-
-  document.querySelectorAll(".drop-zone").forEach(zone => {
-    zone.addEventListener("dragover", e => e.preventDefault());
-
-    zone.addEventListener("drop", e => {
-      e.preventDefault();
-
-      if (zone.classList.contains("correct")) return;
-
-      const answer = e.dataTransfer.getData("text/plain");
-
-      if (answer === zone.dataset.answer) {
-        zone.textContent = answer;
-        zone.classList.add("correct");
-
-        const usedWord = [...bank.children].find(
-          w => w.textContent === answer
-        );
-
-        if (usedWord) usedWord.classList.add("used");
-
-        updateScore(10);
-        matches++;
-
-        document.getElementById("match-feedback").textContent =
-          "Correct! Well done, young rescuer!";
-
-        if (matches === animals.length) {
-          setTimeout(() => {
-            alert("Excellent! You matched all four animals!");
-            completeStation();
-          }, 500);
-        }
-      } else {
-        document.getElementById("match-feedback").textContent =
-          "Not quite! Try another animal name.";
-      }
-    });
-  });
-}
-
-// ======================================
-// STATION 2: OPERATION ANIMAL RESCUE
-// ======================================
-
-function setupRescue() {
-  document.getElementById("mission-title").textContent =
-    "Mission 2: Operation Animal Rescue";
-
-  const actions = [
-    {
-      id: "observe",
-      title: "Observe the trapped animal",
-      image: animalPictures.Elephant
-    },
-    {
-      id: "key",
-      title: "Find the cage key",
-      image: makeIcon("key")
-    },
-    {
-      id: "unlock",
-      title: "Unlock the cage",
-      image: makeIcon("cage")
-    },
-    {
-      id: "release",
-      title: "Release the animal safely",
-      image: animalPictures.Elephant
-    }
-  ];
-
-  const shuffled = [...actions].sort(() => Math.random() - .5);
-
-  let selected = [];
-
-  document.getElementById("mission-content").innerHTML = `
-    <div class="instruction">
-      <strong>Help the trapped elephant!</strong><br>
-      The elephant needs your help. Click the four action cards
-      in the correct order to complete the rescue mission.
-      Think carefully about what should happen first, next and last.
-    </div>
-
-    <div class="rescue-scene" id="rescue-scene">
-      <img id="rescue-elephant" src="${animalPictures.Elephant}" alt="Trapped elephant">
-      <p id="rescue-message">A baby elephant is waiting for your help!</p>
-    </div>
-
-    <h3>Your rescue sequence</h3>
-
-    <div class="sequence-grid" id="sequence-grid"></div>
-
-    <div class="sequence-result" id="sequence-result">
-      Selected: 0 / 4
-    </div>
-
-    <button class="btn orange" id="reset-sequence">START AGAIN</button>
-  `;
-
-  const grid = document.getElementById("sequence-grid");
-
-  shuffled.forEach(action => {
-    const card = document.createElement("button");
-    card.className = "sequence-card";
-    card.dataset.id = action.id;
+  shuffledPictures.forEach(name => {
+    const card = document.createElement("div");
+    card.className = "animal-card";
 
     card.innerHTML = `
-      <img src="${action.image}" alt="">
-      <span>${action.title}</span>
+      <img src="${animalImages[name]}" alt="${name}">
+      <div class="drop-zone" data-answer="${name}">
+        Choose the animal name
+      </div>
     `;
 
-    card.onclick = () => {
-      if (card.classList.contains("selected")) return;
+    const zone = card.querySelector(".drop-zone");
 
-      const correctOrder = ["observe", "key", "unlock", "release"];
-      const expected = correctOrder[selected.length];
+    zone.addEventListener("dragover",e => e.preventDefault());
 
-      if (action.id === expected) {
-        selected.push(action.id);
-        card.classList.add("selected");
+    zone.addEventListener("drop",e => {
+      e.preventDefault();
+      checkMatch(e.dataTransfer.getData("text/plain"),zone);
+    });
 
-        document.getElementById("sequence-result").textContent =
-          `Correct! Step ${selected.length} of 4 completed.`;
-
-        updateScore(10);
-
-        if (selected.length === 4) {
-          finishRescue();
-        }
-      } else {
-        document.getElementById("sequence-result").textContent =
-          "That is not the correct next step. Try again!";
+    zone.onclick = () => {
+      if (selectedWord) {
+        checkMatch(selectedWord,zone);
       }
     };
 
     grid.appendChild(card);
   });
 
-  document.getElementById("reset-sequence").onclick = () => {
-    selected = [];
-    grid.querySelectorAll(".sequence-card").forEach(card => {
-      card.classList.remove("selected");
+  shuffledWords.forEach(name => {
+    const word = document.createElement("button");
+    word.className = "word";
+    word.textContent = name;
+    word.draggable = true;
+
+    word.addEventListener("dragstart",e => {
+      e.dataTransfer.setData("text/plain",name);
     });
 
-    document.getElementById("sequence-result").textContent =
-      "Selected: 0 / 4";
-  };
+    word.onclick = () => {
+      selectedWord = name;
+
+      document.querySelectorAll(".word").forEach(w => {
+        w.style.outline = "none";
+      });
+
+      word.style.outline = "3px solid #315b3e";
+
+      document.getElementById("match-feedback").textContent =
+        `Selected: ${name}. Now tap its picture.`;
+    };
+
+    bank.appendChild(word);
+  });
+
+  function checkMatch(answer,zone) {
+    if (!answer || zone.classList.contains("correct")) return;
+
+    if (answer === zone.dataset.answer) {
+      zone.textContent = answer;
+      zone.classList.add("correct");
+
+      const word = [...bank.children].find(
+        w => w.textContent === answer
+      );
+
+      if (word) word.classList.add("used");
+
+      selectedWord = null;
+      matches++;
+      updateScore(10);
+
+      document.getElementById("match-feedback").textContent =
+        "Correct! Well done!";
+
+      if (matches === animalNames.length) {
+        setTimeout(() => {
+          alert("Excellent! You matched all eight animals!");
+          completeStation();
+        },500);
+      }
+    } else {
+      document.getElementById("match-feedback").textContent =
+        "Not quite! Look carefully and try again.";
+    }
+  }
 }
 
-function makeIcon(type) {
-  const drawings = {
-    key: `<circle cx="55" cy="65" r="25" fill="none"
-      stroke="#d9a53f" stroke-width="13"/>
-      <path d="M78 65 L160 65 L160 85 L140 85 L140 105 L120 105 L120 65"
-      fill="none" stroke="#d9a53f" stroke-width="13"/>`,
 
-    cage: `<rect x="35" y="35" width="130" height="125"
-      fill="#a68b66" stroke="#604e3a" stroke-width="8"/>
-      <path d="M65 35 V160 M100 35 V160 M135 35 V160"
-      stroke="#604e3a" stroke-width="9"/>
-      <path d="M35 65 H165 M35 130 H165"
-      stroke="#604e3a" stroke-width="7"/>`
-  };
+/* =================================
+   STATION 2: WALK AND RESCUE
+================================= */
 
-  return "data:image/svg+xml;charset=UTF-8," +
-    encodeURIComponent(
-      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-      ${drawings[type]}</svg>`
-    );
-}
+function setupRescue() {
+  cleanupMission();
 
-function finishRescue() {
-  const scene = document.getElementById("rescue-scene");
-
-  scene.classList.add("rescued");
-
-  document.getElementById("rescue-message").textContent =
-    "The elephant is FREE! You have successfully rescued it!";
-
-  document.getElementById("sequence-result").textContent =
-    "MISSION COMPLETE! You earned 40 points!";
-
-  const elephant = document.getElementById("rescue-elephant");
-  elephant.style.transform = "translateX(100px)";
-
-  setTimeout(() => {
-    alert("Amazing work! The elephant is now safe!");
-    completeStation();
-  }, 1800);
-}
-
-// ======================================
-// STATION 3: HIDDEN FOREST
-// ======================================
-
-function setupHiddenForest() {
   document.getElementById("mission-title").textContent =
-    "Mission 3: Hidden Forest";
+    "Mission 2: Wildlife Rescue";
 
+  // Four animals and their rescue locations.
   const animals = [
-    {name:"Owl", x:76, y:17},
-    {name:"Squirrel", x:20, y:60},
-    {name:"Butterfly", x:52, y:38}
+    {name:"Panda",x:12,y:12},
+    {name:"Rabbit",x:72,y:12},
+    {name:"Snake",x:40,y:65},
+    {name:"Dolphin",x:78,y:65}
   ];
 
-  let found = 0;
+  // Shuffle the rescue order.
+  const order = [...animals].sort(() => Math.random()-.5);
+
+  let current = 0;
+  let playerX = 15;
+  let playerY = 315;
+  let locked = false;
+  let lastWrong = 0;
 
   document.getElementById("mission-content").innerHTML = `
     <div class="instruction">
-      <strong>Explore the Hidden Forest!</strong><br>
-      Three animals are hiding among the trees and bushes.
-      Find the owl, squirrel and butterfly.
-      Click each animal to rescue it!
+      <strong>Save the trapped animals!</strong><br>
+      Follow the rescue order. Walk towards each animal's cage
+      and approach the correct animal to release it.
     </div>
 
-    <div class="forest-scene" id="forest-scene">
-      <div class="forest-tree one"></div>
-      <div class="forest-tree two"></div>
-      <div class="forest-tree three"></div>
-      <div class="found-label" id="found-count">
-        Animals found: 0 / 3
+    <div class="rescue-order">
+      YOUR RESCUE ORDER:<br>
+      ${order.map((a,i) => `${i+1}. ${a.name}`).join(" → ")}
+    </div>
+
+    <div class="rescue-world" id="rescue-world">
+      <div class="world-path"></div>
+      <div class="world-water"></div>
+      <div class="rescuer" id="rescuer"></div>
+    </div>
+
+    <div class="rescue-status" id="rescue-status">
+      Find the ${order[0].name} first!
+    </div>
+
+    <p><strong>Keyboard:</strong> Arrow keys or W, A, S, D</p>
+
+    <div class="mobile-controls">
+      <button class="empty"> </button>
+      <button data-dir="up">↑</button>
+      <button class="empty"> </button>
+      <button data-dir="left">←</button>
+      <button data-dir="down">↓</button>
+      <button data-dir="right">→</button>
+    </div>
+  `;
+
+  const world = document.getElementById("rescue-world");
+  const player = document.getElementById("rescuer");
+  const status = document.getElementById("rescue-status");
+
+  animals.forEach(animal => {
+    const cage = document.createElement("div");
+    cage.className = "rescue-cage";
+    cage.dataset.name = animal.name;
+
+    cage.style.left = animal.x + "%";
+    cage.style.top = animal.y + "%";
+
+    cage.innerHTML = `
+      <img src="${animalImages[animal.name]}" alt="${animal.name}">
+      <span>${animal.name}</span>
+    `;
+
+    world.appendChild(cage);
+  });
+
+  function renderPlayer() {
+    player.style.left = playerX + "px";
+    player.style.top = playerY + "px";
+  }
+
+  function checkCollision() {
+    const cages = [...world.querySelectorAll(".rescue-cage")];
+
+    for (const cage of cages) {
+      if (cage.classList.contains("open")) continue;
+
+      const cx = cage.offsetLeft + cage.offsetWidth/2;
+      const cy = cage.offsetTop + cage.offsetHeight/2;
+
+      const px = playerX + 17;
+      const py = playerY + 21;
+
+      const distance = Math.hypot(cx-px,cy-py);
+
+      if (distance < 62) {
+        const name = cage.dataset.name;
+        const expected = order[current].name;
+
+        if (name === expected) {
+          cage.classList.add("open");
+          current++;
+
+          updateScore(20);
+
+          if (current === order.length) {
+            finishRescue();
+          } else {
+            status.textContent =
+              `${name} rescued! Now find the ${order[current].name}.`;
+          }
+        } else {
+          if (Date.now()-lastWrong > 1000) {
+            status.textContent =
+              `Not yet! Follow your rescue order. Find the ${expected} first.`;
+            lastWrong = Date.now();
+          }
+        }
+
+        break;
+      }
+    }
+  }
+
+  function move(dx,dy) {
+    if (locked) return;
+
+    playerX = Math.max(
+      0,
+      Math.min(world.clientWidth-34,playerX+dx)
+    );
+
+    playerY = Math.max(
+      0,
+      Math.min(world.clientHeight-43,playerY+dy)
+    );
+
+    renderPlayer();
+    checkCollision();
+  }
+
+  function keyHandler(e) {
+    const key = e.key.toLowerCase();
+
+    const directions = {
+      arrowup:[0,-12],
+      w:[0,-12],
+      arrowdown:[0,12],
+      s:[0,12],
+      arrowleft:[-12,0],
+      a:[-12,0],
+      arrowright:[12,0],
+      d:[12,0]
+    };
+
+    if (directions[key]) {
+      e.preventDefault();
+      move(...directions[key]);
+    }
+  }
+
+  window.addEventListener("keydown",keyHandler);
+
+  document.querySelectorAll(".mobile-controls button[data-dir]")
+    .forEach(button => {
+      button.addEventListener("pointerdown",e => {
+        e.preventDefault();
+
+        const moves = {
+          up:[0,-15],
+          down:[0,15],
+          left:[-15,0],
+          right:[15,0]
+        };
+
+        move(...moves[button.dataset.dir]);
+      });
+    });
+
+  function finishRescue() {
+    locked = true;
+
+    status.textContent =
+      "Amazing! All four animals have been released safely!";
+
+    const cages = world.querySelectorAll(".rescue-cage");
+    cages.forEach(cage => cage.classList.add("open"));
+
+    setTimeout(() => {
+      alert("Wildlife Rescue Complete! You earned 80 points!");
+      completeStation();
+    },1200);
+  }
+
+  cleanupMission = () => {
+    locked = true;
+    window.removeEventListener("keydown",keyHandler);
+  };
+
+  renderPlayer();
+}
+
+
+/* =================================
+   STATION 3: ANIMAL DETECTIVE
+================================= */
+
+function setupDetective() {
+  cleanupMission();
+
+  document.getElementById("mission-title").textContent =
+    "Mission 3: The Ultimate Animal Detective";
+
+  // First three clues: find the animal in the forest.
+  // Last three clues: type the animal's name without a picture.
+  const clues = [
+    {
+      clue:"I have eight legs. I can make a web. Who am I?",
+      answer:"Spider",
+      mode:"picture",
+      points:15
+    },
+    {
+      clue:"I carry a shell on my back and move very slowly. Who am I?",
+      answer:"Snail",
+      mode:"picture",
+      points:15
+    },
+    {
+      clue:"I am black and white. I eat bamboo. Who am I?",
+      answer:"Panda",
+      mode:"picture",
+      points:15
+    },
+    {
+      clue:"I am a large sea animal. I have sharp teeth and fins. Who am I?",
+      answer:"Shark",
+      mode:"text",
+      points:20
+    },
+    {
+      clue:"I am a sea animal. I can jump out of the water and communicate using sounds. Who am I?",
+      answer:"Dolphin",
+      mode:"text",
+      points:20
+    },
+    {
+      clue:"I have long ears. I hop and eat plants. Who am I?",
+      answer:"Rabbit",
+      mode:"text",
+      points:25
+    }
+  ];
+
+  let question = 0;
+
+  document.getElementById("mission-content").innerHTML = `
+    <div class="instruction">
+      <strong>Welcome to the Ultimate Animal Detective Challenge!</strong><br>
+      Read each clue carefully. The questions become harder as you progress.
+      You must answer all six questions to complete this mission.
+    </div>
+
+    <div class="clue-counter" id="clue-counter">
+      QUESTION 1 / 6
+    </div>
+
+    <h3 id="clue-text"></h3>
+
+    <div id="picture-challenge">
+      <div class="forest-scene" id="forest-scene">
+        <div class="forest-tree tree-one"></div>
+        <div class="forest-tree tree-two"></div>
+        <div class="forest-tree tree-three"></div>
       </div>
     </div>
 
-    <p id="forest-feedback">Look carefully between the trees!</p>
+    <div id="text-challenge" class="answer-area" style="display:none">
+      <p>No pictures or word bank for this challenge!</p>
+      <label for="written-answer">Type the animal's name:</label>
+      <input id="written-answer" placeholder="Your answer">
+      <button class="btn" id="submit-answer">SUBMIT ANSWER</button>
+    </div>
+
+    <div class="feedback" id="detective-feedback"></div>
   `;
 
   const forest = document.getElementById("forest-scene");
 
-  animals.forEach(animal => {
+  // Add all eight animals to the forest for the picture rounds.
+  animalNames.forEach((name,index) => {
     const img = document.createElement("img");
+    img.src = animalImages[name];
+    img.alt = name;
+    img.className = "forest-animal";
 
-    img.src = animalPictures[animal.name];
-    img.alt = animal.name;
-    img.className = "hidden-animal";
-    img.style.left = animal.x + "%";
-    img.style.top = animal.y + "%";
+    const positions = [
+      [5,55],[22,35],[40,65],[58,35],
+      [76,60],[83,15],[32,12],[58,70]
+    ];
+
+    img.style.left = positions[index][0]+"%";
+    img.style.top = positions[index][1]+"%";
 
     img.onclick = () => {
-      if (img.classList.contains("found")) return;
+      if (question >= clues.length ||
+          clues[question].mode !== "picture") return;
 
-      img.classList.add("found");
-      img.style.filter = "drop-shadow(0 0 10px yellow)";
-
-      found++;
-      updateScore(15);
-
-      document.getElementById("found-count").textContent =
-        `Animals found: ${found} / 3`;
-
-      document.getElementById("forest-feedback").textContent =
-        `You found the ${animal.name}! Great job!`;
-
-      if (found === animals.length) {
-        document.getElementById("forest-feedback").textContent =
-          "All animals have been found! The forest is safe!";
-
-        setTimeout(() => {
-          alert("Fantastic! You found every hidden animal!");
-          completeStation();
-        }, 600);
+      if (name === clues[question].answer) {
+        answerCorrect();
+      } else {
+        img.classList.add("wrong");
+        document.getElementById("detective-feedback").textContent =
+          "That is not the animal described. Read the clue again!";
+        setTimeout(() => img.classList.remove("wrong"),400);
       }
     };
 
     forest.appendChild(img);
   });
+
+  function displayQuestion() {
+    if (question >= clues.length) {
+      setTimeout(() => {
+        alert("Fantastic! You solved all six animal clues!");
+        completeStation();
+      },500);
+      return;
+    }
+
+    const q = clues[question];
+
+    document.getElementById("clue-counter").textContent =
+      `QUESTION ${question+1} / 6`;
+
+    document.getElementById("clue-text").textContent = q.clue;
+
+    document.getElementById("detective-feedback").textContent = "";
+
+    document.getElementById("picture-challenge").style.display =
+      q.mode === "picture" ? "block" : "none";
+
+    document.getElementById("text-challenge").style.display =
+      q.mode === "text" ? "block" : "none";
+
+    if (q.mode === "text") {
+      const input = document.getElementById("written-answer");
+      input.value = "";
+      input.focus();
+    }
+  }
+
+  function answerCorrect() {
+    const q = clues[question];
+
+    updateScore(q.points);
+
+    document.getElementById("detective-feedback").textContent =
+      `Correct! You identified the ${q.answer}!`;
+
+    question++;
+
+    setTimeout(displayQuestion,1000);
+  }
+
+  function submitWrittenAnswer() {
+    if (question >= clues.length ||
+        clues[question].mode !== "text") return;
+
+    const input = document.getElementById("written-answer");
+    const answer = input.value.trim().toLowerCase();
+
+    if (answer === clues[question].answer.toLowerCase()) {
+      answerCorrect();
+    } else {
+      document.getElementById("detective-feedback").textContent =
+        "Not quite! Think carefully and try again.";
+      input.value = "";
+      input.focus();
+    }
+  }
+
+  document.getElementById("submit-answer").onclick =
+    submitWrittenAnswer;
+
+  document.getElementById("written-answer").addEventListener(
+    "keydown",e => {
+      if (e.key === "Enter") submitWrittenAnswer();
+    }
+  );
+
+  displayQuestion();
 }
 
-// ======================================
-// FINAL ENDING
-// ======================================
+
+/* =================================
+   FINAL CERTIFICATE
+================================= */
 
 function showEnding() {
   document.getElementById("certificate-name").textContent =
@@ -1374,10 +1577,8 @@ function showEnding() {
   document.getElementById("final-score").textContent =
     state.score;
 
+  cleanupMission();
   showScreen("ending-screen");
-
-  // Optional Google Sheets connection goes here.
-  // See the integration note below.
 }
 
 </script>
