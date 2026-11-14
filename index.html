@@ -1,1587 +1,1341 @@
+### Part 1: Universal Google Apps Script (`Code.gs`)
 
+1. Open your Google Spreadsheet and click **Extensions > Apps Script** (always open it from inside the Sheet so it is linked to that file).
+2. Replace everything in `Code.gs` with the script below and click **Save**:
+
+```javascript
+function doGet(e) {
+  return handleRequest(e);
+}
+
+function doPost(e) {
+  return handleRequest(e);
+}
+
+function handleRequest(e) {
+  const lock = LockService.getScriptLock();
+  lock.tryLock(10000);
+
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (!ss) {
+      return ContentService.createTextOutput(
+        "ERROR: This script is not attached to a Google Sheet. Open your Google Sheet and click Extensions > Apps Script."
+      );
+    }
+
+    const sheet = ss.getSheets()[0];
+
+    // Create headers automatically if Sheet1 is empty
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow([
+        "Timestamp",
+        "Explorer Name",
+        "Class",
+        "Activity / Station",
+        "Score",
+        "Correct Matches",
+        "Stations Cleared",
+        "Gems",
+        "Total Mistakes",
+        "Accuracy",
+        "Station 1 Errors",
+        "Station 2 Errors",
+        "Station 3 Errors",
+        "Mistake Details (Expected != Picked)",
+        "Full Status"
+      ]);
+      sheet.setFrozenRows(1);
+    }
+
+    // Read both URL query parameters AND JSON body so nothing ever mismatches
+    let p = (e && e.parameter) ? Object.assign({}, e.parameter) : {};
+    if (e && e.postData && e.postData.contents) {
+      try {
+        const json = JSON.parse(e.postData.contents);
+        p = Object.assign(p, json);
+      } catch (ignore) {}
+    }
+
+    // If opened in a browser tab with zero data, just confirm connection is live
+    if (!p.name && !p.activity) {
+      return ContentService.createTextOutput(
+        "CONNECTED! Your Web App is live and linked to sheet: " + sheet.getName()
+      );
+    }
+
+    sheet.appendRow([
+      new Date(),
+      p.name || "Explorer",
+      p.studentClass || p.class || "",
+      p.activity || "",
+      Number(p.score || 0),
+      Number(p.correctAnswers || 0),
+      Number(p.questionsCompleted || 0),
+      Number(p.gems || 0),
+      Number(p.wrongAnswers || 0),
+      p.accuracy || "100%",
+      Number(p.s1Mistakes || 0),
+      Number(p.s2Mistakes || 0),
+      Number(p.s3Mistakes || 0),
+      p.mistakeDetails || "None",
+      p.status || ""
+    ]);
+
+    return ContentService
+      .createTextOutput("SUCCESS! Row recorded in sheet: " + sheet.getName())
+      .setMimeType(ContentService.MimeType.TEXT);
+
+  } catch (err) {
+    return ContentService
+      .createTextOutput("SCRIPT ERROR: " + err.toString())
+      .setMimeType(ContentService.MimeType.TEXT);
+  } finally {
+    lock.releaseLock();
+  }
+}
+```
+
+3. Click **Deploy > Manage deployments > Edit (pencil icon)**.
+4. Under **Version**, choose **New version** (critical step!).
+5. Under **Execute as**, choose **Me**, and under **Who has access**, choose **Anyone** (*Note: if your school or government Google account only shows "Anyone within organization" and hides "Anyone", create the Sheet in a personal `@gmail.com` account so student browsers don't get blocked by organization login walls*).
+6. Click **Deploy** (if your `/exec` URL changes, paste the new URL into `GOOGLE_SCRIPT_URL` in the HTML below).
+
+---
+
+### Part 2: Complete Game Code (`english_treasure_quest.html`)
+
+Copy everything inside the block below and save it as **`english_treasure_quest.html`**. It has your `AKfycbyXh3lVBxo2r...` URL pre-installed, sends **both JSON and URL parameters**, and includes a **Test Sheet Sync** button right on the Start Screen so you can verify your spreadsheet connection in one click.
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Wildlife Rescue Adventure</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>English Treasure Quest — Year 4 Wildlife Guardians</title>
 <style>
-:root {
-  --forest:#244b38;
-  --green:#659b59;
-  --light:#e6efd9;
-  --cream:#fff8e9;
-  --orange:#e7a04c;
-  --brown:#765438;
-  --text:#304638;
-}
-
-* {
-  box-sizing:border-box;
-  font-family:Trebuchet MS,Arial,sans-serif;
-}
-
-body {
-  margin:0;
-  min-height:100vh;
-  padding:12px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:#203d30;
-  color:var(--text);
-}
-
-#game {
-  width:100%;
-  max-width:1050px;
-  height:min(780px,96vh);
-  min-height:550px;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  background:var(--cream);
-  border:6px solid #d4b982;
-  border-radius:20px;
-  box-shadow:0 12px 35px #0005;
-}
-
-header {
-  min-height:65px;
-  padding:10px 20px;
-  background:#f2e6ca;
-  border-bottom:3px solid #d4bd91;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:8px;
-}
-
-.logo {
-  font-size:19px;
-  font-weight:900;
-  color:var(--forest);
-}
-
-#player-display {
-  font-size:12px;
-  font-weight:bold;
-  text-align:right;
-}
-
-#score-display {
-  color:#ae702f;
-  font-size:18px;
-}
-
-.screen {
-  display:none;
-  flex:1;
-  min-height:0;
-  overflow:auto;
-}
-
-.screen.active {
-  display:flex;
-}
-
-button {
-  cursor:pointer;
-}
-
-.btn {
-  padding:12px 20px;
-  border:0;
-  border-radius:10px;
-  background:var(--green);
-  color:white;
-  font-weight:bold;
-  font-size:15px;
-}
-
-.btn:hover {
-  filter:brightness(1.1);
-}
-
-.btn.dark {
-  background:var(--forest);
-}
-
-.btn.orange {
-  background:var(--orange);
-  color:#49321c;
-}
-
-input {
-  padding:12px;
-  width:100%;
-  border:2px solid #b7c7ad;
-  border-radius:9px;
-  font-size:16px;
-  margin:6px 0 15px;
-}
-
-label {
-  display:block;
-  text-align:left;
-  font-weight:bold;
-}
-
-/* START */
-
-#start-screen {
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  padding:20px;
-  background:
-    linear-gradient(#214c3580,#214c3580),
-    linear-gradient(130deg,#78a96d,#dfc68f);
-}
-
-.start-card {
-  width:min(430px,100%);
-  padding:30px;
-  background:var(--cream);
-  border:5px solid #d4b982;
-  border-radius:22px;
-  box-shadow:0 10px 30px #0004;
-}
-
-.start-card h1 {
-  color:var(--forest);
-  font-size:32px;
-  margin:5px;
-}
-
-/* MAP */
-
-#map-screen {
-  position:relative;
-  justify-content:center;
-  align-items:center;
-  overflow:hidden;
-  background:
-    radial-gradient(ellipse at 15% 15%,#9fc47d 0 15%,transparent 16%),
-    radial-gradient(ellipse at 90% 80%,#a9ca82 0 18%,transparent 19%),
-    linear-gradient(135deg,#76a76b,#c4d99b);
-}
-
-.map-art {
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-}
-
-.map-heading {
-  position:absolute;
-  top:15px;
-  z-index:3;
-  text-align:center;
-  padding:12px 20px;
-  border-radius:15px;
-  background:#fff8e9ed;
-  box-shadow:0 4px 12px #0002;
-}
-
-.map-heading h2 {
-  margin:0;
-  font-size:21px;
-  color:var(--forest);
-}
-
-.map-heading p {
-  margin:5px 0 0;
-  font-size:12px;
-}
-
-.station {
-  position:absolute;
-  z-index:4;
-  width:155px;
-  min-height:150px;
-  border:5px solid #f6e5c1;
-  border-radius:20px;
-  background:#fff9e9;
-  box-shadow:0 6px 14px #0004;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  padding:8px;
-  color:var(--text);
-  transition:.2s;
-}
-
-.station:hover {
-  transform:translateY(-5px);
-}
-
-.station img {
-  width:75px;
-  height:75px;
-  object-fit:contain;
-}
-
-.station small {
-  color:#a56c32;
-  font-weight:bold;
-}
-
-.station strong {
-  font-size:13px;
-}
-
-.station.done {
-  background:#d9edcf;
-  border-color:#4b9852;
-}
-
-.station.done::after {
-  content:"COMPLETED";
-  color:#27733b;
-  font-size:10px;
-  font-weight:bold;
-}
-
-#station-1 {left:8%;top:36%;}
-#station-2 {left:42%;top:58%;}
-#station-3 {right:8%;top:34%;}
-
-.map-progress {
-  position:absolute;
-  bottom:12px;
-  left:50%;
-  transform:translateX(-50%);
-  background:var(--cream);
-  padding:10px 18px;
-  border-radius:20px;
-  z-index:4;
-  font-weight:bold;
-  font-size:13px;
-  white-space:nowrap;
-}
-
-/* MISSION SCREENS */
-
-#mission-screen {
-  flex-direction:column;
-  background:#edf3e4;
-}
-
-.mission-header {
-  padding:13px 20px;
-  background:#d7e7c9;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:8px;
-}
-
-.mission-header h2 {
-  margin:0;
-  color:var(--forest);
-  font-size:20px;
-}
-
-.mission-content {
-  flex:1;
-  overflow:auto;
-  text-align:center;
-  padding:18px;
-}
-
-.instruction {
-  max-width:680px;
-  margin:0 auto 18px;
-  padding:13px;
-  line-height:1.6;
-  border-radius:12px;
-  background:var(--cream);
-}
-
-.feedback {
-  min-height:27px;
-  font-weight:bold;
-  margin:12px;
-}
-
-/* STATION 1 */
-
-.match-grid {
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:12px;
-  max-width:760px;
-  margin:auto;
-}
-
-.animal-card {
-  background:white;
-  border:3px solid #c7d7bb;
-  border-radius:15px;
-  padding:10px;
-}
-
-.animal-card img {
-  width:100px;
-  height:95px;
-  object-fit:contain;
-}
-
-.drop-zone {
-  min-height:40px;
-  padding:8px;
-  background:#edf3e7;
-  border:2px dashed #9ab48e;
-  border-radius:8px;
-  font-weight:bold;
-  font-size:13px;
-}
-
-.drop-zone.correct {
-  background:#d3efcc;
-  border:2px solid #4b9950;
-}
-
-.word-bank {
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:center;
-  gap:9px;
-  margin:20px auto;
-}
-
-.word {
-  padding:10px 15px;
-  border-radius:9px;
-  background:#d58c47;
-  border:2px solid #b46c31;
-  color:white;
-  font-weight:bold;
-  cursor:grab;
-}
-
-.word.used {
-  display:none;
-}
-
-/* STATION 2 */
-
-.rescue-order {
-  max-width:680px;
-  padding:12px;
-  margin:10px auto;
-  border-radius:12px;
-  background:var(--cream);
-  line-height:1.8;
-  font-weight:bold;
-}
-
-.rescue-world {
-  position:relative;
-  width:100%;
-  max-width:740px;
-  height:390px;
-  margin:auto;
-  overflow:hidden;
-  border:5px solid #536f45;
-  border-radius:18px;
-  background:
-    radial-gradient(ellipse at 15% 15%,#aecb7f 0 12%,transparent 13%),
-    radial-gradient(ellipse at 85% 75%,#adc97a 0 15%,transparent 16%),
-    linear-gradient(135deg,#66965a,#a6c67d);
-}
-
-.world-path {
-  position:absolute;
-  width:115%;
-  height:90px;
-  top:46%;
-  left:-5%;
-  transform:rotate(-10deg);
-  border-radius:50%;
-  background:#ddc99e;
-  border:5px solid #c7ad7d;
-}
-
-.world-water {
-  position:absolute;
-  width:38%;
-  height:50px;
-  right:-5%;
-  bottom:0;
-  border-radius:50%;
-  background:#69b5c3;
-}
-
-.rescue-cage {
-  position:absolute;
-  z-index:2;
-  width:90px;
-  height:105px;
-  background:#b9a27e;
-  border:5px solid #70563a;
-  border-radius:10px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  transition:.4s;
-}
-
-.rescue-cage img {
-  width:58px;
-  height:58px;
-  object-fit:contain;
-}
-
-.rescue-cage span {
-  font-size:11px;
-  font-weight:bold;
-  color:#263b2d;
-}
-
-.rescue-cage::after {
-  content:"";
-  position:absolute;
-  inset:4px;
-  border-left:4px solid #72563a;
-  border-right:4px solid #72563a;
-  pointer-events:none;
-}
-
-.rescue-cage.open {
-  opacity:.3;
-  transform:scale(.8);
-  border-color:#4b9852;
-}
-
-.rescue-cage.open::after {
-  display:none;
-}
-
-.rescuer {
-  position:absolute;
-  z-index:5;
-  width:34px;
-  height:43px;
-  border-radius:10px;
-  background:#315d9b;
-  border:3px solid white;
-  left:15px;
-  top:325px;
-}
-
-.rescuer::before {
-  content:"";
-  position:absolute;
-  width:22px;
-  height:22px;
-  left:3px;
-  top:-22px;
-  border:2px solid #76533b;
-  border-radius:50%;
-  background:#e7c09c;
-}
-
-.rescue-status {
-  min-height:28px;
-  font-weight:bold;
-  margin:12px;
-}
-
-.mobile-controls {
-  display:grid;
-  grid-template-columns:repeat(3,55px);
-  gap:5px;
-  justify-content:center;
-  margin:10px auto;
-}
-
-.mobile-controls button {
-  border:0;
-  border-radius:10px;
-  padding:12px;
-  background:#315d48;
-  color:white;
-  font-weight:bold;
-  font-size:18px;
-  touch-action:none;
-}
-
-.mobile-controls .empty {
-  visibility:hidden;
-}
-
-/* STATION 3 */
-
-.forest-scene {
-  position:relative;
-  width:100%;
-  max-width:680px;
-  height:340px;
-  margin:auto;
-  overflow:hidden;
-  border:5px solid #536f45;
-  border-radius:17px;
-  background:
-    radial-gradient(ellipse at 20% 80%,#a2bd68 0 18%,transparent 19%),
-    radial-gradient(ellipse at 80% 70%,#7da554 0 20%,transparent 21%),
-    linear-gradient(#a5c7a0 0 35%,#547d45 36% 100%);
-}
-
-.forest-tree {
-  position:absolute;
-  width:130px;
-  height:220px;
-  top:-100px;
-  border-radius:50%;
-  background:#315f39;
-}
-
-.tree-one {left:-25px;}
-.tree-two {right:-30px;}
-.tree-three {left:42%;top:-140px;}
-
-.forest-animal {
-  position:absolute;
-  width:75px;
-  height:75px;
-  object-fit:contain;
-  cursor:pointer;
-  opacity:.8;
-  filter:brightness(.7);
-  transition:.2s;
-}
-
-.forest-animal:hover {
-  transform:scale(1.15);
-  filter:brightness(1);
-}
-
-.forest-animal.found {
-  opacity:1;
-  filter:drop-shadow(0 0 9px yellow);
-  transform:scale(1.2);
-  pointer-events:none;
-}
-
-.forest-animal.wrong {
-  animation:shake .3s;
-}
-
-@keyframes shake {
-  25% {transform:translateX(-5px);}
-  75% {transform:translateX(5px);}
-}
-
-.answer-area {
-  max-width:480px;
-  margin:15px auto;
-  background:var(--cream);
-  padding:15px;
-  border-radius:12px;
-}
-
-.answer-area input {
-  margin-top:10px;
-}
-
-.clue-counter {
-  color:#a66b32;
-  font-weight:bold;
-}
-
-/* ENDING */
-
-#ending-screen {
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:15px;
-  background:
-    linear-gradient(#244c3588,#244c3588),
-    linear-gradient(130deg,#83b77b,#e7d39a);
-}
-
-.certificate {
-  width:min(620px,100%);
-  background:#fff9e9;
-  border:9px double #c99b4e;
-  border-radius:16px;
-  padding:25px;
-  box-shadow:0 10px 35px #0004;
-}
-
-.certificate h1 {
-  font-size:clamp(24px,5vw,38px);
-  color:#315b3e;
-  margin:10px 0;
-}
-
-.certificate img {
-  width:100px;
-  height:90px;
-  object-fit:contain;
-}
-
-#certificate-name {
-  padding:10px;
-  border-bottom:2px solid #c9b17f;
-  font-size:26px;
-  font-weight:bold;
-  color:#a46b32;
-}
-
-.final-score {
-  font-size:24px;
-  font-weight:bold;
-  color:#a56c30;
-}
-
-/* SMALL SCREENS */
-
-@media(max-width:650px) {
-  body {padding:0;}
-
-  #game {
-    height:100dvh;
-    min-height:500px;
-    border:0;
-    border-radius:0;
-  }
-
-  header {padding:8px 10px;}
-  .logo {font-size:14px;}
-
-  .station {
-    width:105px;
-    min-height:125px;
-  }
-
-  .station img {width:58px;height:58px;}
-  .station strong {font-size:11px;}
-
-  #station-1 {left:2%;top:38%;}
-  #station-2 {left:50%;top:62%;transform:translateX(-50%);}
-  #station-3 {right:2%;top:38%;}
-
-  .map-heading h2 {font-size:16px;}
-  .map-heading p {font-size:10px;}
-
-  .match-grid {
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:7px;
-  }
-
-  .animal-card img {width:75px;height:70px;}
-  .mission-content {padding:10px;}
-
-  .rescue-world {height:360px;}
-  .rescue-cage {width:76px;height:90px;}
-  .rescue-cage img {width:48px;height:48px;}
-  .forest-scene {height:310px;}
+:root{--ink:#1d3549;--green:#1f6f48;--gold:#f4b942;--cream:#fff9eb;--danger:#c0392b;--jungle-bg:none}
+*{box-sizing:border-box;user-select:none}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:#163a2b var(--jungle-bg) center/cover no-repeat}
+#bgBackdrop{position:fixed;inset:0;background:var(--jungle-bg) center/cover no-repeat;z-index:0}
+#gameWrap{position:fixed;inset:0;z-index:1;display:flex;align-items:center;justify-content:center}
+#gameCanvas{display:block;width:100%;height:100%}
+.overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;background:linear-gradient(rgba(12,38,28,.5),rgba(12,38,28,.74)),var(--jungle-bg) center/cover no-repeat;z-index:6}
+#logModal{background:rgba(10,32,24,.7);backdrop-filter:blur(4px);z-index:10}
+.hidden{display:none!important}
+.panel{background:rgba(255,249,235,.97);border:3px solid #fff;box-shadow:0 14px 38px rgba(8,28,20,.55);border-radius:24px;padding:20px 22px;max-height:95vh;overflow-y:auto;text-align:center}
+#startPanel{width:min(550px,96vw)}
+#mapPanel{width:min(940px,97vw);padding:16px 20px}
+#endPanel,#logPanel{width:min(760px,96vw)}
+.hero-art{width:100%;height:148px;object-fit:cover;border-radius:16px;border:3px solid #fff;box-shadow:0 6px 16px rgba(0,0,0,.18);margin-bottom:8px}
+.logo{font-weight:950;font-size:clamp(1.65rem,4.2vw,2.4rem);line-height:1.02;color:var(--green);margin:4px 0 6px}
+.subtitle{font-weight:700;color:#466070;margin:0 auto 10px;max-width:540px;font-size:.92rem}
+input{width:100%;padding:10px 14px;border:2px solid #bfd6cb;border-radius:12px;margin:4px 0 8px;font:inherit;user-select:text}
+button{border:0;border-radius:13px;padding:10px 16px;background:var(--green);color:#fff;font-weight:800;font-size:.94rem;cursor:pointer;margin:3px;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:transform .12s ease,filter .12s ease}
+button:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.07)}
+button.secondary{background:#3d6b82}
+button.gold{background:#e8a825;color:#2d1f04;border:2px solid #fff}
+button.SoundBtn{background:#265947;border:2px solid rgba(255,255,255,.8)}
+button.logBtn{background:#7a4b1e;border:2px solid rgba(255,255,255,.85)}
+button:disabled{opacity:.55;cursor:not-allowed}
+.icon-sm{width:20px;height:20px;object-fit:contain;flex-shrink:0}
+.sync-box{margin-top:8px;padding:8px 12px;border-radius:12px;background:#eef7f1;border:1.5px solid #c3dfd0;font-size:.81rem;font-weight:750;color:#23533d}
+.map-topbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.map-stats-pills{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.pill{background:#e3f3e8;color:#174932;font-weight:850;font-size:.84rem;padding:6px 11px;border-radius:999px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.08);display:inline-flex;align-items:center;gap:5px}
+.pill.warn{background:#fde8e6;color:#96281b}
+.island-map-frame{position:relative;width:100%;aspect-ratio:16/9;max-height:62vh;border-radius:18px;overflow:hidden;border:5px solid #8c6d3f;box-shadow:0 10px 28px rgba(10,32,24,.35),inset 0 0 0 3px #d9b87c;background:#1a7a99;margin:6px auto 10px}
+.island-map-svg{width:100%;height:100%;display:block}
+.map-node{position:absolute;transform:translate(-50%,-50%);background:none;border:0;padding:0;margin:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;z-index:3}
+.map-node:hover:not(:disabled){transform:translate(-50%,-53%) scale(1.05)}
+.orb-ring{width:clamp(44px,5.5vw,58px);height:clamp(44px,5.5vw,58px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:950;font-size:clamp(1.15rem,2.2vw,1.55rem);color:#fff;border:3px solid #fff;text-shadow:0 2px 4px rgba(0,0,0,.45);animation:orbPulse 2.1s infinite ease-in-out;position:relative}
+.orb-green{background:radial-gradient(circle at 35% 30%,#80ff72,#1ea83c 65%,#116624);box-shadow:0 0 18px 5px rgba(80,240,100,.78)}
+.orb-gold{background:radial-gradient(circle at 35% 30%,#fff275,#e69d14 65%,#8f5c05);box-shadow:0 0 18px 5px rgba(255,208,60,.82)}
+.orb-blue{background:radial-gradient(circle at 35% 30%,#80e5ff,#168aad 65%,#0a4866);box-shadow:0 0 18px 5px rgba(64,196,255,.8)}
+.orb-coral{background:radial-gradient(circle at 35% 30%,#ff99ac,#e63946 65%,#800f2f);box-shadow:0 0 20px 6px rgba(255,90,105,.85)}
+.map-node:disabled .orb-ring{filter:grayscale(.75) opacity(.7);animation:none}
+.node-banner{margin-top:4px;background:rgba(34,46,38,.92);color:#fff8e7;border:2px solid #d9b87c;border-radius:8px;padding:3px 10px;font-size:clamp(.68rem,1.25vw,.82rem);font-weight:900;letter-spacing:.03em;white-space:nowrap;box-shadow:0 4px 10px rgba(0,0,0,.35)}
+.node-sub{font-size:.68rem;font-weight:800;color:#a8f0c0;display:block}
+.done-check{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#fff;padding:1px}
+@keyframes orbPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+#hud{position:fixed;inset:0;pointer-events:none;z-index:4}
+.hud-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 14px}
+.hud-left,.hud-right{display:flex;align-items:center;gap:7px;flex-wrap:wrap;pointer-events:auto}
+.badge{background:rgba(22,62,48,.93);color:#fff;border:2px solid rgba(255,255,255,.82);border-radius:13px;padding:6px 12px;font-weight:900;font-size:.88rem;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.badge.mistake-badge{background:rgba(138,42,32,.92)}
+#promptBanner{position:absolute;top:58px;left:50%;transform:translateX(-50%);background:rgba(255,250,236,.97);border:3px solid #fff;border-radius:18px;padding:7px 18px;box-shadow:0 8px 22px rgba(0,0,0,.28);text-align:center;max-width:min(700px,94vw);pointer-events:auto}
+#promptWord{font-size:clamp(1.05rem,2.6vw,1.4rem);font-weight:950;color:#165b8c}
+#promptClue{font-size:.86rem;font-weight:750;color:#385060;margin-top:2px}
+#toastMsg{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(25,95,60,.96);color:#fff;border:2px solid #fff;border-radius:999px;padding:8px 18px;font-weight:850;font-size:.92rem;box-shadow:0 6px 18px rgba(0,0,0,.32);max-width:90vw;text-align:center}
+#dpad{position:fixed;right:16px;bottom:16px;width:126px;height:126px;z-index:5;pointer-events:auto;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:4px}
+.dpad-btn{background:rgba(255,255,255,.85);border:2px solid #1f6f48;border-radius:12px;padding:0;margin:0;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(0,0,0,.22)}
+.dpad-btn:active{background:#bfe8d0;transform:scale(.94)}
+.dpad-btn img{width:19px;height:19px;pointer-events:none}
+.diag-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin:10px 0 12px}
+.diag-box{background:#f2ede0;border:2px solid #dfd6c3;border-radius:14px;padding:8px 10px}
+.diag-val{font-size:1.25rem;font-weight:950;color:#1f6f48}
+.diag-lbl{font-size:.76rem;font-weight:800;color:#546a76}
+.log-table-wrap{max-height:210px;overflow-y:auto;border-radius:12px;border:2px solid #d8e2dc;background:#fff;margin:8px 0 12px;text-align:left}
+table.log-table{width:100%;border-collapse:collapse;font-size:.84rem}
+table.log-table th{background:#1f6f48;color:#fff;padding:8px 10px;position:sticky;top:0;font-weight:850}
+table.log-table td{padding:7px 10px;border-bottom:1px solid #e9ecef;color:#263846;font-weight:650}
+table.log-table tr:nth-child(even) td{background:#f8fcf9}
+.tag-wrong{color:#b83227;font-weight:850}
+.tag-right{color:#1f6f48;font-weight:850}
+@media(max-width:680px){
+  #dpad{width:108px;height:108px;right:10px;bottom:10px}
+  .node-sub{display:none}
+  #promptBanner{top:96px;padding:6px 12px}
 }
 </style>
 </head>
-
 <body>
+<div id="bgBackdrop"></div>
+<div id="gameWrap">
+  <canvas id="gameCanvas" width="1000" height="620"></canvas>
+</div>
 
-<div id="game">
-
-<header>
-  <div class="logo">WILDLIFE RESCUE ADVENTURE</div>
-  <div id="player-display">
-    <div id="player-name">Young Rescuer</div>
-    <div>Score: <span id="score-display">0</span></div>
-  </div>
-</header>
-
-<!-- START SCREEN -->
-
-<section id="start-screen" class="screen active">
-  <div class="start-card">
-    <h1>Wildlife Rescue Adventure</h1>
-    <p>Welcome, young wildlife rescuer!</p>
-    <p>Explore the forest, identify animals and rescue wildlife in danger.</p>
-
-    <form id="start-form">
-      <label for="name-input">Your Name</label>
-      <input id="name-input" required maxlength="40"
-        placeholder="Enter your name">
-
-      <label for="class-input">Your Class</label>
-      <input id="class-input" required maxlength="40"
-        placeholder="Example: Year 4 Amanah">
-
-      <button class="btn" type="submit">START ADVENTURE</button>
-    </form>
-  </div>
-</section>
-
-<!-- MAP SCREEN -->
-
-<section id="map-screen" class="screen">
-
-  <div class="map-heading">
-    <h2>Explore the Wildlife Forest</h2>
-    <p>Complete all three missions to become a Wildlife Hero!</p>
-  </div>
-
-  <svg class="map-art" viewBox="0 0 1000 650"
-    preserveAspectRatio="none">
-    <path d="M80 300 C250 500 350 150 500 380 S750 500 920 240"
-      fill="none" stroke="#ddc99e" stroke-width="85"
-      stroke-linecap="round"/>
-    <path d="M80 300 C250 500 350 150 500 380 S750 500 920 240"
-      fill="none" stroke="#fff0d2" stroke-width="5"
-      stroke-dasharray="15 20"/>
-    <path d="M0 550 Q180 480 350 580 T700 550 T1000 600"
-      fill="none" stroke="#5b9fa2" stroke-width="35"/>
-    <g fill="#416e43">
-      <circle cx="80" cy="90" r="65"/>
-      <circle cx="160" cy="80" r="45"/>
-      <circle cx="880" cy="90" r="65"/>
-      <circle cx="950" cy="140" r="50"/>
-      <circle cx="760" cy="580" r="60"/>
-      <circle cx="150" cy="590" r="60"/>
-    </g>
-    <g fill="#83ad63">
-      <circle cx="80" cy="90" r="40"/>
-      <circle cx="880" cy="90" r="40"/>
-      <circle cx="760" cy="580" r="40"/>
-    </g>
-  </svg>
-
-  <button class="station" id="station-1">
-    <img id="map-img-1" alt="Panda">
-    <small>MISSION 01</small>
-    <strong>Animal Identification</strong>
-  </button>
-
-  <button class="station" id="station-2">
-    <img id="map-img-2" alt="Rabbit">
-    <small>MISSION 02</small>
-    <strong>Wildlife Rescue</strong>
-  </button>
-
-  <button class="station" id="station-3">
-    <img id="map-img-3" alt="Owl">
-    <small>MISSION 03</small>
-    <strong>Animal Detective</strong>
-  </button>
-
-  <div class="map-progress" id="map-progress">
-    Missions completed: 0 / 3
-  </div>
-</section>
-
-<!-- MISSION SCREEN -->
-
-<section id="mission-screen" class="screen">
-  <div class="mission-header">
-    <h2 id="mission-title">Mission</h2>
-    <button class="btn dark" id="back-map">Back to Map</button>
-  </div>
-  <div class="mission-content" id="mission-content"></div>
-</section>
-
-<!-- ENDING SCREEN -->
-
-<section id="ending-screen" class="screen">
-  <div class="certificate">
-    <img id="ending-img" alt="Wildlife hero">
-    <h1>WILDLIFE RESCUE HERO</h1>
-    <p>Certificate of Achievement</p>
-    <p>This certificate is proudly presented to:</p>
-    <div id="certificate-name"></div>
-    <p id="certificate-class"></p>
-    <p>For successfully completing all three wildlife missions and demonstrating excellent animal vocabulary knowledge!</p>
-    <div class="final-score">
-      FINAL SCORE: <span id="final-score">0</span>
+<!-- GAMEPLAY HUD -->
+<div id="hud" class="hidden">
+  <div class="hud-top">
+    <div class="hud-left">
+      <button id="backToMapBtn" class="gold" type="button"><img id="hudMapIcon" class="icon-sm" alt=""> Map</button>
+      <div class="badge"><img id="hudCompassIcon" class="icon-sm" alt=""> <span id="stationLabel">Station 1</span>: <span id="stationProgress">0/5</span></div>
     </div>
-    <h3>Thank you for protecting wildlife!</h3>
-    <button class="btn orange" onclick="location.reload()">PLAY AGAIN</button>
+    <div class="hud-right">
+      <div class="badge"><img id="hudGemIcon" class="icon-sm" alt=""> Gems: <span id="gemsText">0</span></div>
+      <div class="badge"><img id="hudStarIcon" class="icon-sm" alt=""> Score: <span id="scoreText">0</span></div>
+      <div class="badge mistake-badge">Mistakes: <span id="mistakesText">0</span></div>
+      <button id="hudLogBtn" class="logBtn" type="button">Log</button>
+      <button id="hudSoundBtn" class="SoundBtn" type="button">Sound: ON</button>
+    </div>
   </div>
-</section>
+  <div id="promptBanner">
+    <div id="promptWord">WALK TO THE ANIMAL</div>
+    <div id="promptClue">Use Arrow Keys, WASD, D-Pad, or tap anywhere to move your explorer!</div>
+  </div>
+  <div id="toastMsg" class="hidden">Great job!</div>
 
+  <div id="dpad">
+    <div></div>
+    <button class="dpad-btn" data-dir="up" aria-label="Up"><img id="arrUp" alt=""></button>
+    <div></div>
+    <button class="dpad-btn" data-dir="left" aria-label="Left"><img id="arrLeft" alt=""></button>
+    <div></div>
+    <button class="dpad-btn" data-dir="right" aria-label="Right"><img id="arrRight" alt=""></button>
+    <div></div>
+    <button class="dpad-btn" data-dir="down" aria-label="Down"><img id="arrDown" alt=""></button>
+    <div></div>
+  </div>
+</div>
+
+<!-- STEP 1: START SCREEN -->
+<div class="overlay" id="startScreen">
+  <div class="panel" id="startPanel">
+    <img id="startBannerImg" class="hero-art" alt="Wildlife Guardians Rainforest Expedition">
+    <div class="logo">ENGLISH TREASURE QUEST</div>
+    <p class="subtitle">Year 4 Amazing Animals Expedition — Enter your name to explore the island map, play 3 wildlife stations, and track your score!</p>
+    <div style="text-align:left">
+      <label for="playerName"><b>Explorer Name</b></label>
+      <input id="playerName" maxlength="28" placeholder="Enter your full name">
+      <label for="playerClass"><b>Class</b></label>
+      <input id="playerClass" maxlength="24" placeholder="e.g. Year 4 Bestari">
+    </div>
+    <button id="startBtn" style="width:100%;font-size:1.06rem;padding:12px;margin-top:2px" type="button">
+      <img id="startPlayIcon" class="icon-sm" alt=""> OPEN WILDLIFE EXPEDITION MAP
+    </button>
+    <div style="margin-top:6px">
+      <button id="testSheetBtn" class="secondary" style="font-size:.82rem;padding:7px 13px" type="button">
+        Teacher: Test Google Sheet Sync
+      </button>
+      <div id="syncStatusBox" class="sync-box hidden"></div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2: WILDLIFE GUARDIANS ILLUSTRATED EXPEDITION MAP -->
+<div class="overlay hidden" id="mapScreen">
+  <div class="panel" id="mapPanel">
+    <div class="map-topbar">
+      <div class="map-stats-pills">
+        <span class="pill" id="explorerTag">Explorer</span>
+        <span class="pill"><img id="mapStarIcon" class="icon-sm" alt=""> Score: <span id="mapScoreText">0</span></span>
+        <span class="pill">Accuracy: <span id="mapAccText">100%</span></span>
+        <span class="pill warn">Mistakes: <span id="mapMistakesText">0</span></span>
+      </div>
+      <div>
+        <button id="openLogMapBtn" class="logBtn" type="button">Score &amp; Mistake Log</button>
+        <button id="mapSoundBtn" class="SoundBtn" type="button">Sound: ON</button>
+      </div>
+    </div>
+
+    <div class="island-map-frame">
+      <svg class="island-map-svg" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="oceanGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#19647e"/><stop offset="55%" stop-color="#2892b0"/><stop offset="100%" stop-color="#145369"/></linearGradient>
+          <linearGradient id="islandGrass" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6ab04c"/><stop offset="55%" stop-color="#448c3e"/><stop offset="100%" stop-color="#29632b"/></linearGradient>
+          <linearGradient id="scrollGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#faedcd"/><stop offset="100%" stop-color="#d4a373"/></linearGradient>
+        </defs>
+        <rect width="960" height="540" fill="url(#oceanGrad)"/>
+        <path d="M95,335 Q120,165 280,105 Q435,68 585,78 Q815,62 870,210 Q905,365 780,455 Q620,505 465,485 Q240,515 125,425 Z" fill="#64dfdf" opacity="0.48"/>
+        <path d="M115,330 Q140,178 290,120 Q440,86 580,94 Q795,82 848,218 Q880,355 762,438 Q610,482 465,465 Q255,492 142,410 Z" fill="url(#islandGrass)" stroke="#3b5e2b" stroke-width="4"/>
+        <path d="M235,418 Q355,375 495,412 Q575,438 595,468 Q455,495 315,472 Q230,455 235,418 Z" fill="#f6e4ad" stroke="#d4b475" stroke-width="3"/>
+        <ellipse cx="435" cy="468" rx="120" ry="38" fill="#48cae4"/>
+        <circle cx="380" cy="482" r="14" fill="#ff758f"/><circle cx="395" cy="488" r="10" fill="#ffb703"/>
+        <circle cx="495" cy="478" r="13" fill="#c77dff"/><circle cx="510" cy="485" r="9" fill="#fb8500"/>
+        <polygon points="150,305 235,145 320,305" fill="#6c757d"/>
+        <polygon points="235,145 202,206 222,200 238,215 255,198 270,208" fill="#ffffff"/>
+        <polygon points="245,310 345,115 450,310" fill="#5c677d"/>
+        <polygon points="345,115 305,192 328,182 346,202 368,180 388,194" fill="#f8f9fa"/>
+        <polygon points="355,295 435,142 510,295" fill="#7d8597"/>
+        <polygon points="435,142 405,198 424,190 438,205 455,188 468,198" fill="#ffffff"/>
+        <ellipse cx="335" cy="265" rx="52" ry="20" fill="#4ea8de" stroke="#caf0f8" stroke-width="2.5"/>
+        <text x="335" y="269" font-size="10" font-weight="900" fill="#03045e" text-anchor="middle">SAPPHIRE LAKE</text>
+        <g fill="#1b4332"><polygon points="175,320 187,288 199,320"/><polygon points="205,332 217,300 229,332"/><polygon points="245,325 257,293 269,325"/><polygon points="395,295 407,265 419,295"/></g>
+        <rect x="615" y="92" width="18" height="58" fill="#6f4528"/>
+        <circle cx="624" cy="78" r="46" fill="#2d6a4f"/><circle cx="598" cy="86" r="32" fill="#40916c"/><circle cx="650" cy="86" r="32" fill="#52b788"/>
+        <rect x="735" y="96" width="18" height="58" fill="#6f4528"/>
+        <circle cx="744" cy="82" r="44" fill="#2d6a4f"/><circle cx="718" cy="90" r="30" fill="#52b788"/><circle cx="768" cy="90" r="30" fill="#40916c"/>
+        <path d="M805,145 Q825,145 830,225 L795,225 Z" fill="#90e0ef"/>
+        <path d="M800,222 Q690,260 595,235 Q505,212 468,282 Q440,342 565,388 Q650,420 695,468" fill="none" stroke="#2ec4b6" stroke-width="22" stroke-linecap="round"/>
+        <path d="M800,222 Q690,260 595,235 Q505,212 468,282 Q440,342 565,388 Q650,420 695,468" fill="none" stroke="#cbf3f0" stroke-width="5" stroke-dasharray="12 10" stroke-linecap="round"/>
+        <g transform="translate(530,265)">
+          <rect x="0" y="34" width="76" height="18" rx="3" fill="#9b967c" stroke="#5c5846" stroke-width="2"/>
+          <rect x="11" y="18" width="54" height="18" rx="3" fill="#b5b095" stroke="#5c5846" stroke-width="2"/>
+          <rect x="22" y="4" width="32" height="16" rx="2" fill="#cbc6ad" stroke="#5c5846" stroke-width="2"/>
+          <rect x="31" y="22" width="14" height="30" fill="#3a382e"/>
+          <text x="38" y="66" font-size="10.5" font-weight="900" fill="#fff9eb" text-anchor="middle">TEMPLE RUINS</text>
+        </g>
+        <rect x="536" y="358" width="36" height="12" rx="3" transform="rotate(-24 554 364)" fill="#bc6c25" stroke="#582f0e" stroke-width="2"/>
+        <polygon points="482,208 500,182 518,208" fill="#e9c46a" stroke="#7f4f24" stroke-width="2"/>
+        <text x="500" y="221" font-size="10" font-weight="900" fill="#fff9eb" text-anchor="middle">BASE CAMP</text>
+        <path d="M500,208 Q605,195 705,180" fill="none" stroke="#fff3b0" stroke-width="4" stroke-dasharray="6 6" stroke-linecap="round"/>
+        <path d="M705,180 Q735,265 695,325" fill="none" stroke="#fff3b0" stroke-width="4" stroke-dasharray="6 6" stroke-linecap="round"/>
+        <path d="M500,208 Q445,165 395,148" fill="none" stroke="#fff3b0" stroke-width="4" stroke-dasharray="6 6" stroke-linecap="round"/>
+        <path d="M695,325 Q570,415 445,450" fill="none" stroke="#ffd166" stroke-width="4" stroke-dasharray="6 6" stroke-linecap="round"/>
+        <g font-family="Arial,sans-serif" font-weight="900" font-size="12" text-anchor="middle">
+          <rect x="215" y="292" width="150" height="24" rx="6" fill="#264653" stroke="#fff" stroke-width="1.5"/><text x="290" y="308" fill="#ffffff">MOUNTAIN FORESTS</text>
+          <rect x="755" y="72" width="122" height="24" rx="6" fill="#2d6a4f" stroke="#d8f3dc" stroke-width="1.5"/><text x="816" y="88" fill="#fff9eb">RAINFOREST</text>
+          <rect x="242" y="476" width="120" height="24" rx="6" fill="#d4a373" stroke="#582f0e" stroke-width="1.5"/><text x="302" y="492" fill="#2d1f04">CORAL COAST</text>
+        </g>
+        <g transform="translate(28,22)">
+          <rect x="0" y="6" width="16" height="72" rx="7" fill="#bc8a5f" stroke="#582f0e" stroke-width="2.5"/>
+          <rect x="12" y="12" width="220" height="60" fill="url(#scrollGrad)" stroke="#582f0e" stroke-width="2.5"/>
+          <rect x="228" y="6" width="16" height="72" rx="7" fill="#bc8a5f" stroke="#582f0e" stroke-width="2.5"/>
+          <text x="122" y="38" font-size="14" font-weight="950" fill="#3d250c" text-anchor="middle">WILDLIFE GUARDIANS</text>
+          <text x="122" y="57" font-size="13" font-weight="900" fill="#5c3a16" text-anchor="middle">EXPEDITION MAP</text>
+        </g>
+        <rect x="6" y="6" width="948" height="528" rx="12" fill="none" stroke="#386641" stroke-width="5"/>
+      </svg>
+
+      <button class="map-node" id="btnStation1" style="left:73%;top:34%" type="button">
+        <div class="orb-ring orb-green">1<img id="chk1" class="done-check hidden" alt=""></div>
+        <div class="node-banner">ORCHID HAVEN<span class="node-sub">Walk &amp; Match (5 Animals)</span></div>
+      </button>
+
+      <button class="map-node" id="btnStation2" style="left:72%;top:62%" type="button">
+        <div class="orb-ring orb-gold">2<img id="chk2" class="done-check hidden" alt=""></div>
+        <div class="node-banner">HIDDEN FALLS MAZE<span class="node-sub">Temple Maze (4 Animals)</span></div>
+      </button>
+
+      <button class="map-node" id="btnStation3" style="left:41%;top:26%" type="button">
+        <div class="orb-ring orb-blue">3<img id="chk3" class="done-check hidden" alt=""></div>
+        <div class="node-banner">EAGLE'S SUMMIT<span class="node-sub">Clue Crate Rescue (5 Animals)</span></div>
+      </button>
+
+      <button class="map-node" id="claimTreasureBtn" style="left:46%;top:83%" type="button" disabled>
+        <div class="orb-ring orb-coral">4</div>
+        <div class="node-banner" id="coralBannerText">CORAL TREASURE (0/3 Stations)</div>
+      </button>
+    </div>
+
+    <div style="font-size:.84rem;font-weight:750;color:#3d5a6c">
+      Click glowing stations <b>1</b>, <b>2</b>, and <b>3</b> in any order. Clear all 3 to unlock <b>4 — Coral Treasure</b>!
+    </div>
+  </div>
+</div>
+
+<!-- LIVE TEACHER / PUPIL SCORE & MISTAKE DIAGNOSTIC MODAL -->
+<div class="overlay hidden" id="logModal">
+  <div class="panel" id="logPanel">
+    <div class="logo" style="font-size:1.65rem">Score &amp; Mistake Diagnostic Report</div>
+    <p id="logSubHeader" class="subtitle" style="margin-bottom:8px"></p>
+    <div class="diag-grid">
+      <div class="diag-box"><div class="diag-val" id="dScore">0</div><div class="diag-lbl">Total Score</div></div>
+      <div class="diag-box"><div class="diag-val" id="dAcc">100%</div><div class="diag-lbl">Accuracy Rate</div></div>
+      <div class="diag-box"><div class="diag-val" id="dFirstTry">0</div><div class="diag-lbl">First-Try Matches</div></div>
+      <div class="diag-box"><div class="diag-val" style="color:#b83227" id="dWrong">0</div><div class="diag-lbl">Total Mistakes</div></div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;font-size:.82rem;font-weight:850">
+      <span class="pill">Station 1 Errors: <span id="dS1Err">0</span></span>
+      <span class="pill">Station 2 Errors: <span id="dS2Err">0</span></span>
+      <span class="pill">Station 3 Errors: <span id="dS3Err">0</span></span>
+    </div>
+    <div class="log-table-wrap">
+      <table class="log-table">
+        <thead><tr><th>Station</th><th>Expected Animal</th><th>Pupil Picked</th><th>Clue / Question Prompt</th></tr></thead>
+        <tbody id="mistakeTableBody"></tbody>
+      </table>
+    </div>
+    <div>
+      <button id="copyReportBtn" class="secondary" type="button">Copy Teacher Summary</button>
+      <button id="closeLogBtn" type="button">Close Report</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3: FINAL VICTORY & DIAGNOSTIC SUMMARY -->
+<div class="overlay hidden" id="endScreen">
+  <div class="panel" id="endPanel">
+    <img id="endBannerImg" class="hero-art" alt="Coral Treasure Unlocked">
+    <div style="margin-top:-32px">
+      <img id="endTrophyIcon" style="width:64px;height:64px;background:#fff9eb;border-radius:50%;padding:6px;border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.22)" alt="Trophy">
+    </div>
+    <div class="logo" style="font-size:2rem">EXPEDITION COMPLETE!</div>
+    <p id="endGreeting" style="font-weight:800;margin:4px 0 8px"></p>
+    <div class="diag-grid" id="endSummaryCards"></div>
+    <div style="font-weight:900;font-size:.9rem;text-align:left;margin-top:6px;color:#1d3549">
+      Areas to Review (Incorrect Attempts Detected):
+    </div>
+    <div class="log-table-wrap" style="max-height:165px">
+      <table class="log-table">
+        <thead><tr><th>Station</th><th>Expected Animal</th><th>Pupil Picked</th><th>Clue Tested</th></tr></thead>
+        <tbody id="endMistakeBody"></tbody>
+      </table>
+    </div>
+    <div>
+      <button id="backMapEndBtn" class="secondary" type="button"><img id="endMapIcon" class="icon-sm" alt=""> Back to Map</button>
+      <button id="playAgainBtn" type="button"><img id="endRestartIcon" class="icon-sm" alt=""> New Explorer</button>
+    </div>
+  </div>
 </div>
 
 <script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
 
-/* =================================
-   ANIMAL ILLUSTRATIONS
-================================= */
+  // Connected directly to your Google Apps Script Web App URL
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXh3lVBxo2rPZWMwZW-i2p_uLlYn3iS_V0whZZxb2T5BQ6cIHw1EPzWSw4cHcohPt9yw/exec";
 
-function makeAnimal(name, colour) {
-  const art = {
-    Panda: `
-      <circle cx="100" cy="105" r="65" fill="white"/>
-      <circle cx="55" cy="53" r="27" fill="#262c27"/>
-      <circle cx="145" cy="53" r="27" fill="#262c27"/>
-      <ellipse cx="75" cy="90" rx="19" ry="25" fill="#262c27" transform="rotate(25 75 90)"/>
-      <ellipse cx="125" cy="90" rx="19" ry="25" fill="#262c27" transform="rotate(-25 125 90)"/>
-      <circle cx="78" cy="90" r="7" fill="white"/>
-      <circle cx="122" cy="90" r="7" fill="white"/>
-      <circle cx="78" cy="90" r="3" fill="#222"/>
-      <circle cx="122" cy="90" r="3" fill="#222"/>
-      <ellipse cx="100" cy="125" rx="23" ry="17" fill="#e8cdb8"/>
-      <circle cx="100" cy="119" r="6" fill="#222"/>
-      <ellipse cx="100" cy="174" rx="43" ry="28" fill="#262c27"/>`,
-
-    Dolphin: `
-      <path d="M20 112 Q60 42 145 76 Q170 82 180 60
-      L165 108 L195 135 L145 127 Q90 175 35 139 Z"
-      fill="${colour}"/>
-      <path d="M90 78 L115 35 L130 82" fill="${colour}"/>
-      <path d="M90 128 L110 165 L125 123" fill="#e8e5d6"/>
-      <circle cx="145" cy="95" r="5" fill="#222"/>
-      <path d="M150 113 Q160 120 168 112" fill="none" stroke="#234b63" stroke-width="3"/>`,
-
-    Rabbit: `
-      <ellipse cx="100" cy="140" rx="45" ry="38" fill="${colour}"/>
-      <ellipse cx="73" cy="43" rx="18" ry="48" fill="${colour}" transform="rotate(-12 73 43)"/>
-      <ellipse cx="125" cy="43" rx="18" ry="48" fill="${colour}" transform="rotate(12 125 43)"/>
-      <ellipse cx="73" cy="43" rx="8" ry="30" fill="#e6a4a5"/>
-      <ellipse cx="125" cy="43" rx="8" ry="30" fill="#e6a4a5"/>
-      <circle cx="85" cy="112" r="5" fill="#222"/>
-      <circle cx="115" cy="112" r="5" fill="#222"/>
-      <ellipse cx="100" cy="130" rx="9" ry="7" fill="#e89a9d"/>
-      <circle cx="100" cy="171" r="14" fill="white"/>`,
-
-    Shark: `
-      <path d="M10 115 Q75 38 180 110 Q125 175 35 145 Z" fill="${colour}"/>
-      <path d="M100 75 L125 15 L145 95" fill="${colour}"/>
-      <path d="M100 145 L120 180 L135 140" fill="#c7dce0"/>
-      <path d="M30 118 L5 145 L50 145" fill="${colour}"/>
-      <circle cx="145" cy="105" r="5" fill="#222"/>
-      <path d="M110 145 L120 130 L130 145 L140 132 L150 140"
-        fill="white" stroke="#555" stroke-width="2"/>`,
-
-    Fish: `
-      <ellipse cx="95" cy="105" rx="65" ry="42" fill="${colour}"/>
-      <path d="M155 105 L195 68 L195 142 Z" fill="#e8a24d"/>
-      <path d="M75 70 L105 35 L125 75" fill="#edb85c"/>
-      <path d="M75 140 L105 170 L125 140" fill="#edb85c"/>
-      <circle cx="125" cy="95" r="7" fill="white"/>
-      <circle cx="127" cy="95" r="3" fill="#222"/>
-      <path d="M55 115 Q90 145 115 112" fill="none" stroke="#e4e2ad" stroke-width="4"/>`,
-
-    Snail: `
-      <path d="M25 145 Q100 125 170 145 L175 170 L25 170 Z" fill="#a9c879"/>
-      <circle cx="95" cy="105" r="48" fill="${colour}" stroke="#79533b" stroke-width="7"/>
-      <path d="M95 65 Q145 80 115 125 Q70 140 75 95 Q85 75 105 88"
-        fill="none" stroke="#805537" stroke-width="6"/>
-      <path d="M140 140 L150 75 M165 140 L175 75"
-        stroke="#a9c879" stroke-width="7"/>
-      <circle cx="150" cy="73" r="7" fill="white"/>
-      <circle cx="175" cy="73" r="7" fill="white"/>
-      <circle cx="150" cy="73" r="3" fill="#222"/>
-      <circle cx="175" cy="73" r="3" fill="#222"/>`,
-
-    Snake: `
-      <path d="M25 155 Q20 75 85 115 T145 70 Q155 40 175 55"
-        fill="none" stroke="${colour}" stroke-width="30" stroke-linecap="round"/>
-      <circle cx="175" cy="55" r="24" fill="${colour}"/>
-      <circle cx="167" cy="48" r="4" fill="white"/>
-      <circle cx="184" cy="48" r="4" fill="white"/>
-      <circle cx="167" cy="48" r="2" fill="#222"/>
-      <circle cx="184" cy="48" r="2" fill="#222"/>
-      <path d="M170 70 Q180 78 190 70" fill="none" stroke="#c75e60" stroke-width="4"/>`,
-
-    Spider: `
-      <g stroke="${colour}" stroke-width="9" fill="none" stroke-linecap="round">
-      <path d="M78 80 L35 40 L15 25 M72 95 L25 90 L10 105
-      M75 120 L30 145 L15 170 M85 135 L55 180 L45 195
-      M122 80 L165 40 L185 25 M128 95 L175 90 L190 105
-      M125 120 L170 145 L185 170 M115 135 L145 180 L155 195"/>
-      </g>
-      <ellipse cx="100" cy="110" rx="37" ry="43" fill="${colour}"/>
-      <circle cx="100" cy="65" r="28" fill="${colour}"/>
-      <circle cx="88" cy="61" r="6" fill="white"/>
-      <circle cx="112" cy="61" r="6" fill="white"/>
-      <circle cx="88" cy="61" r="3" fill="#222"/>
-      <circle cx="112" cy="61" r="3" fill="#222"/>`
-  };
-
-  return `<svg xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 200 200">${art[name]}</svg>`;
-}
-
-function imageFor(name) {
-  const colours = {
-    Panda:"#222",
-    Dolphin:"#73b9d0",
-    Rabbit:"#eee1d1",
-    Shark:"#7599a9",
-    Fish:"#ed9e51",
-    Snail:"#b47d49",
-    Snake:"#68a95b",
-    Spider:"#715b4b"
-  };
-
-  return "data:image/svg+xml;charset=UTF-8," +
-    encodeURIComponent(makeAnimal(name,colours[name]));
-}
-
-const animalImages = {};
-
-const animalNames = [
-  "Panda","Dolphin","Rabbit","Shark",
-  "Fish","Snail","Snake","Spider"
-];
-
-animalNames.forEach(name => {
-  animalImages[name] = imageFor(name);
-});
-
-document.getElementById("map-img-1").src = animalImages.Panda;
-document.getElementById("map-img-2").src = animalImages.Rabbit;
-document.getElementById("map-img-3").src = animalImages.Spider;
-document.getElementById("ending-img").src = animalImages.Panda;
-
-
-/* =================================
-   GAME STATE
-================================= */
-
-const state = {
-  name:"",
-  studentClass:"",
-  score:0,
-  completed:[false,false,false],
-  station:0
-};
-
-const screens = document.querySelectorAll(".screen");
-
-function showScreen(id) {
-  screens.forEach(screen => screen.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-
-function updateScore(points) {
-  state.score += points;
-  document.getElementById("score-display").textContent = state.score;
-}
-
-function updateMap() {
-  const count = state.completed.filter(Boolean).length;
-
-  document.getElementById("map-progress").textContent =
-    `Missions completed: ${count} / 3`;
-
-  state.completed.forEach((done,index) => {
-    document.getElementById(`station-${index+1}`)
-      .classList.toggle("done",done);
-  });
-}
-
-function completeStation() {
-  state.completed[state.station] = true;
-  updateMap();
-
-  if (state.completed.every(Boolean)) {
-    setTimeout(showEnding,1000);
-  } else {
-    setTimeout(() => showScreen("map-screen"),1000);
-  }
-}
-
-function startMission(index) {
-  if (state.completed[index]) {
-    alert("You have already completed this mission!");
-    return;
+  function svgUri(svg) {
+    return "data:image/svg+xml;utf8," + encodeURIComponent(svg.trim());
   }
 
-  state.station = index;
-  showScreen("mission-screen");
-
-  if (index === 0) setupMatching();
-  if (index === 1) setupRescue();
-  if (index === 2) setupDetective();
-}
-
-document.getElementById("station-1").onclick = () => startMission(0);
-document.getElementById("station-2").onclick = () => startMission(1);
-document.getElementById("station-3").onclick = () => startMission(2);
-
-document.getElementById("start-form").addEventListener("submit",e => {
-  e.preventDefault();
-
-  state.name = document.getElementById("name-input").value.trim();
-  state.studentClass = document.getElementById("class-input").value.trim();
-
-  if (!state.name || !state.studentClass) return;
-
-  document.getElementById("player-name").textContent =
-    state.name + " | " + state.studentClass;
-
-  updateMap();
-  showScreen("map-screen");
-});
-
-
-/* =================================
-   BACK BUTTON
-================================= */
-
-let cleanupMission = () => {};
-
-document.getElementById("back-map").onclick = () => {
-  cleanupMission();
-  cleanupMission = () => {};
-  showScreen("map-screen");
-};
-
-
-/* =================================
-   STATION 1: MATCH ANIMALS
-================================= */
-
-function setupMatching() {
-  cleanupMission();
-
-  document.getElementById("mission-title").textContent =
-    "Mission 1: Animal Identification";
-
-  let matches = 0;
-
-  const shuffledPictures = [...animalNames]
-    .sort(() => Math.random()-.5);
-
-  const shuffledWords = [...animalNames]
-    .sort(() => Math.random()-.5);
-
-  document.getElementById("mission-content").innerHTML = `
-    <div class="instruction">
-      <strong>Match the Animals!</strong><br>
-      Look at the eight animal pictures and match each one
-      with its correct English name. You earn 10 points per answer.
-      You can drag the words or tap a word and then a picture.
-    </div>
-
-    <div class="match-grid" id="match-grid"></div>
-    <div class="word-bank" id="word-bank"></div>
-    <div class="feedback" id="match-feedback"></div>
-  `;
-
-  const grid = document.getElementById("match-grid");
-  const bank = document.getElementById("word-bank");
-
-  let selectedWord = null;
-
-  shuffledPictures.forEach(name => {
-    const card = document.createElement("div");
-    card.className = "animal-card";
-
-    card.innerHTML = `
-      <img src="${animalImages[name]}" alt="${name}">
-      <div class="drop-zone" data-answer="${name}">
-        Choose the animal name
-      </div>
-    `;
-
-    const zone = card.querySelector(".drop-zone");
-
-    zone.addEventListener("dragover",e => e.preventDefault());
-
-    zone.addEventListener("drop",e => {
-      e.preventDefault();
-      checkMatch(e.dataTransfer.getData("text/plain"),zone);
-    });
-
-    zone.onclick = () => {
-      if (selectedWord) {
-        checkMatch(selectedWord,zone);
-      }
-    };
-
-    grid.appendChild(card);
-  });
-
-  shuffledWords.forEach(name => {
-    const word = document.createElement("button");
-    word.className = "word";
-    word.textContent = name;
-    word.draggable = true;
-
-    word.addEventListener("dragstart",e => {
-      e.dataTransfer.setData("text/plain",name);
-    });
-
-    word.onclick = () => {
-      selectedWord = name;
-
-      document.querySelectorAll(".word").forEach(w => {
-        w.style.outline = "none";
-      });
-
-      word.style.outline = "3px solid #315b3e";
-
-      document.getElementById("match-feedback").textContent =
-        `Selected: ${name}. Now tap its picture.`;
-    };
-
-    bank.appendChild(word);
-  });
-
-  function checkMatch(answer,zone) {
-    if (!answer || zone.classList.contains("correct")) return;
-
-    if (answer === zone.dataset.answer) {
-      zone.textContent = answer;
-      zone.classList.add("correct");
-
-      const word = [...bank.children].find(
-        w => w.textContent === answer
-      );
-
-      if (word) word.classList.add("used");
-
-      selectedWord = null;
-      matches++;
-      updateScore(10);
-
-      document.getElementById("match-feedback").textContent =
-        "Correct! Well done!";
-
-      if (matches === animalNames.length) {
-        setTimeout(() => {
-          alert("Excellent! You matched all eight animals!");
-          completeStation();
-        },500);
-      }
-    } else {
-      document.getElementById("match-feedback").textContent =
-        "Not quite! Look carefully and try again.";
-    }
-  }
-}
-
-
-/* =================================
-   STATION 2: WALK AND RESCUE
-================================= */
-
-function setupRescue() {
-  cleanupMission();
-
-  document.getElementById("mission-title").textContent =
-    "Mission 2: Wildlife Rescue";
-
-  // Four animals and their rescue locations.
-  const animals = [
-    {name:"Panda",x:12,y:12},
-    {name:"Rabbit",x:72,y:12},
-    {name:"Snake",x:40,y:65},
-    {name:"Dolphin",x:78,y:65}
-  ];
-
-  // Shuffle the rescue order.
-  const order = [...animals].sort(() => Math.random()-.5);
-
-  let current = 0;
-  let playerX = 15;
-  let playerY = 315;
-  let locked = false;
-  let lastWrong = 0;
-
-  document.getElementById("mission-content").innerHTML = `
-    <div class="instruction">
-      <strong>Save the trapped animals!</strong><br>
-      Follow the rescue order. Walk towards each animal's cage
-      and approach the correct animal to release it.
-    </div>
-
-    <div class="rescue-order">
-      YOUR RESCUE ORDER:<br>
-      ${order.map((a,i) => `${i+1}. ${a.name}`).join(" → ")}
-    </div>
-
-    <div class="rescue-world" id="rescue-world">
-      <div class="world-path"></div>
-      <div class="world-water"></div>
-      <div class="rescuer" id="rescuer"></div>
-    </div>
-
-    <div class="rescue-status" id="rescue-status">
-      Find the ${order[0].name} first!
-    </div>
-
-    <p><strong>Keyboard:</strong> Arrow keys or W, A, S, D</p>
-
-    <div class="mobile-controls">
-      <button class="empty"> </button>
-      <button data-dir="up">↑</button>
-      <button class="empty"> </button>
-      <button data-dir="left">←</button>
-      <button data-dir="down">↓</button>
-      <button data-dir="right">→</button>
-    </div>
-  `;
-
-  const world = document.getElementById("rescue-world");
-  const player = document.getElementById("rescuer");
-  const status = document.getElementById("rescue-status");
-
-  animals.forEach(animal => {
-    const cage = document.createElement("div");
-    cage.className = "rescue-cage";
-    cage.dataset.name = animal.name;
-
-    cage.style.left = animal.x + "%";
-    cage.style.top = animal.y + "%";
-
-    cage.innerHTML = `
-      <img src="${animalImages[animal.name]}" alt="${animal.name}">
-      <span>${animal.name}</span>
-    `;
-
-    world.appendChild(cage);
-  });
-
-  function renderPlayer() {
-    player.style.left = playerX + "px";
-    player.style.top = playerY + "px";
-  }
-
-  function checkCollision() {
-    const cages = [...world.querySelectorAll(".rescue-cage")];
-
-    for (const cage of cages) {
-      if (cage.classList.contains("open")) continue;
-
-      const cx = cage.offsetLeft + cage.offsetWidth/2;
-      const cy = cage.offsetTop + cage.offsetHeight/2;
-
-      const px = playerX + 17;
-      const py = playerY + 21;
-
-      const distance = Math.hypot(cx-px,cy-py);
-
-      if (distance < 62) {
-        const name = cage.dataset.name;
-        const expected = order[current].name;
-
-        if (name === expected) {
-          cage.classList.add("open");
-          current++;
-
-          updateScore(20);
-
-          if (current === order.length) {
-            finishRescue();
-          } else {
-            status.textContent =
-              `${name} rescued! Now find the ${order[current].name}.`;
-          }
-        } else {
-          if (Date.now()-lastWrong > 1000) {
-            status.textContent =
-              `Not yet! Follow your rescue order. Find the ${expected} first.`;
-            lastWrong = Date.now();
-          }
-        }
-
-        break;
-      }
-    }
-  }
-
-  function move(dx,dy) {
-    if (locked) return;
-
-    playerX = Math.max(
-      0,
-      Math.min(world.clientWidth-34,playerX+dx)
-    );
-
-    playerY = Math.max(
-      0,
-      Math.min(world.clientHeight-43,playerY+dy)
-    );
-
-    renderPlayer();
-    checkCollision();
-  }
-
-  function keyHandler(e) {
-    const key = e.key.toLowerCase();
-
-    const directions = {
-      arrowup:[0,-12],
-      w:[0,-12],
-      arrowdown:[0,12],
-      s:[0,12],
-      arrowleft:[-12,0],
-      a:[-12,0],
-      arrowright:[12,0],
-      d:[12,0]
-    };
-
-    if (directions[key]) {
-      e.preventDefault();
-      move(...directions[key]);
-    }
-  }
-
-  window.addEventListener("keydown",keyHandler);
-
-  document.querySelectorAll(".mobile-controls button[data-dir]")
-    .forEach(button => {
-      button.addEventListener("pointerdown",e => {
-        e.preventDefault();
-
-        const moves = {
-          up:[0,-15],
-          down:[0,15],
-          left:[-15,0],
-          right:[15,0]
-        };
-
-        move(...moves[button.dataset.dir]);
-      });
-    });
-
-  function finishRescue() {
-    locked = true;
-
-    status.textContent =
-      "Amazing! All four animals have been released safely!";
-
-    const cages = world.querySelectorAll(".rescue-cage");
-    cages.forEach(cage => cage.classList.add("open"));
-
-    setTimeout(() => {
-      alert("Wildlife Rescue Complete! You earned 80 points!");
-      completeStation();
-    },1200);
-  }
-
-  cleanupMission = () => {
-    locked = true;
-    window.removeEventListener("keydown",keyHandler);
-  };
-
-  renderPlayer();
-}
-
-
-/* =================================
-   STATION 3: ANIMAL DETECTIVE
-================================= */
-
-function setupDetective() {
-  cleanupMission();
-
-  document.getElementById("mission-title").textContent =
-    "Mission 3: The Ultimate Animal Detective";
-
-  // First three clues: find the animal in the forest.
-  // Last three clues: type the animal's name without a picture.
-  const clues = [
-    {
-      clue:"I have eight legs. I can make a web. Who am I?",
-      answer:"Spider",
-      mode:"picture",
-      points:15
-    },
-    {
-      clue:"I carry a shell on my back and move very slowly. Who am I?",
-      answer:"Snail",
-      mode:"picture",
-      points:15
-    },
-    {
-      clue:"I am black and white. I eat bamboo. Who am I?",
-      answer:"Panda",
-      mode:"picture",
-      points:15
-    },
-    {
-      clue:"I am a large sea animal. I have sharp teeth and fins. Who am I?",
-      answer:"Shark",
-      mode:"text",
-      points:20
-    },
-    {
-      clue:"I am a sea animal. I can jump out of the water and communicate using sounds. Who am I?",
-      answer:"Dolphin",
-      mode:"text",
-      points:20
-    },
-    {
-      clue:"I have long ears. I hop and eat plants. Who am I?",
-      answer:"Rabbit",
-      mode:"text",
-      points:25
-    }
-  ];
-
-  let question = 0;
-
-  document.getElementById("mission-content").innerHTML = `
-    <div class="instruction">
-      <strong>Welcome to the Ultimate Animal Detective Challenge!</strong><br>
-      Read each clue carefully. The questions become harder as you progress.
-      You must answer all six questions to complete this mission.
-    </div>
-
-    <div class="clue-counter" id="clue-counter">
-      QUESTION 1 / 6
-    </div>
-
-    <h3 id="clue-text"></h3>
-
-    <div id="picture-challenge">
-      <div class="forest-scene" id="forest-scene">
-        <div class="forest-tree tree-one"></div>
-        <div class="forest-tree tree-two"></div>
-        <div class="forest-tree tree-three"></div>
-      </div>
-    </div>
-
-    <div id="text-challenge" class="answer-area" style="display:none">
-      <p>No pictures or word bank for this challenge!</p>
-      <label for="written-answer">Type the animal's name:</label>
-      <input id="written-answer" placeholder="Your answer">
-      <button class="btn" id="submit-answer">SUBMIT ANSWER</button>
-    </div>
-
-    <div class="feedback" id="detective-feedback"></div>
-  `;
-
-  const forest = document.getElementById("forest-scene");
-
-  // Add all eight animals to the forest for the picture rounds.
-  animalNames.forEach((name,index) => {
-    const img = document.createElement("img");
-    img.src = animalImages[name];
-    img.alt = name;
-    img.className = "forest-animal";
-
-    const positions = [
-      [5,55],[22,35],[40,65],[58,35],
-      [76,60],[83,15],[32,12],[58,70]
-    ];
-
-    img.style.left = positions[index][0]+"%";
-    img.style.top = positions[index][1]+"%";
-
-    img.onclick = () => {
-      if (question >= clues.length ||
-          clues[question].mode !== "picture") return;
-
-      if (name === clues[question].answer) {
-        answerCorrect();
-      } else {
-        img.classList.add("wrong");
-        document.getElementById("detective-feedback").textContent =
-          "That is not the animal described. Read the clue again!";
-        setTimeout(() => img.classList.remove("wrong"),400);
-      }
-    };
-
-    forest.appendChild(img);
-  });
-
-  function displayQuestion() {
-    if (question >= clues.length) {
-      setTimeout(() => {
-        alert("Fantastic! You solved all six animal clues!");
-        completeStation();
-      },500);
+  // 1. WEB AUDIO SYNTHESIZER: RAINFOREST WATERFALL AMBIENCE, MARIMBA & SFX
+  let audioCtx = null, soundEnabled = true, waterfallNode = null, masterGain = null;
+
+  function initAudio() {
+    if (audioCtx) {
+      if (audioCtx.state === 'suspended' && soundEnabled) audioCtx.resume();
       return;
     }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    audioCtx = new AC();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = soundEnabled ? 0.55 : 0;
+    masterGain.connect(audioCtx.destination);
 
-    const q = clues[question];
+    const bufSize = audioCtx.sampleRate * 2;
+    const noiseBuf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+    const out = noiseBuf.getChannelData(0);
+    let b0 = 0, b1 = 0, b2 = 0;
+    for (let i = 0; i < bufSize; i++) {
+      const white = Math.random() * 2 - 1;
+      b0 = 0.997 * b0 + white * 0.029;
+      b1 = 0.985 * b1 + white * 0.032;
+      b2 = 0.950 * b2 + white * 0.048;
+      out[i] = (b0 + b1 + b2) * 0.16;
+    }
+    waterfallNode = audioCtx.createBufferSource();
+    waterfallNode.buffer = noiseBuf;
+    waterfallNode.loop = true;
+    const lp = audioCtx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 620;
+    const wfGain = audioCtx.createGain(); wfGain.gain.value = 0.18;
+    waterfallNode.connect(lp); lp.connect(wfGain); wfGain.connect(masterGain);
+    waterfallNode.start();
 
-    document.getElementById("clue-counter").textContent =
-      `QUESTION ${question+1} / 6`;
+    const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
+    const pattern = [0, 2, 4, 5, 4, 2, 3, 1, 0, 4, 6, 5, 4, 2, 1, 2];
+    let step = 0;
+    setInterval(() => {
+      if (!soundEnabled || !audioCtx || audioCtx.state !== 'running') return;
+      const now = audioCtx.currentTime;
+      const freq = scale[pattern[step % pattern.length]];
+      playTone(freq, now, 0.24, 'sine', 0.11);
+      if (step % 4 === 0) playTone(freq * 0.5, now, 0.35, 'triangle', 0.08);
+      if (step % 11 === 0) playBirdChirp(now + 0.12);
+      step++;
+    }, 360);
+  }
 
-    document.getElementById("clue-text").textContent = q.clue;
+  function playTone(freq, startTime, dur, type = 'sine', vol = 0.18) {
+    if (!audioCtx || !soundEnabled) return;
+    const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, startTime);
+    g.gain.setValueAtTime(0.001, startTime);
+    g.gain.exponentialRampToValueAtTime(vol, startTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0008, startTime + dur);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(startTime); osc.stop(startTime + dur + 0.02);
+  }
 
-    document.getElementById("detective-feedback").textContent = "";
+  function playBirdChirp(t) {
+    if (!audioCtx || !soundEnabled) return;
+    const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1450, t);
+    osc.frequency.exponentialRampToValueAtTime(2250, t + 0.07);
+    osc.frequency.exponentialRampToValueAtTime(1750, t + 0.14);
+    g.gain.setValueAtTime(0.001, t);
+    g.gain.linearRampToValueAtTime(0.045, t + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t); osc.stop(t + 0.17);
+  }
 
-    document.getElementById("picture-challenge").style.display =
-      q.mode === "picture" ? "block" : "none";
-
-    document.getElementById("text-challenge").style.display =
-      q.mode === "text" ? "block" : "none";
-
-    if (q.mode === "text") {
-      const input = document.getElementById("written-answer");
-      input.value = "";
-      input.focus();
+  function playSfx(kind) {
+    initAudio();
+    if (!audioCtx || !soundEnabled) return;
+    const t = audioCtx.currentTime;
+    if (kind === 'correct') {
+      playTone(523.25, t, 0.14, 'triangle', 0.25);
+      playTone(659.25, t + 0.09, 0.16, 'triangle', 0.25);
+      playTone(783.99, t + 0.18, 0.28, 'sine', 0.28);
+    } else if (kind === 'wrong') {
+      playTone(220, t, 0.18, 'sawtooth', 0.16);
+      playTone(174.61, t + 0.14, 0.26, 'sawtooth', 0.16);
+    } else if (kind === 'pickup') {
+      playTone(440, t, 0.1, 'sine', 0.2);
+      playTone(587.33, t + 0.07, 0.14, 'sine', 0.2);
+    } else if (kind === 'gem') {
+      playTone(880, t, 0.1, 'sine', 0.2);
+      playTone(1174.66, t + 0.08, 0.2, 'sine', 0.22);
+    } else if (kind === 'fanfare') {
+      [523.25, 659.25, 783.99, 1046.5].forEach((f, idx) => playTone(f, t + idx * 0.11, 0.32, 'triangle', 0.26));
     }
   }
 
-  function answerCorrect() {
-    const q = clues[question];
-
-    updateScore(q.points);
-
-    document.getElementById("detective-feedback").textContent =
-      `Correct! You identified the ${q.answer}!`;
-
-    question++;
-
-    setTimeout(displayQuestion,1000);
+  function toggleSound() {
+    initAudio();
+    soundEnabled = !soundEnabled;
+    if (masterGain && audioCtx) masterGain.gain.setValueAtTime(soundEnabled ? 0.55 : 0, audioCtx.currentTime);
+    const label = `Sound: ${soundEnabled ? 'ON' : 'OFF'}`;
+    $('hudSoundBtn').textContent = label;
+    $('mapSoundBtn').textContent = label;
   }
 
-  function submitWrittenAnswer() {
-    if (question >= clues.length ||
-        clues[question].mode !== "text") return;
+  // 2. RAINFOREST WATERFALL & TEMPLE RUINS BACKGROUND
+  function buildJungleSceneCanvas() {
+    const c = document.createElement('canvas');
+    c.width = 1280; c.height = 720;
+    const ctx = c.getContext('2d');
+    const sky = ctx.createLinearGradient(0, 0, 0, 720);
+    sky.addColorStop(0, '#c7f9cc'); sky.addColorStop(0.35, '#74c69d');
+    sky.addColorStop(0.72, '#2d6a4f'); sky.addColorStop(1, '#1b4332');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, 1280, 720);
 
-    const input = document.getElementById("written-answer");
-    const answer = input.value.trim().toLowerCase();
+    for (let i = 0; i < 5; i++) {
+      const g = ctx.createLinearGradient(180 + i * 190, 0, 420 + i * 200, 650);
+      g.addColorStop(0, 'rgba(255,250,205,0.3)'); g.addColorStop(1, 'rgba(255,250,205,0)');
+      ctx.fillStyle = g; ctx.beginPath();
+      ctx.moveTo(150 + i * 190, 0); ctx.lineTo(265 + i * 190, 0);
+      ctx.lineTo(510 + i * 195, 700); ctx.lineTo(340 + i * 195, 700);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = '#52b788'; ctx.beginPath();
+    ctx.moveTo(0, 410); ctx.quadraticCurveTo(240, 220, 500, 350);
+    ctx.quadraticCurveTo(780, 180, 1040, 340); ctx.lineTo(1280, 350);
+    ctx.lineTo(1280, 720); ctx.lineTo(0, 720); ctx.fill();
 
-    if (answer === clues[question].answer.toLowerCase()) {
-      answerCorrect();
+    ctx.fillStyle = '#8d99ae'; ctx.fillRect(195, 210, 175, 155);
+    ctx.fillStyle = '#6c757d'; ctx.fillRect(180, 192, 205, 22);
+    ctx.fillStyle = '#1b4332'; ctx.beginPath(); ctx.arc(282, 365, 44, Math.PI, 0); ctx.fill();
+
+    const wf = ctx.createLinearGradient(960, 210, 960, 520);
+    wf.addColorStop(0, '#e0fbfc'); wf.addColorStop(0.5, '#72efdd'); wf.addColorStop(1, '#00b4d8');
+    ctx.fillStyle = wf; ctx.beginPath();
+    ctx.moveTo(920, 220); ctx.quadraticCurveTo(980, 215, 1025, 225);
+    ctx.lineTo(1065, 520); ctx.lineTo(895, 520); ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = '#48cae4'; ctx.beginPath(); ctx.ellipse(960, 540, 205, 45, 0, 0, Math.PI * 2); ctx.fill();
+
+    const floorGrad = ctx.createLinearGradient(0, 360, 0, 720);
+    floorGrad.addColorStop(0, 'rgba(64,145,108,0.88)'); floorGrad.addColorStop(1, 'rgba(40,96,70,0.95)');
+    ctx.fillStyle = floorGrad; ctx.fillRect(0, 365, 1280, 355);
+
+    ctx.fillStyle = 'rgba(221,184,146,0.52)';
+    ctx.beginPath(); ctx.ellipse(640, 540, 440, 145, 0, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#4a2c11'; ctx.fillRect(0, 0, 48, 720); ctx.fillRect(1232, 0, 48, 720);
+    const greens = ['#1b4332', '#2d6a4f', '#40916c', '#52b788'];
+    for (let i = 0; i < 18; i++) {
+      ctx.fillStyle = greens[i % 4];
+      ctx.beginPath(); ctx.arc(i * 78, 18 + (i % 3) * 14, 58, 0, Math.PI * 2); ctx.fill();
+    }
+    return c;
+  }
+
+  const bgSceneCanvas = buildJungleSceneCanvas();
+  document.documentElement.style.setProperty('--jungle-bg', `url("${bgSceneCanvas.toDataURL('image/jpeg', 0.9)}")`);
+
+  // 3. ILLUSTRATED SVG GRAPHICS: UI + 18 YEAR 4 DSKP ANIMALS (ZERO EMOJIS)
+  const SVGS = {
+    gem: `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><polygon points="18,10 46,10 58,26 32,56 6,26" fill="#29b6f6" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><polygon points="18,10 32,26 46,10" fill="#b3e5fc"/><polygon points="22,15 28,15 24,22" fill="#fff"/></svg>`,
+    compass: `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="27" fill="#f5b041" stroke="#fff" stroke-width="3"/><circle cx="32" cy="32" r="20" fill="#fef9e7"/><polygon points="32,14 38,32 26,32" fill="#e74c3c"/><polygon points="32,50 38,32 26,32" fill="#5d6d7e"/></svg>`,
+    star: `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><polygon points="32,6 40,22 58,25 45,38 48,56 32,47 16,56 19,38 6,25 24,22" fill="#ffd166" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg>`,
+    mapIcon: `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><polygon points="8,14 24,8 40,14 56,8 56,50 40,56 24,50 8,56" fill="#fae588" stroke="#8d5524" stroke-width="3" stroke-linejoin="round"/><path d="M16,36 Q26,22 36,32 T49,22" fill="none" stroke="#c0392b" stroke-width="3.5" stroke-dasharray="4 3" stroke-linecap="round"/></svg>`,
+    check: `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="26" fill="#2ecc71" stroke="#fff" stroke-width="3"/><polyline points="19,33 28,42 46,22" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    trophy: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><path d="M22,18 H58 V34 C58,47 48,54 40,54 C32,54 22,47 22,34 Z" fill="#ffd166" stroke="#b7791f" stroke-width="3"/><path d="M22,22 H12 C12,34 17,40 23,40" fill="none" stroke="#f6ad55" stroke-width="5"/><path d="M58,22 H68 C68,34 63,40 57,40" fill="none" stroke="#f6ad55" stroke-width="5"/><rect x="35" y="54" width="10" height="10" fill="#ecc94b"/><rect x="24" y="64" width="32" height="8" rx="3" fill="#975a16"/></svg>`,
+    play: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><polygon points="8,5 27,16 8,27" fill="#ffffff"/></svg>`,
+    restart: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M25,16 A9,9 0 1,1 22,9" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/><polygon points="23,3 26,12 17,11" fill="#ffffff"/></svg>`,
+    arrUp: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><polygon points="16,5 28,24 4,24" fill="#1f6f48"/></svg>`,
+    arrDown: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><polygon points="16,27 28,8 4,8" fill="#1f6f48"/></svg>`,
+    arrLeft: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><polygon points="5,16 24,4 24,28" fill="#1f6f48"/></svg>`,
+    arrRight: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><polygon points="27,16 8,4 8,28" fill="#1f6f48"/></svg>`,
+    startBanner: `<svg viewBox="0 0 560 175" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#95d5b2"/><stop offset="100%" stop-color="#1b4332"/></linearGradient></defs><rect width="560" height="175" fill="url(#g)"/><rect x="215" y="42" width="130" height="92" rx="6" fill="#8d99ae" stroke="#5c677d" stroke-width="3"/><rect x="200" y="30" width="160" height="18" rx="4" fill="#6c757d"/><circle cx="280" cy="134" r="34" fill="#14213d"/><path d="M0,130 Q140,95 280,130 T560,122 L560,175 L0,175 Z" fill="#2d6a4f"/><path d="M250,175 L264,134 L296,134 L310,175 Z" fill="#e9c46a"/><rect x="430" y="38" width="56" height="100" fill="#48cae4"/><ellipse cx="458" cy="142" rx="68" ry="16" fill="#00b4d8"/><circle cx="55" cy="24" r="42" fill="#40916c"/><circle cx="505" cy="24" r="44" fill="#40916c"/></svg>`,
+    endBanner: `<svg viewBox="0 0 560 175" xmlns="http://www.w3.org/2000/svg"><rect width="560" height="175" fill="#145369"/><ellipse cx="280" cy="145" rx="230" ry="38" fill="#48cae4"/><circle cx="280" cy="88" r="65" fill="#ffd166" opacity="0.32"/><rect x="225" y="78" width="110" height="60" rx="8" fill="#9c6644" stroke="#582f0e" stroke-width="4"/><path d="M220,80 Q280,40 340,80 Z" fill="#e09f3e" stroke="#582f0e" stroke-width="4"/><rect x="270" y="72" width="20" height="24" rx="4" fill="#ffd166" stroke="#582f0e" stroke-width="3"/></svg>`,
+    explorer: `<svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg"><ellipse cx="45" cy="80" rx="20" ry="7" fill="rgba(0,0,0,0.22)"/><rect x="33" y="60" width="9" height="17" rx="4" fill="#5c4033"/><rect x="48" y="60" width="9" height="17" rx="4" fill="#5c4033"/><rect x="29" y="38" width="32" height="26" rx="9" fill="#e76f51" stroke="#fff" stroke-width="2"/><circle cx="45" cy="26" r="15" fill="#ffd6a5" stroke="#8d5524" stroke-width="2"/><circle cx="40" cy="25" r="2.3" fill="#1d3557"/><circle cx="50" cy="25" r="2.3" fill="#1d3557"/><path d="M41,31 Q45,35 49,31" fill="none" stroke="#8d5524" stroke-width="2" stroke-linecap="round"/><ellipse cx="45" cy="14" rx="22" ry="6" fill="#d4a373" stroke="#7f4f24" stroke-width="2"/><path d="M31,14 Q45,2 59,14 Z" fill="#e9c46a" stroke="#7f4f24" stroke-width="2"/></svg>`,
+    crate: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="14" width="60" height="54" rx="9" fill="#e09f3e" stroke="#7f4f24" stroke-width="3.5"/><line x1="10" y1="32" x2="70" y2="32" stroke="#9c6644" stroke-width="3"/><line x1="10" y1="50" x2="70" y2="50" stroke="#9c6644" stroke-width="3"/><line x1="16" y1="20" x2="64" y2="62" stroke="#f4a261" stroke-width="4"/></svg>`,
+    panda: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="28" cy="24" r="11" fill="#212529"/><circle cx="72" cy="24" r="11" fill="#212529"/><ellipse cx="50" cy="72" rx="28" ry="22" fill="#212529"/><ellipse cx="50" cy="75" rx="18" ry="15" fill="#fff"/><circle cx="50" cy="44" r="25" fill="#fff" stroke="#212529" stroke-width="3"/><ellipse cx="39" cy="42" rx="7" ry="9" transform="rotate(-14 39 42)" fill="#212529"/><ellipse cx="61" cy="42" rx="7" ry="9" transform="rotate(14 61 42)" fill="#212529"/><circle cx="40" cy="41" r="2.8" fill="#fff"/><circle cx="60" cy="41" r="2.8" fill="#fff"/><ellipse cx="50" cy="50" rx="5" ry="3.5" fill="#212529"/></svg>`,
+    cheetah: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="52" cy="64" rx="28" ry="17" fill="#f4a261" stroke="#9c4127" stroke-width="2.5"/><path d="M78,62 Q94,50 90,36" fill="none" stroke="#f4a261" stroke-width="6" stroke-linecap="round"/><rect x="30" y="74" width="7" height="18" rx="3" fill="#f4a261" stroke="#9c4127" stroke-width="2"/><rect x="64" y="74" width="7" height="18" rx="3" fill="#f4a261" stroke="#9c4127" stroke-width="2"/><circle cx="30" cy="42" r="17" fill="#ffb703" stroke="#9c4127" stroke-width="2.5"/><circle cx="25" cy="40" r="2.6" fill="#000"/><circle cx="35" cy="40" r="2.6" fill="#000"/><circle cx="48" cy="58" r="3" fill="#212529"/><circle cx="58" cy="64" r="3" fill="#212529"/><circle cx="64" cy="56" r="2.8" fill="#212529"/></svg>`,
+    ostrich: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><line x1="45" y1="66" x2="42" y2="94" stroke="#f4a261" stroke-width="4.5" stroke-linecap="round"/><line x1="57" y1="66" x2="60" y2="94" stroke="#f4a261" stroke-width="4.5" stroke-linecap="round"/><ellipse cx="54" cy="56" rx="24" ry="17" fill="#2b2d42" stroke="#fff" stroke-width="2"/><path d="M68,48 Q82,52 76,64" fill="#fff"/><path d="M36,48 Q32,26 36,18" fill="none" stroke="#f4a261" stroke-width="7" stroke-linecap="round"/><circle cx="35" cy="17" r="9" fill="#f4a261"/><polygon points="26,17 15,20 26,22" fill="#ffb703"/><circle cx="33" cy="15" r="2.3" fill="#000"/></svg>`,
+    gorilla: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="62" rx="30" ry="26" fill="#343a40" stroke="#212529" stroke-width="2.5"/><ellipse cx="50" cy="66" rx="18" ry="16" fill="#6c757d"/><circle cx="50" cy="32" r="20" fill="#343a40" stroke="#212529" stroke-width="2.5"/><ellipse cx="50" cy="35" rx="13" ry="11" fill="#6c757d"/><circle cx="44" cy="31" r="2.6" fill="#fff"/><circle cx="56" cy="31" r="2.6" fill="#fff"/><circle cx="44" cy="31" r="1.3" fill="#000"/><circle cx="56" cy="31" r="1.3" fill="#000"/></svg>`,
+    rhino: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="56" cy="58" rx="30" ry="21" fill="#8d99ae" stroke="#495057" stroke-width="2.5"/><rect x="36" y="72" width="9" height="18" rx="3" fill="#8d99ae" stroke="#495057" stroke-width="2"/><rect x="66" y="72" width="9" height="18" rx="3" fill="#8d99ae" stroke="#495057" stroke-width="2"/><ellipse cx="28" cy="52" rx="17" ry="14" fill="#8d99ae" stroke="#495057" stroke-width="2.5"/><polygon points="13,48 5,32 21,44" fill="#faedcd" stroke="#495057" stroke-width="2"/><circle cx="26" cy="48" r="2.6" fill="#000"/></svg>`,
+    elephant: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="56" cy="58" rx="28" ry="22" fill="#90a4ae" stroke="#455a64" stroke-width="2.5"/><rect x="38" y="72" width="9" height="18" rx="3" fill="#90a4ae" stroke="#455a64" stroke-width="2"/><rect x="64" y="72" width="9" height="18" rx="3" fill="#90a4ae" stroke="#455a64" stroke-width="2"/><ellipse cx="44" cy="44" rx="12" ry="16" fill="#b0bec5" stroke="#455a64" stroke-width="2"/><circle cx="30" cy="46" r="16" fill="#90a4ae" stroke="#455a64" stroke-width="2.5"/><path d="M18,48 C8,52 10,74 20,72" fill="none" stroke="#90a4ae" stroke-width="8" stroke-linecap="round"/><path d="M22,56 Q12,60 10,53" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="26" cy="42" r="2.6" fill="#000"/></svg>`,
+    tortoise: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="70" width="9" height="14" rx="4" fill="#74c69d" stroke="#2d6a4f" stroke-width="2"/><rect x="62" y="70" width="9" height="14" rx="4" fill="#74c69d" stroke="#2d6a4f" stroke-width="2"/><path d="M22,68 C22,34 78,34 78,68 Z" fill="#bc6c25" stroke="#582f0e" stroke-width="3"/><circle cx="50" cy="52" r="8" fill="#dda15e"/><circle cx="18" cy="58" r="10" fill="#74c69d" stroke="#2d6a4f" stroke-width="2.5"/><circle cx="15" cy="56" r="2.2" fill="#000"/></svg>`,
+    camel: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><line x1="38" y1="68" x2="38" y2="92" stroke="#d4a373" stroke-width="5" stroke-linecap="round"/><line x1="66" y1="68" x2="66" y2="92" stroke="#d4a373" stroke-width="5" stroke-linecap="round"/><path d="M30,62 C32,36 48,36 50,54 C54,36 70,36 74,62 Z" fill="#dda15e" stroke="#8d5524" stroke-width="2.5"/><ellipse cx="52" cy="62" rx="25" ry="13" fill="#dda15e" stroke="#8d5524" stroke-width="2.5"/><path d="M30,58 Q20,52 22,32" fill="none" stroke="#dda15e" stroke-width="9" stroke-linecap="round"/><ellipse cx="19" cy="29" rx="11" ry="7" fill="#dda15e" stroke="#8d5524" stroke-width="2"/><circle cx="17" cy="27" r="2.2" fill="#000"/></svg>`,
+    crocodile: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="56" cy="60" rx="32" ry="13" fill="#52b788" stroke="#1b4332" stroke-width="2.5"/><ellipse cx="24" cy="58" rx="18" ry="9" fill="#52b788" stroke="#1b4332" stroke-width="2.5"/><polyline points="10,60 15,64 20,60 25,64 30,60" fill="none" stroke="#fff" stroke-width="2.5"/><circle cx="28" cy="51" r="4" fill="#ffd166" stroke="#1b4332" stroke-width="1.5"/><circle cx="28" cy="51" r="1.8" fill="#000"/></svg>`,
+    dolphin: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M18,62 C26,28 68,22 84,54 C88,62 94,64 96,58 C92,68 90,74 95,80 C85,76 78,70 74,64 C58,48 36,52 26,68 Z" fill="#48cae4" stroke="#023e8a" stroke-width="2.5" stroke-linejoin="round"/><path d="M52,32 L60,18 L66,35 Z" fill="#0096c7" stroke="#023e8a" stroke-width="2"/><circle cx="29" cy="52" r="2.6" fill="#03045e"/></svg>`,
+    giraffe: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><line x1="46" y1="68" x2="45" y2="94" stroke="#f4a261" stroke-width="4.5"/><line x1="62" y1="68" x2="64" y2="94" stroke="#f4a261" stroke-width="4.5"/><ellipse cx="55" cy="64" rx="20" ry="13" fill="#ffd166" stroke="#9c4127" stroke-width="2.5"/><path d="M42,58 L34,18" stroke="#ffd166" stroke-width="11" stroke-linecap="round"/><ellipse cx="30" cy="18" rx="11" ry="8" fill="#ffd166" stroke="#9c4127" stroke-width="2.2"/><line x1="28" y1="10" x2="26" y2="4" stroke="#9c4127" stroke-width="2.5"/><line x1="34" y1="10" x2="36" y2="4" stroke="#9c4127" stroke-width="2.5"/><circle cx="38" cy="34" r="3" fill="#bc6c25"/><circle cx="40" cy="46" r="3.2" fill="#bc6c25"/><circle cx="54" cy="62" r="3.5" fill="#bc6c25"/><circle cx="27" cy="17" r="2.2" fill="#000"/></svg>`,
+    tiger: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="54" cy="62" rx="27" ry="18" fill="#fb8500" stroke="#7f4f24" stroke-width="2.5"/><path d="M48,46 L46,58 M58,46 L56,58 M68,48 L66,58" stroke="#212529" stroke-width="3.5" stroke-linecap="round"/><circle cx="30" cy="44" r="18" fill="#fb8500" stroke="#7f4f24" stroke-width="2.5"/><circle cx="18" cy="30" r="6" fill="#fb8500" stroke="#212529" stroke-width="2"/><circle cx="42" cy="30" r="6" fill="#fb8500" stroke="#212529" stroke-width="2"/><path d="M15,42 L21,42 M39,42 L45,42" stroke="#212529" stroke-width="3"/><circle cx="25" cy="43" r="2.5" fill="#000"/><circle cx="35" cy="43" r="2.5" fill="#000"/></svg>`,
+    hippo: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="56" cy="60" rx="29" ry="22" fill="#9d8189" stroke="#4a3b40" stroke-width="2.5"/><ellipse cx="30" cy="54" rx="19" ry="16" fill="#b59da4" stroke="#4a3b40" stroke-width="2.5"/><ellipse cx="24" cy="60" rx="15" ry="10" fill="#d8bbff" stroke="#4a3b40" stroke-width="2"/><circle cx="20" cy="57" r="2.2" fill="#4a3b40"/><circle cx="29" cy="57" r="2.2" fill="#4a3b40"/><circle cx="28" cy="45" r="2.6" fill="#000"/></svg>`,
+    whale: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M14,58 C14,30 62,28 78,52 L94,40 L90,58 L95,72 L78,62 C58,74 18,74 14,58 Z" fill="#1d6fa5" stroke="#0b3954" stroke-width="2.5" stroke-linejoin="round"/><path d="M18,60 C34,70 60,70 74,61 C56,57 34,57 18,60 Z" fill="#caf0f8"/><path d="M32,32 Q28,18 20,16 M34,32 Q38,18 46,16" fill="none" stroke="#90e0ef" stroke-width="3" stroke-linecap="round"/><circle cx="28" cy="51" r="2.6" fill="#fff"/></svg>`,
+    polarbear: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="55" cy="60" rx="28" ry="21" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2.5"/><rect x="35" y="73" width="9" height="17" rx="4" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/><rect x="65" y="73" width="9" height="17" rx="4" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/><circle cx="29" cy="44" r="17" fill="#ffffff" stroke="#adb5bd" stroke-width="2.5"/><circle cx="19" cy="30" r="6" fill="#ffffff" stroke="#adb5bd" stroke-width="2"/><circle cx="39" cy="30" r="6" fill="#ffffff" stroke="#adb5bd" stroke-width="2"/><circle cx="24" cy="42" r="2.4" fill="#000"/><circle cx="33" cy="42" r="2.4" fill="#000"/><ellipse cx="26" cy="48" rx="4" ry="3" fill="#212529"/></svg>`,
+    squirrel: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M62,72 C88,72 92,30 68,30 C56,30 60,52 62,72 Z" fill="#d97724" stroke="#7f4f24" stroke-width="2.5"/><ellipse cx="48" cy="62" rx="18" ry="20" fill="#e08738" stroke="#7f4f24" stroke-width="2.5"/><circle cx="40" cy="38" r="14" fill="#e08738" stroke="#7f4f24" stroke-width="2.5"/><polygon points="33,26 36,15 43,26" fill="#e08738" stroke="#7f4f24" stroke-width="2"/><circle cx="36" cy="37" r="2.5" fill="#000"/><circle cx="24" cy="58" r="6" fill="#8d5524"/></svg>`,
+    snail: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M16,76 L82,76 C90,76 90,64 80,62 L22,64 C12,64 10,76 16,76 Z" fill="#ffd166" stroke="#b7791f" stroke-width="2.5"/><circle cx="56" cy="48" r="22" fill="#e76f51" stroke="#9c4127" stroke-width="2.5"/><path d="M56,48 a5,5 0 1,1 5,5 a10,10 0 1,1 -10,-10 a15,15 0 1,1 15,15" fill="none" stroke="#fff3b0" stroke-width="2.8" stroke-linecap="round"/><line x1="22" y1="64" x2="17" y2="48" stroke="#b7791f" stroke-width="2.5"/><circle cx="17" cy="46" r="3" fill="#000"/></svg>`,
+    peacock: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="52" cy="48" rx="36" ry="28" fill="#2a9d8f" stroke="#1b4332" stroke-width="2.5"/><circle cx="32" cy="38" r="5" fill="#ffd166"/><circle cx="52" cy="28" r="5" fill="#ffd166"/><circle cx="72" cy="38" r="5" fill="#ffd166"/><circle cx="32" cy="38" r="2.3" fill="#1d3557"/><circle cx="52" cy="28" r="2.3" fill="#1d3557"/><circle cx="72" cy="38" r="2.3" fill="#1d3557"/><ellipse cx="52" cy="64" rx="12" ry="18" fill="#0077b6" stroke="#023e8a" stroke-width="2"/><circle cx="52" cy="42" r="8" fill="#0096c7"/><polygon points="52,44 47,49 57,49" fill="#ffb703"/></svg>`
+  };
+
+  const IMG_URI = {}, IMG_OBJ = {};
+  Object.keys(SVGS).forEach(k => {
+    IMG_URI[k] = svgUri(SVGS[k]);
+    const im = new Image();
+    im.src = IMG_URI[k];
+    IMG_OBJ[k] = im;
+  });
+
+  $('startBannerImg').src = IMG_URI.startBanner;
+  $('startPlayIcon').src = IMG_URI.play;
+  $('mapStarIcon').src = IMG_URI.star;
+  $('chk1').src = IMG_URI.check; $('chk2').src = IMG_URI.check; $('chk3').src = IMG_URI.check;
+  $('hudMapIcon').src = IMG_URI.mapIcon; $('hudCompassIcon').src = IMG_URI.compass;
+  $('hudGemIcon').src = IMG_URI.gem; $('hudStarIcon').src = IMG_URI.star;
+  $('arrUp').src = IMG_URI.arrUp; $('arrDown').src = IMG_URI.arrDown;
+  $('arrLeft').src = IMG_URI.arrLeft; $('arrRight').src = IMG_URI.arrRight;
+  $('endBannerImg').src = IMG_URI.endBanner; $('endTrophyIcon').src = IMG_URI.trophy;
+  $('endMapIcon').src = IMG_URI.mapIcon; $('endRestartIcon').src = IMG_URI.restart;
+
+  // 4. DIAGNOSTIC SCORING & DUAL-FORMAT GOOGLE SHEETS SYNC
+  let playerName = 'Explorer', playerClass = 'Year 4';
+  let score = 0, gems = 0, totalMatches = 0, firstTryMatches = 0, wrongAttempts = 0;
+  let currentPromptHadMistake = false;
+  const stationDone = { 1: false, 2: false, 3: false };
+  const stationMistakes = { 1: 0, 2: 0, 3: 0 };
+  const mistakeLog = [];
+
+  function getAccuracyPct() {
+    const attempts = totalMatches + wrongAttempts;
+    return attempts === 0 ? 100 : Math.round((totalMatches / attempts) * 100);
+  }
+
+  function buildMistakeSummaryString() {
+    if (mistakeLog.length === 0) return 'Perfect (0 mistakes)';
+    return mistakeLog.map(m => `S${m.stationNum}:${m.expected}!=${m.picked}`).join(' | ');
+  }
+
+  function buildPayload(activity, baseStatus) {
+    const completedCount = Number(stationDone[1]) + Number(stationDone[2]) + Number(stationDone[3]);
+    const acc = getAccuracyPct() + '%';
+    const summary = buildMistakeSummaryString();
+    const richStatus = `${baseStatus} | Acc:${acc} | Err(S1:${stationMistakes[1]},S2:${stationMistakes[2]},S3:${stationMistakes[3]}) | ${summary}`;
+    return {
+      name: playerName,
+      studentClass: playerClass,
+      class: playerClass,
+      activity,
+      score: String(score),
+      correctAnswers: String(totalMatches),
+      questionsCompleted: String(completedCount),
+      gems: String(gems),
+      wrongAnswers: String(wrongAttempts),
+      accuracy: acc,
+      s1Mistakes: String(stationMistakes[1]),
+      s2Mistakes: String(stationMistakes[2]),
+      s3Mistakes: String(stationMistakes[3]),
+      mistakeDetails: summary,
+      status: richStatus
+    };
+  }
+
+  // Sends BOTH URL query parameters (e.parameter) AND JSON body (e.postData.contents)
+  function saveToSheets(activity, baseStatus) {
+    const payload = buildPayload(activity, baseStatus);
+    const qs = new URLSearchParams(payload).toString();
+    return fetch(`${GOOGLE_SCRIPT_URL}?${qs}`, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).catch(err => console.error('Could not submit game record:', err));
+  }
+
+  function recordMistake(stationNum, stationName, expectedWord, pickedWord, clue) {
+    wrongAttempts++;
+    stationMistakes[stationNum]++;
+    currentPromptHadMistake = true;
+    score = Math.max(0, score - 15);
+    mistakeLog.push({ stationNum, station: stationName, expected: expectedWord, picked: pickedWord, clue });
+    playSfx('wrong');
+    updateHUD();
+    saveToSheets(stationName, `Mistake: Wanted ${expectedWord}, Picked ${pickedWord}`);
+  }
+
+  function recordCorrectMatch() {
+    const pts = currentPromptHadMistake ? 70 : 100;
+    if (!currentPromptHadMistake) firstTryMatches++;
+    score += pts; gems += 1; totalMatches += 1;
+    currentPromptHadMistake = false;
+    playSfx('correct');
+    updateHUD();
+    return pts;
+  }
+
+  function renderMistakeRows(tbodyId) {
+    const tbody = $(tbodyId);
+    if (mistakeLog.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" class="tag-right" style="text-align:center;padding:14px">Zero mistakes! Every animal was matched accurately on the first try!</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = mistakeLog.map(m => `
+      <tr>
+        <td><b>S${m.stationNum}</b> (${m.station})</td>
+        <td class="tag-right">${m.expected}</td>
+        <td class="tag-wrong">${m.picked}</td>
+        <td>${m.clue}</td>
+      </tr>
+    `).join('');
+  }
+
+  function openDiagnosticModal() {
+    $('logSubHeader').textContent = `Explorer: ${playerName} (${playerClass})`;
+    $('dScore').textContent = score;
+    $('dAcc').textContent = getAccuracyPct() + '%';
+    $('dFirstTry').textContent = `${firstTryMatches}/${totalMatches}`;
+    $('dWrong').textContent = wrongAttempts;
+    $('dS1Err').textContent = stationMistakes[1];
+    $('dS2Err').textContent = stationMistakes[2];
+    $('dS3Err').textContent = stationMistakes[3];
+    renderMistakeRows('mistakeTableBody');
+    $('logModal').classList.remove('hidden');
+  }
+
+  // 5. YEAR 4 DSKP ANIMAL QUESTION POOLS ACROSS 3 STATIONS
+  const s1MasterPool = [
+    { id: 'cheetah',   word: 'CHEETAH',    clue: 'Walk to the fastest land animal in the world with black spots!' },
+    { id: 'giraffe',   word: 'GIRAFFE',    clue: 'Walk to the tallest animal in the world with a very long neck!' },
+    { id: 'ostrich',   word: 'OSTRICH',    clue: 'Walk to the biggest bird that runs fast but cannot fly!' },
+    { id: 'tiger',     word: 'TIGER',      clue: 'Walk to the fierce orange wild cat with black stripes!' },
+    { id: 'panda',     word: 'PANDA',      clue: 'Walk to the black-and-white bear that loves eating bamboo!' },
+    { id: 'rhino',     word: 'RHINO',      clue: 'Walk to the heavy grey animal with a sharp horn on its nose!' },
+    { id: 'camel',     word: 'CAMEL',      clue: 'Walk to the desert animal with humps on its back!' },
+    { id: 'peacock',   word: 'PEACOCK',    clue: 'Walk to the colourful bird famous for its beautiful tail feathers!' },
+    { id: 'squirrel',  word: 'SQUIRREL',   clue: 'Walk to the small furry tree climber with a bushy tail that loves nuts!' },
+    { id: 'snail',     word: 'SNAIL',      clue: 'Walk to the tiny, slowest garden creature that carries a spiral shell!' }
+  ];
+
+  const s2MasterPool = [
+    { id: 'dolphin',   word: 'DOLPHIN',    water: true,  clue: 'Find the intelligent sea mammal that leaps out of the water!', decoys: ['crocodile', 'hippo'] },
+    { id: 'whale',     word: 'BLUE WHALE', water: true,  clue: 'Find the largest and heaviest ocean mammal in the world!', decoys: ['polarbear', 'tortoise'] },
+    { id: 'gorilla',   word: 'GORILLA',    water: false, clue: 'Find the strong, intelligent black ape living in the rainforest!', decoys: ['camel', 'ostrich'] },
+    { id: 'elephant',  word: 'ELEPHANT',   water: false, clue: 'Find the biggest land animal with large ears and a long trunk!', decoys: ['rhino', 'tiger'] },
+    { id: 'tortoise',  word: 'TORTOISE',   water: false, clue: 'Find the slow land reptile with a hard dome shell!', decoys: ['snail', 'panda'] },
+    { id: 'polarbear', word: 'POLAR BEAR', water: false, clue: 'Find the large white bear that lives on icy Arctic snow!', decoys: ['giraffe', 'cheetah'] }
+  ];
+
+  const s3MasterPool = [
+    { id: 'panda',     label: 'PANDA',      clueText: 'Heavy bear that eats green bamboo' },
+    { id: 'crocodile', label: 'CROCODILE',  clueText: 'Dangerous scaly reptile with sharp jaws' },
+    { id: 'dolphin',   label: 'DOLPHIN',    clueText: 'Friendly sea mammal intelligent at jumping' },
+    { id: 'camel',     label: 'CAMEL',      clueText: 'Taller than a horse with desert humps' },
+    { id: 'giraffe',   label: 'GIRAFFE',    clueText: 'Tallest mammal that eats high tree leaves' },
+    { id: 'hippo',     label: 'HIPPO',      clueText: 'Heavy river mammal with a huge mouth' },
+    { id: 'whale',     label: 'BLUE WHALE', clueText: 'Biggest animal in the deep blue ocean' },
+    { id: 'squirrel',  label: 'SQUIRREL',   clueText: 'Smaller than a cat and collects acorns' },
+    { id: 'peacock',   label: 'PEACOCK',    clueText: 'Proud bird with bright green-and-gold feathers' }
+  ];
+
+  // 6. CANVAS ENGINE & MOVEMENT
+  const canvas = $('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = 1000, H = 620;
+  let activeStation = 0;
+  let keys = {}, dpadState = { up: false, down: false, left: false, right: false };
+  let pointerTarget = null, s2AutoPath = [], s2HintPath = [];
+  let toastTimer = null, cooldown = 0;
+  const explorer = { x: 500, y: 470, speed: 245, bob: 0 };
+
+  function showToast(msg, isGood = true) {
+    const el = $('toastMsg');
+    el.textContent = msg;
+    el.style.background = isGood ? 'rgba(25,105,65,0.96)' : 'rgba(168,52,38,0.96)';
+    el.classList.remove('hidden');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.add('hidden'), 2400);
+  }
+
+  function updateHUD(label, progText, word, clue) {
+    $('gemsText').textContent = gems;
+    $('scoreText').textContent = score;
+    $('mistakesText').textContent = wrongAttempts;
+    if (label !== undefined) $('stationLabel').textContent = label;
+    if (progText !== undefined) $('stationProgress').textContent = progText;
+    if (word !== undefined) $('promptWord').textContent = word;
+    if (clue !== undefined) $('promptClue').textContent = clue;
+  }
+
+  function refreshMapUI() {
+    $('explorerTag').textContent = `${playerName} (${playerClass})`;
+    $('mapScoreText').textContent = score;
+    $('mapAccText').textContent = getAccuracyPct() + '%';
+    $('mapMistakesText').textContent = wrongAttempts;
+    const cleared = Number(stationDone[1]) + Number(stationDone[2]) + Number(stationDone[3]);
+    [1, 2, 3].forEach(n => $('chk' + n).classList.toggle('hidden', !stationDone[n]));
+    const claimBtn = $('claimTreasureBtn');
+    if (cleared === 3) {
+      claimBtn.disabled = false;
+      $('coralBannerText').textContent = 'UNLOCK CORAL TREASURE!';
     } else {
-      document.getElementById("detective-feedback").textContent =
-        "Not quite! Think carefully and try again.";
-      input.value = "";
-      input.focus();
+      claimBtn.disabled = true;
+      $('coralBannerText').textContent = `CORAL TREASURE (${cleared}/3 Stations)`;
     }
   }
 
-  document.getElementById("submit-answer").onclick =
-    submitWrittenAnswer;
+  function openMapScreen() {
+    activeStation = 0; pointerTarget = null; s2AutoPath = []; s2HintPath = [];
+    $('hud').classList.add('hidden');
+    $('startScreen').classList.add('hidden');
+    $('endScreen').classList.add('hidden');
+    refreshMapUI();
+    $('mapScreen').classList.remove('hidden');
+  }
 
-  document.getElementById("written-answer").addEventListener(
-    "keydown",e => {
-      if (e.key === "Enter") submitWrittenAnswer();
+  function completeCurrentStation(num, title) {
+    stationDone[num] = true;
+    score += 150; gems += 2;
+    playSfx('fanfare');
+    saveToSheets(title, `Station ${num} Completed`);
+    showToast(`${title} Cleared! (+150 Bonus) Returning to Island Map...`, true);
+    setTimeout(openMapScreen, 1450);
+  }
+
+  // --- STATION 1: ORCHID HAVEN (WALK & MATCH — 5 ROUNDS) ---
+  let s1Step = 0, s1Targets = [], s1Animals = [];
+  const S1_TOTAL = 5;
+
+  function startStation1() {
+    initAudio(); activeStation = 1;
+    $('mapScreen').classList.add('hidden'); $('hud').classList.remove('hidden');
+    s1Step = 0; currentPromptHadMistake = false;
+    s1Targets = [...s1MasterPool].sort(() => Math.random() - 0.5).slice(0, S1_TOTAL);
+    explorer.x = 500; explorer.y = 530; pointerTarget = null;
+    spawnS1Round();
+  }
+
+  function spawnS1Round() {
+    const cur = s1Targets[s1Step];
+    const distractors = s1MasterPool.filter(x => x.id !== cur.id).sort(() => Math.random() - 0.5).slice(0, 4);
+    const roundList = [cur, ...distractors].sort(() => Math.random() - 0.5);
+    const spots = [
+      { x: 185, y: 245, vx: 38, vy: 24 },
+      { x: 815, y: 245, vx: -36, vy: 26 },
+      { x: 215, y: 425, vx: 32, vy: -24 },
+      { x: 785, y: 425, vx: -34, vy: -22 },
+      { x: 500, y: 230, vx: 30, vy: 20 }
+    ];
+    s1Animals = roundList.map((item, idx) => ({ ...item, x: spots[idx].x, y: spots[idx].y, vx: spots[idx].vx, vy: spots[idx].vy }));
+    updateHUD('Orchid Haven', `${s1Step}/${S1_TOTAL}`, `WALK TO: ${cur.word}`, cur.clue);
+  }
+
+  // --- STATION 2: HIDDEN FALLS TEMPLE MAZE (100% ZERO DEAD ENDS) ---
+  const MAZE_GRID = [
+    "111111111111111",
+    "100000000000001",
+    "101101101101101",
+    "100000000000001",
+    "101011010110101",
+    "100000000000001",
+    "101101101101101",
+    "100000000000001",
+    "111111111111111"
+  ];
+  const TILE = 52, MX = 105, MY = 122, S2_TOTAL = 4;
+  const MAZE_SANCTUARIES = [
+    { c: 2,  r: 1, safeC: 1,  safeR: 3 },
+    { c: 6,  r: 1, safeC: 7,  safeR: 3 },
+    { c: 12, r: 1, safeC: 13, safeR: 3 },
+    { c: 2,  r: 5, safeC: 2,  safeR: 7 },
+    { c: 12, r: 5, safeC: 12, safeR: 7 }
+  ];
+  let s2Stage = 0, s2Queue = [], s2Walls = [], s2Animals = [], s2Gems = [];
+
+  function cellCenter(c, r) {
+    return { x: MX + c * TILE + TILE / 2, y: MY + r * TILE + TILE / 2, c, r };
+  }
+
+  function posToCell(px, py) {
+    return {
+      c: Math.max(1, Math.min(13, Math.floor((px - MX) / TILE))),
+      r: Math.max(1, Math.min(7, Math.floor((py - MY) / TILE)))
+    };
+  }
+
+  function bfsMazePath(sc, sr, tc, tr, avoidCells = []) {
+    const blocked = new Set(avoidCells.map(p => `${p.c},${p.r}`));
+    const q = [[{ c: sc, r: sr }]];
+    const seen = new Set([`${sc},${sr}`]);
+    const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    while (q.length > 0) {
+      const path = q.shift();
+      const cur = path[path.length - 1];
+      if (cur.c === tc && cur.r === tr) return path.slice(1).map(n => cellCenter(n.c, n.r));
+      for (const [dc, dr] of dirs) {
+        const nc = cur.c + dc, nr = cur.r + dr, key = `${nc},${nr}`;
+        if (nr >= 0 && nr < 9 && nc >= 0 && nc < 15 && MAZE_GRID[nr][nc] === '0' && !seen.has(key)) {
+          if (blocked.has(key) && !(nc === tc && nr === tr)) continue;
+          seen.add(key);
+          q.push([...path, { c: nc, r: nr }]);
+        }
+      }
     }
-  );
+    return [];
+  }
 
-  displayQuestion();
-}
+  function startStation2() {
+    initAudio(); activeStation = 2;
+    $('mapScreen').classList.add('hidden'); $('hud').classList.remove('hidden');
+    s2Stage = 0; currentPromptHadMistake = false;
+    const others = s2MasterPool.slice(1).sort(() => Math.random() - 0.5).slice(0, S2_TOTAL - 1);
+    s2Queue = [s2MasterPool[0], ...others];
+    s2Walls = [];
+    for (let r = 0; r < MAZE_GRID.length; r++) {
+      for (let c = 0; c < MAZE_GRID[r].length; c++) {
+        if (MAZE_GRID[r][c] === '1') s2Walls.push({ x: MX + c * TILE, y: MY + r * TILE, w: TILE, h: TILE });
+      }
+    }
+    spawnS2Stage();
+  }
 
+  function spawnS2Stage() {
+    const startPos = cellCenter(7, 7);
+    explorer.x = startPos.x; explorer.y = startPos.y;
+    pointerTarget = null; s2AutoPath = []; s2HintPath = [];
+    currentPromptHadMistake = false;
 
-/* =================================
-   FINAL CERTIFICATE
-================================= */
+    const pickedSanctuaries = [...MAZE_SANCTUARIES].sort(() => Math.random() - 0.5).slice(0, 3);
+    const st = s2Queue[s2Stage];
+    const items = [
+      { id: st.id, name: st.word, water: st.water, correct: true },
+      { id: st.decoys[0], name: st.decoys[0].toUpperCase(), water: st.decoys[0] === 'crocodile' || st.decoys[0] === 'hippo', correct: false },
+      { id: st.decoys[1], name: st.decoys[1].toUpperCase(), water: st.decoys[1] === 'crocodile' || st.decoys[1] === 'hippo', correct: false }
+    ];
+    s2Animals = items.map((it, idx) => {
+      const sc = pickedSanctuaries[idx];
+      const pt = cellCenter(sc.c, sc.r);
+      return { ...it, x: pt.x, y: pt.y, c: sc.c, r: sc.r, safeC: sc.safeC, safeR: sc.safeR };
+    });
 
-function showEnding() {
-  document.getElementById("certificate-name").textContent =
-    state.name;
+    s2Gems = [cellCenter(1, 3), cellCenter(7, 3), cellCenter(13, 3), cellCenter(7, 5)].map(p => ({ x: p.x, y: p.y, taken: false }));
+    updateHUD('Hidden Falls Maze', `${s2Stage}/${S2_TOTAL}`, `MAZE QUEST: ${st.word}`, st.clue);
+  }
 
-  document.getElementById("certificate-class").textContent =
-    state.studentClass;
+  // --- STATION 3: EAGLE'S SUMMIT CLUE CRATE RESCUE (5 ANIMALS) ---
+  let s3Crates = [], s3Animals = [], carriedCrate = null, s3DoneCount = 0;
+  const S3_TOTAL = 5;
 
-  document.getElementById("final-score").textContent =
-    state.score;
+  function startStation3() {
+    initAudio(); activeStation = 3;
+    $('mapScreen').classList.add('hidden'); $('hud').classList.remove('hidden');
+    explorer.x = 500; explorer.y = 365; pointerTarget = null;
+    carriedCrate = null; s3DoneCount = 0; currentPromptHadMistake = false;
 
-  cleanupMission();
-  showScreen("ending-screen");
-}
+    const chosen = [...s3MasterPool].sort(() => Math.random() - 0.5).slice(0, S3_TOTAL);
+    const animalSpots = [
+      { x: 155, y: 225 }, { x: 845, y: 225 },
+      { x: 155, y: 500 }, { x: 845, y: 500 },
+      { x: 500, y: 190 }
+    ];
+    s3Animals = chosen.map((a, i) => ({ ...a, x: animalSpots[i].x, y: animalSpots[i].y, matched: false }));
 
+    const crateSpots = [
+      { x: 390, y: 310 }, { x: 610, y: 310 },
+      { x: 380, y: 455 }, { x: 620, y: 455 },
+      { x: 500, y: 515 }
+    ].sort(() => Math.random() - 0.5);
+
+    s3Crates = chosen.map((a, i) => ({ id: a.id, expectedLabel: a.label, clueText: a.clueText, x: crateSpots[i].x, y: crateSpots[i].y, delivered: false }));
+    updateHUD("Eagle's Summit", `0/${S3_TOTAL}`, 'PICK UP A CLUE CRATE', 'Walk onto any wooden crate, then carry it to the matching animal!');
+  }
+
+  function resolveCircleRect(cx, cy, cr, rect) {
+    const nx = Math.max(rect.x, Math.min(cx, rect.x + rect.w));
+    const ny = Math.max(rect.y, Math.min(cy, rect.y + rect.h));
+    const dx = cx - nx, dy = cy - ny, d2 = dx * dx + dy * dy;
+    if (d2 < cr * cr && d2 > 0.0001) {
+      const d = Math.sqrt(d2), ov = cr - d;
+      return { x: cx + (dx / d) * ov, y: cy + (dy / d) * ov };
+    }
+    return { x: cx, y: cy };
+  }
+
+  function drawLabelPill(text, x, y, bg = 'rgba(255,255,255,0.94)', fg = '#1d3549') {
+    ctx.font = '800 12.5px system-ui, Arial, sans-serif';
+    const tw = ctx.measureText(text).width + 16;
+    ctx.fillStyle = bg;
+    ctx.beginPath(); ctx.roundRect(x - tw / 2, y - 11, tw, 22, 9); ctx.fill();
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(text, x, y);
+  }
+
+  // 7. MAIN GAME LOOP
+  let lastTime = performance.now();
+  function gameLoop(now) {
+    requestAnimationFrame(gameLoop);
+    const dt = Math.min((now - lastTime) / 1000, 0.05);
+    lastTime = now;
+    if (cooldown > 0) cooldown -= dt;
+    if (activeStation === 0) return;
+
+    let vx = 0, vy = 0;
+    if (keys.ArrowUp || keys.KeyW || dpadState.up) vy -= 1;
+    if (keys.ArrowDown || keys.KeyS || dpadState.down) vy += 1;
+    if (keys.ArrowLeft || keys.KeyA || dpadState.left) vx -= 1;
+    if (keys.ArrowRight || keys.KeyD || dpadState.right) vx += 1;
+
+    if (vx !== 0 || vy !== 0) {
+      pointerTarget = null; s2AutoPath = [];
+      const len = Math.hypot(vx, vy);
+      vx /= len; vy /= len;
+      if (activeStation === 2) {
+        const cc = posToCell(explorer.x, explorer.y);
+        const center = cellCenter(cc.c, cc.r);
+        if (vx !== 0 && vy === 0) explorer.y += (center.y - explorer.y) * Math.min(1, dt * 10);
+        if (vy !== 0 && vx === 0) explorer.x += (center.x - explorer.x) * Math.min(1, dt * 10);
+      }
+    } else if (activeStation === 2 && s2AutoPath.length > 0) {
+      const wp = s2AutoPath[0];
+      const dx = wp.x - explorer.x, dy = wp.y - explorer.y, d = Math.hypot(dx, dy);
+      if (d < 6) s2AutoPath.shift();
+      else { vx = dx / d; vy = dy / d; }
+    } else if (pointerTarget) {
+      const dx = pointerTarget.x - explorer.x, dy = pointerTarget.y - explorer.y, d = Math.hypot(dx, dy);
+      if (d > 7) { vx = dx / d; vy = dy / d; } else pointerTarget = null;
+    }
+
+    const currSpeed = activeStation === 2 ? 220 : explorer.speed;
+    const radius = activeStation === 2 ? 14 : 23;
+    explorer.x += vx * currSpeed * dt;
+    explorer.y += vy * currSpeed * dt;
+    if (vx !== 0 || vy !== 0) explorer.bob += dt * 12;
+
+    explorer.x = Math.max(55, Math.min(W - 55, explorer.x));
+    explorer.y = Math.max(122, Math.min(H - 34, explorer.y));
+
+    if (activeStation === 2) {
+      for (const w of s2Walls) {
+        const res = resolveCircleRect(explorer.x, explorer.y, radius, w);
+        explorer.x = res.x; explorer.y = res.y;
+      }
+    }
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.drawImage(bgSceneCanvas, 0, 0, W, H);
+    ctx.fillStyle = 'rgba(18,52,38,0.24)';
+    ctx.fillRect(0, 0, W, H);
+
+    if (activeStation === 1) drawAndUpdateS1(dt);
+    else if (activeStation === 2) drawAndUpdateS2();
+    else if (activeStation === 3) drawAndUpdateS3();
+
+    const bobOffset = Math.sin(explorer.bob) * 3;
+    const expSize = activeStation === 2 ? 42 : 62;
+    ctx.drawImage(IMG_OBJ.explorer, explorer.x - expSize / 2, explorer.y - expSize / 2 + bobOffset, expSize, expSize);
+
+    if (activeStation === 3 && carriedCrate) {
+      ctx.drawImage(IMG_OBJ.crate, explorer.x - 19, explorer.y - 66 + bobOffset, 38, 38);
+      drawLabelPill(carriedCrate.clueText, explorer.x, explorer.y - 78 + bobOffset, '#fff3cd', '#582f0e');
+    }
+  }
+
+  function drawAndUpdateS1(dt) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.34)'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.ellipse(500, 370, 395, 195, 0, 0, Math.PI * 2); ctx.stroke();
+
+    const target = s1Targets[s1Step];
+    for (const a of s1Animals) {
+      a.x += a.vx * dt; a.y += a.vy * dt;
+      if (a.x < 110 || a.x > W - 110) a.vx *= -1;
+      if (a.y < 180 || a.y > H - 70) a.vy *= -1;
+
+      ctx.fillStyle = 'rgba(0,0,0,0.22)';
+      ctx.beginPath(); ctx.ellipse(a.x, a.y + 30, 27, 8, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.drawImage(IMG_OBJ[a.id], a.x - 37, a.y - 37, 74, 74);
+
+      if (cooldown <= 0 && target && Math.hypot(explorer.x - a.x, explorer.y - a.y) < 50) {
+        cooldown = 0.95;
+        if (a.id === target.id) {
+          const pts = recordCorrectMatch();
+          s1Step++;
+          if (s1Step >= S1_TOTAL) {
+            updateHUD('Orchid Haven', `${S1_TOTAL}/${S1_TOTAL}`, 'ORCHID HAVEN CLEARED!', 'All 5 rainforest animals matched!');
+            completeCurrentStation(1, 'Orchid Haven');
+          } else {
+            showToast(`Correct! That is the ${target.word}! (+${pts} pts)`, true);
+            spawnS1Round();
+          }
+        } else {
+          recordMistake(1, 'Orchid Haven', target.word, a.word, target.clue);
+          showToast(`Oops! That is a ${a.word}. Find the ${target.word}! (-15 pts)`, false);
+          const pushAngle = Math.atan2(explorer.y - a.y, explorer.x - a.x);
+          explorer.x += Math.cos(pushAngle) * 34;
+          explorer.y += Math.sin(pushAngle) * 34;
+          pointerTarget = null;
+        }
+      }
+    }
+  }
+
+  function drawAndUpdateS2() {
+    ctx.fillStyle = 'rgba(238,231,210,0.9)';
+    ctx.beginPath(); ctx.roundRect(MX - 6, MY - 6, 15 * TILE + 12, 9 * TILE + 12, 14); ctx.fill();
+
+    if (s2HintPath.length > 0) {
+      ctx.fillStyle = 'rgba(255,209,102,0.65)';
+      for (const hp of s2HintPath) {
+        ctx.beginPath(); ctx.arc(hp.x, hp.y, 9, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    for (const w of s2Walls) {
+      ctx.fillStyle = '#5c677d'; ctx.fillRect(w.x, w.y, w.w, w.h);
+      ctx.fillStyle = '#8d99ae'; ctx.fillRect(w.x + 3, w.y + 3, w.w - 6, w.h - 6);
+      ctx.fillStyle = '#52b788'; ctx.fillRect(w.x + 3, w.y + 3, w.w - 12, 6);
+    }
+
+    for (const g of s2Gems) {
+      if (g.taken) continue;
+      ctx.drawImage(IMG_OBJ.gem, g.x - 14, g.y - 14, 28, 28);
+      if (Math.hypot(explorer.x - g.x, explorer.y - g.y) < 24) {
+        g.taken = true; gems += 1; score += 25;
+        playSfx('gem'); updateHUD();
+        showToast('Temple Gem Collected! (+25 pts)', true);
+      }
+    }
+
+    const st = s2Queue[s2Stage];
+    for (const a of s2Animals) {
+      if (a.water) {
+        ctx.fillStyle = 'rgba(72,202,228,0.65)';
+        ctx.beginPath(); ctx.arc(a.x, a.y, 23, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#caf0f8'; ctx.lineWidth = 2; ctx.stroke();
+      }
+      ctx.drawImage(IMG_OBJ[a.id], a.x - 23, a.y - 23, 46, 46);
+
+      if (cooldown <= 0 && st && Math.hypot(explorer.x - a.x, explorer.y - a.y) < 30) {
+        cooldown = 0.95;
+        s2AutoPath = []; pointerTarget = null;
+        if (a.correct) {
+          const pts = recordCorrectMatch();
+          s2Stage++;
+          if (s2Stage >= S2_TOTAL) {
+            updateHUD('Hidden Falls Maze', `${S2_TOTAL}/${S2_TOTAL}`, 'TEMPLE MAZE CLEARED!', 'Every hidden animal rescued!');
+            completeCurrentStation(2, 'Hidden Falls Maze');
+          } else {
+            showToast(`Rescued the ${a.name}! (+${pts} pts) Next chamber...`, true);
+            spawnS2Stage();
+          }
+        } else {
+          recordMistake(2, 'Hidden Falls Maze', st.word, a.name, st.clue);
+          const safePt = cellCenter(a.safeC, a.safeR);
+          explorer.x = safePt.x; explorer.y = safePt.y;
+          const rightAnimal = s2Animals.find(x => x.correct);
+          const decoys = s2Animals.filter(x => !x.correct);
+          if (rightAnimal) s2HintPath = bfsMazePath(a.safeC, a.safeR, rightAnimal.c, rightAnimal.r, decoys);
+          showToast(`That is ${a.name}! Follow the golden stones to ${st.word}! (-15 pts)`, false);
+        }
+      }
+    }
+  }
+
+  function drawAndUpdateS3() {
+    ctx.fillStyle = 'rgba(72,202,228,0.52)';
+    ctx.strokeStyle = 'rgba(224,251,252,0.85)'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.ellipse(500, 380, 195, 115, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+    for (const a of s3Animals) {
+      ctx.fillStyle = a.matched ? 'rgba(46,204,113,0.48)' : 'rgba(255,255,255,0.36)';
+      ctx.beginPath(); ctx.arc(a.x, a.y, 44, 0, Math.PI * 2); ctx.fill();
+      ctx.drawImage(IMG_OBJ[a.id], a.x - 36, a.y - 36, 72, 72);
+      drawLabelPill(a.label, a.x, a.y + 48, a.matched ? '#d8f3dc' : '#ffffff', '#1d3549');
+      if (a.matched) ctx.drawImage(IMG_OBJ.check, a.x + 20, a.y - 42, 24, 24);
+
+      if (!a.matched && carriedCrate && cooldown <= 0 && Math.hypot(explorer.x - a.x, explorer.y - a.y) < 54) {
+        cooldown = 0.85;
+        if (carriedCrate.id === a.id) {
+          a.matched = true; carriedCrate.delivered = true;
+          const pts = recordCorrectMatch();
+          carriedCrate = null; s3DoneCount++;
+          if (s3DoneCount >= S3_TOTAL) {
+            updateHUD("Eagle's Summit", `${S3_TOTAL}/${S3_TOTAL}`, 'SUMMIT RESCUE COMPLETE!', 'All 5 clue crates matched!');
+            completeCurrentStation(3, "Eagle's Summit");
+          } else {
+            updateHUD("Eagle's Summit", `${s3DoneCount}/${S3_TOTAL}`, 'PICK UP NEXT CLUE CRATE', `Matched ${a.label}! Pick up another crate.`);
+            showToast(`Delivered to ${a.label}! (+${pts} pts)`, true);
+          }
+        } else {
+          recordMistake(3, "Eagle's Summit", carriedCrate.expectedLabel, a.label, carriedCrate.clueText);
+          showToast(`Wrong animal! "${carriedCrate.clueText}" is not ${a.label}. (-15 pts)`, false);
+          const pushAngle = Math.atan2(explorer.y - a.y, explorer.x - a.x);
+          explorer.x += Math.cos(pushAngle) * 32; explorer.y += Math.sin(pushAngle) * 32;
+          pointerTarget = null;
+        }
+      }
+    }
+
+    for (const c of s3Crates) {
+      if (c.delivered || carriedCrate === c) continue;
+      ctx.drawImage(IMG_OBJ.crate, c.x - 22, c.y - 22, 44, 44);
+      drawLabelPill(c.clueText, c.x, c.y + 32, '#fff9eb', '#582f0e');
+
+      if (!carriedCrate && cooldown <= 0 && Math.hypot(explorer.x - c.x, explorer.y - c.y) < 40) {
+        cooldown = 0.45; carriedCrate = c; currentPromptHadMistake = false;
+        playSfx('pickup');
+        updateHUD("Eagle's Summit", `${s3DoneCount}/${S3_TOTAL}`, `CLUE: "${c.clueText.toUpperCase()}"`, 'Carry this crate to the matching animal! (Touch another crate to swap)');
+      } else if (carriedCrate && carriedCrate !== c && cooldown <= 0 && Math.hypot(explorer.x - c.x, explorer.y - c.y) < 34) {
+        cooldown = 0.55; carriedCrate = c; currentPromptHadMistake = false;
+        playSfx('pickup');
+        updateHUD("Eagle's Summit", `${s3DoneCount}/${S3_TOTAL}`, `CLUE: "${c.clueText.toUpperCase()}"`, 'Swapped crate! Carry it to the matching animal.');
+      }
+    }
+  }
+
+  // 8. UI BUTTONS & DIAGNOSTIC SYNC TESTER
+  $('testSheetBtn').onclick = () => {
+    playerName = $('playerName').value.trim() || 'Teacher Test';
+    playerClass = $('playerClass').value.trim() || 'Year 4';
+    const payload = buildPayload('Sheet Sync Test', 'Diagnostic Ping');
+    const diagUrl = `${GOOGLE_SCRIPT_URL}?${new URLSearchParams(payload).toString()}`;
+    saveToSheets('Sheet Sync Test', 'Diagnostic Ping');
+
+    const box = $('syncStatusBox');
+    box.classList.remove('hidden');
+    box.innerHTML = `Test ping sent! Check your Google Sheet. Still empty? <button id="openDiagTabBtn" type="button" style="padding:5px 10px;font-size:.78rem;margin-left:4px">Open Live Script Check</button>`;
+    $('openDiagTabBtn').onclick = () => window.open(diagUrl, '_blank');
+  };
+
+  $('startBtn').onclick = () => {
+    initAudio();
+    playerName = $('playerName').value.trim() || 'Explorer';
+    playerClass = $('playerClass').value.trim() || 'Year 4';
+    saveToSheets('English Treasure Quest', 'Started Expedition');
+    openMapScreen();
+  };
+
+  $('btnStation1').onclick = startStation1;
+  $('btnStation2').onclick = startStation2;
+  $('btnStation3').onclick = startStation3;
+  $('backToMapBtn').onclick = openMapScreen;
+  $('hudSoundBtn').onclick = toggleSound;
+  $('mapSoundBtn').onclick = toggleSound;
+  $('openLogMapBtn').onclick = openDiagnosticModal;
+  $('hudLogBtn').onclick = openDiagnosticModal;
+  $('closeLogBtn').onclick = () => $('logModal').classList.add('hidden');
+
+  $('copyReportBtn').onclick = () => {
+    const lines = [
+      `Pupil: ${playerName} (${playerClass})`,
+      `Score: ${score} | Accuracy: ${getAccuracyPct()}% | First-Try: ${firstTryMatches}/${totalMatches} | Mistakes: ${wrongAttempts}`,
+      `Station Errors -> S1: ${stationMistakes[1]}, S2: ${stationMistakes[2]}, S3: ${stationMistakes[3]}`,
+      `Details: ${buildMistakeSummaryString()}`
+    ].join('\n');
+    if (navigator.clipboard) navigator.clipboard.writeText(lines);
+    $('copyReportBtn').textContent = 'Copied to Clipboard!';
+    setTimeout(() => { $('copyReportBtn').textContent = 'Copy Teacher Summary'; }, 1600);
+  };
+
+  $('claimTreasureBtn').onclick = () => {
+    if (!(stationDone[1] && stationDone[2] && stationDone[3])) return;
+    playSfx('fanfare');
+    $('mapScreen').classList.add('hidden');
+    $('endScreen').classList.remove('hidden');
+    saveToSheets('English Treasure Quest', 'Completed All 3 Stations');
+
+    $('endGreeting').textContent = `Congratulations, ${playerName} (${playerClass})!`;
+    $('endSummaryCards').innerHTML = `
+      <div class="diag-box"><div class="diag-val">${score}</div><div class="diag-lbl">Final Score</div></div>
+      <div class="diag-box"><div class="diag-val">${getAccuracyPct()}%</div><div class="diag-lbl">Overall Accuracy</div></div>
+      <div class="diag-box"><div class="diag-val">${firstTryMatches}/${totalMatches}</div><div class="diag-lbl">First-Try Matches</div></div>
+      <div class="diag-box"><div class="diag-val" style="color:#b83227">${wrongAttempts}</div><div class="diag-lbl">Mistakes Detected</div></div>
+    `;
+    renderMistakeRows('endMistakeBody');
+  };
+
+  $('backMapEndBtn').onclick = openMapScreen;
+  $('playAgainBtn').onclick = () => {
+    score = 0; gems = 0; totalMatches = 0; firstTryMatches = 0; wrongAttempts = 0;
+    currentPromptHadMistake = false;
+    stationDone[1] = false; stationDone[2] = false; stationDone[3] = false;
+    stationMistakes[1] = 0; stationMistakes[2] = 0; stationMistakes[3] = 0;
+    mistakeLog.length = 0;
+    $('endScreen').classList.add('hidden');
+    $('startScreen').classList.remove('hidden');
+  };
+
+  window.addEventListener('keydown', e => { keys[e.code] = true; });
+  window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+  canvas.addEventListener('pointerdown', e => {
+    if (activeStation === 0) return;
+    initAudio();
+    const rect = canvas.getBoundingClientRect();
+    const tx = (e.clientX - rect.left) * (W / rect.width);
+    const ty = (e.clientY - rect.top) * (H / rect.height);
+    if (activeStation === 2) {
+      const startCell = posToCell(explorer.x, explorer.y);
+      const goalCell = posToCell(tx, ty);
+      const decoys = s2Animals.filter(x => !x.correct);
+      const route = bfsMazePath(startCell.c, startCell.r, goalCell.c, goalCell.r, decoys);
+      if (route.length > 0) { s2AutoPath = route; pointerTarget = null; return; }
+    }
+    pointerTarget = { x: tx, y: ty };
+  });
+
+  document.querySelectorAll('.dpad-btn').forEach(btn => {
+    const dir = btn.dataset.dir;
+    const setDir = val => e => { e.preventDefault(); if (val) initAudio(); dpadState[dir] = val; };
+    btn.addEventListener('pointerdown', setDir(true));
+    btn.addEventListener('pointerup', setDir(false));
+    btn.addEventListener('pointerleave', setDir(false));
+    btn.addEventListener('pointercancel', setDir(false));
+  });
+
+  requestAnimationFrame(gameLoop);
+})();
 </script>
-
 </body>
 </html>
+```
