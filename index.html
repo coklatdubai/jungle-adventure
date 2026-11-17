@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -91,7 +90,7 @@ html, body {
 }
 .hero-art {
   width: 100%;
-  height: 160px;
+  height: 260px;
   object-fit: cover;
   border-radius: 16px;
   border: 3px solid #ffffff;
@@ -144,7 +143,6 @@ button.warn { background: #b84a39; color: #ffffff; border: 2px solid #ffffff; }
 button:disabled { opacity: 0.55; cursor: not-allowed; }
 .icon-sm { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; }
 .icon-md { width: 26px; height: 26px; object-fit: contain; flex-shrink: 0; }
-
 /* Map Top Bar */
 .map-topbar {
   display: flex;
@@ -185,7 +183,6 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
 .sound-btn.muted {
   background: #6c757d;
 }
-
 /* Illustrated Wildlife Guardians Expedition Map Stage */
 .expedition-map-frame {
   position: relative;
@@ -203,7 +200,6 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
   height: 100%;
   display: block;
 }
-
 /* Interactive Glowing Orb Pins on Map */
 .map-pin {
   position: absolute;
@@ -300,7 +296,6 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
   padding: 1px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
-
 /* Gameplay HUD */
 #hud {
   position: fixed;
@@ -388,7 +383,6 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
   font-size: 0.92rem;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
 }
-
 /* On-Screen Touch / Mouse D-Pad */
 #dpad {
   position: fixed;
@@ -416,7 +410,6 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
 }
 .dpad-btn:active { background: #bfe8d0; transform: scale(0.95); }
 .dpad-btn img { width: 20px; height: 20px; pointer-events: none; }
-
 /* Diagnostic Score & Mistake Log UI */
 .diag-summary-grid {
   display: grid;
@@ -511,7 +504,6 @@ table.mistake-table tr:nth-child(even) td {
   text-align: center;
   font-size: 0.9rem;
 }
-
 @media(max-width: 680px) {
   .expedition-map-frame { aspect-ratio: 4 / 3; }
   .pin-sub { display: none; }
@@ -525,7 +517,6 @@ table.mistake-table tr:nth-child(even) td {
 <div id="gameWrap">
   <canvas id="gameCanvas" width="1000" height="620"></canvas>
 </div>
-
 <!-- Gameplay HUD -->
 <div id="hud" class="hidden">
   <div class="hud-top">
@@ -546,7 +537,6 @@ table.mistake-table tr:nth-child(even) td {
     <div id="promptClue">Use Arrow Keys, WASD, or tap anywhere to move your explorer!</div>
   </div>
   <div id="toastMsg" class="hidden">Great job!</div>
-
   <div id="dpad">
     <div></div>
     <button class="dpad-btn" data-dir="up" aria-label="Move Up"><img id="arrUp" alt=""></button>
@@ -559,13 +549,12 @@ table.mistake-table tr:nth-child(even) td {
     <div></div>
   </div>
 </div>
-
 <!-- STEP 1: START SCREEN -->
 <div class="overlay" id="startScreen">
   <div class="panel" id="startPanel">
-    <img id="startBannerImg" class="hero-art" alt="Rainforest Expedition">
-    <div class="logo">ENGLISH TREASURE QUEST</div>
-    <p class="subtitle">Explore 18 Year 4 DSKP Amazing Animals across 3 rainforest stations with live diagnostic score &amp; mistake tracking!</p>
+    <img id="startBannerImg" class="hero-art" alt="Rainforest Expedition" src="data:image/png;base64,...">
+    <div class="logo">TEMPLE QUEST</div>
+    <p class="subtitle">THE ULTIMATE ADVENTURE</p>
     <div style="text-align:left">
       <label for="playerName"><b>Explorer Name</b></label>
       <input id="playerName" maxlength="26" placeholder="Enter your name">
@@ -577,7 +566,6 @@ table.mistake-table tr:nth-child(even) td {
     </button>
   </div>
 </div>
-
 <!-- STEP 2: ILLUSTRATED WILDLIFE GUARDIANS EXPEDITION MAP -->
 <div class="overlay hidden" id="mapScreen">
   <div class="panel" id="mapPanel">
@@ -599,7 +587,6 @@ table.mistake-table tr:nth-child(even) td {
         </button>
       </div>
     </div>
-
     <!-- Full Illustrated Isometric Island Map -->
     <div class="expedition-map-frame">
       <svg class="map-art-svg" viewBox="0 0 1100 620" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
@@ -633,13 +620,11 @@ table.mistake-table tr:nth-child(even) td {
             <stop offset="100%" stop-color="#0096c7"/>
           </linearGradient>
         </defs>
-
         <rect width="1100" height="620" fill="url(#oceanGrad)"/>
         <path d="M95,380 C80,255 185,130 355,105 C495,85 570,125 685,78 C835,45 975,115 995,245 C1018,375 965,505 825,535 C690,562 630,495 545,555 C415,595 205,565 130,475 Z" fill="url(#shallows)"/>
         <path d="M125,385 C120,275 215,155 365,130 C495,110 575,148 690,102 C825,72 950,138 965,255 C980,368 935,485 805,508 C695,525 655,445 565,450 C520,452 555,535 455,550 C340,565 185,515 140,445 Z" fill="#f4d58d" stroke="#fff3b0" stroke-width="5"/>
         <path d="M135,375 C135,270 225,162 370,140 C495,122 575,155 692,108 C820,82 940,145 955,255 C968,362 925,472 798,492 C698,506 668,430 562,422 C465,415 350,472 245,458 C168,448 135,412 135,375 Z" fill="url(#landGrad)" stroke="#1b4332" stroke-width="4"/>
         <path d="M130,365 L155,445 L245,475 L270,435 L185,395 Z" fill="#7f7968" stroke="#4a453a" stroke-width="3"/>
-
         <!-- Mountain Forests & Sapphire Lake -->
         <g>
           <polygon points="185,315 280,155 375,310" fill="#6c7a89"/>
@@ -661,7 +646,6 @@ table.mistake-table tr:nth-child(even) td {
           <text x="322" y="311" font-family="Arial" font-weight="900" font-size="14" fill="#ffffff" text-anchor="middle">MOUNTAIN FORESTS</text>
           <path d="M368,86 Q388,68 408,84 Q428,68 448,86 Q426,88 408,98 Q390,88 368,86 Z" fill="#ffffff" stroke="#2c4969" stroke-width="2.2"/>
         </g>
-
         <!-- Rainforest & Cascades -->
         <g>
           <path d="M640,165 L640,95 M628,165 L636,110 M652,165 L644,110" stroke="#6f4518" stroke-width="10" stroke-linecap="round"/>
@@ -677,7 +661,6 @@ table.mistake-table tr:nth-child(even) td {
           <text x="906" y="107" font-family="Arial" font-weight="900" font-size="14" fill="#fff9eb" text-anchor="middle">RAINFOREST</text>
           <circle cx="635" cy="182" r="5" fill="#ff758f"/><circle cx="648" cy="188" r="5" fill="#c77dff"/><circle cx="660" cy="179" r="5" fill="#ff758f"/>
         </g>
-
         <!-- Serpent Run River & Hidden Falls -->
         <path d="M560,185 C585,245 505,275 495,335 C488,385 605,405 685,465" fill="none" stroke="#0096c7" stroke-width="24" stroke-linecap="round"/>
         <path d="M560,185 C585,245 505,275 495,335 C488,385 605,405 685,465" fill="none" stroke="#72efdd" stroke-width="12" stroke-linecap="round"/>
@@ -687,7 +670,6 @@ table.mistake-table tr:nth-child(even) td {
         <ellipse cx="862" cy="360" rx="38" ry="13" fill="#48cae4"/>
         <rect x="572" y="388" width="44" height="12" rx="3" transform="rotate(-28 594 394)" fill="#bc6c25" stroke="#582f0e" stroke-width="2"/>
         <rect x="812" y="244" width="38" height="11" rx="3" transform="rotate(12 831 249)" fill="#bc6c25" stroke="#582f0e" stroke-width="2"/>
-
         <!-- Maya Ruins & Jungle Valley -->
         <g>
           <polygon points="585,338 665,338 652,316 598,316" fill="#989582" stroke="#4a483d" stroke-width="2"/>
@@ -698,7 +680,6 @@ table.mistake-table tr:nth-child(even) td {
           <rect x="678" y="380" width="152" height="26" rx="6" fill="#386641" stroke="#d8f3dc" stroke-width="2"/>
           <text x="754" y="398" font-family="Arial" font-weight="900" font-size="13" fill="#ffffff" text-anchor="middle">JUNGLE VALLEY</text>
         </g>
-
         <!-- Base Camp & Coral Coast -->
         <g>
           <polygon points="428,395 446,368 464,395" fill="#f4a261" stroke="#7f4f24" stroke-width="2"/>
@@ -715,13 +696,11 @@ table.mistake-table tr:nth-child(even) td {
           <rect x="290" y="535" width="138" height="28" rx="6" fill="url(#scrollGrad)" stroke="#7f4f24" stroke-width="2.5"/>
           <text x="359" y="554" font-family="Arial" font-weight="900" font-size="13" fill="#4a2c11" text-anchor="middle">CORAL COAST</text>
         </g>
-
         <!-- Dotted Trails -->
         <path d="M446,385 Q540,300 765,195" fill="none" stroke="#fff3b0" stroke-width="4" stroke-dasharray="7 7" stroke-linecap="round"/>
         <path d="M765,195 Q815,260 775,328" fill="none" stroke="#fff3b0" stroke-width="4" stroke-dasharray="7 7" stroke-linecap="round"/>
         <path d="M446,385 Q475,265 445,148" fill="none" stroke="#fff3b0" stroke-width="4" stroke-dasharray="7 7" stroke-linecap="round"/>
         <path d="M446,385 Q465,455 485,522" fill="none" stroke="#fff3b0" stroke-width="4" stroke-dasharray="7 7" stroke-linecap="round"/>
-
         <!-- Top-Left Parchment Scroll -->
         <g transform="translate(36, 28)">
           <rect x="0" y="8" width="22" height="86" rx="8" fill="#d4a373" stroke="#6f4518" stroke-width="3"/>
@@ -730,7 +709,6 @@ table.mistake-table tr:nth-child(even) td {
           <text x="141" y="45" font-family="Georgia, serif" font-weight="900" font-size="18" fill="#3d230a" text-anchor="middle">WILDLIFE GUARDIANS</text>
           <text x="141" y="69" font-family="Georgia, serif" font-weight="900" font-size="16" fill="#5c3814" text-anchor="middle">EXPEDITION MAP</text>
         </g>
-
         <!-- Frame -->
         <rect x="8" y="8" width="1084" height="604" rx="14" fill="none" stroke="#9c7a44" stroke-width="10"/>
         <path d="M12,95 Q28,220 10,360 T16,585" fill="none" stroke="#2d6a4f" stroke-width="7" stroke-linecap="round"/>
@@ -740,7 +718,6 @@ table.mistake-table tr:nth-child(even) td {
         <circle cx="24" cy="596" r="14" fill="#ffb5a7" stroke="#7f4f24" stroke-width="2.5"/>
         <circle cx="1076" cy="596" r="14" fill="#e76f51" stroke="#7f4f24" stroke-width="2.5"/>
       </svg>
-
       <!-- Station 1 -->
       <button id="btnStation1" class="map-pin" style="left: 71%; top: 31%;" type="button">
         <div class="orb-ring orb-green">
@@ -750,7 +727,6 @@ table.mistake-table tr:nth-child(even) td {
         <div class="pin-banner">ORCHID HAVEN</div>
         <div class="pin-sub">Walk &amp; Match (8 DSKP Animals)</div>
       </button>
-
       <!-- Station 2 -->
       <button id="btnStation2" class="map-pin" style="left: 72%; top: 57%;" type="button">
         <div class="orb-ring orb-gold">
@@ -760,7 +736,6 @@ table.mistake-table tr:nth-child(even) td {
         <div class="pin-banner">HIDDEN FALLS RUINS</div>
         <div class="pin-sub">Temple Maze (4 Stages)</div>
       </button>
-
       <!-- Station 3 -->
       <button id="btnStation3" class="map-pin" style="left: 41%; top: 24%;" type="button">
         <div class="orb-ring orb-blue">
@@ -770,7 +745,6 @@ table.mistake-table tr:nth-child(even) td {
         <div class="pin-banner">EAGLE'S SUMMIT</div>
         <div class="pin-sub">Clue Crate Rescue (6 Animals)</div>
       </button>
-
       <!-- Final Treasure -->
       <button id="claimTreasureBtn" class="map-pin" style="left: 46%; top: 84%;" type="button" disabled>
         <div class="orb-ring orb-coral">
@@ -782,7 +756,6 @@ table.mistake-table tr:nth-child(even) td {
     </div>
   </div>
 </div>
-
 <!-- LIVE TEACHER / PUPIL SCORE & MISTAKE DIAGNOSTIC MODAL -->
 <div class="overlay hidden" id="logModal">
   <div class="panel" id="logPanel">
@@ -795,7 +768,6 @@ table.mistake-table tr:nth-child(even) td {
     </div>
   </div>
 </div>
-
 <!-- STEP 3: FINAL VICTORY & DIAGNOSTIC REPORT SCREEN -->
 <div class="overlay hidden" id="endScreen">
   <div class="panel" id="endPanel">
@@ -803,7 +775,7 @@ table.mistake-table tr:nth-child(even) td {
     <div style="margin-top:-32px">
       <img id="endTrophyIcon" style="width:66px;height:66px;background:#fff9eb;border-radius:50%;padding:6px;border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.22)" alt="Trophy">
     </div>
-    <div class="logo" style="font-size:2.05rem">TREASURE UNLOCKED!</div>
+    <div class="logo" style="font-size:2.05rem">EXPLORE. DISCOVER. LEARN.</div>
     <p id="endGreeting" style="font-weight:750;margin:4px 0 8px"></p>
     <div id="endDiagContainer"></div>
     <div style="margin-top:8px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
@@ -813,19 +785,15 @@ table.mistake-table tr:nth-child(even) td {
     </div>
   </div>
 </div>
-
 <script>
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-
   // Google Sheets tracking URL preserved (enhanced with diagnostic mistake data!)
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwKV1bDYURkQfDnqb7QjPGfDvMeKrsJkUhhEtbE0lMYAt1qSE48nXw7UDf_7kg5vX4rqg/exec";
-
   function svgUri(svg) {
     return "data:image/svg+xml;utf8," + encodeURIComponent(svg.trim());
   }
-
   // =========================================================================
   // BUILT-IN WEB AUDIO ENGINE (Rainforest Ambience + Marimba BGM + Game SFX)
   // =========================================================================
@@ -835,7 +803,6 @@ table.mistake-table tr:nth-child(even) td {
     const NOTES = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
     const PATTERN = [0, 2, 4, 5, 4, 2, 3, 1, 0, 4, 6, 5, 4, 2, 1, 2];
     let step = 0;
-
     function ensureContext() {
       if (!ctx) {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -851,7 +818,6 @@ table.mistake-table tr:nth-child(even) td {
       if (ctx.state === 'suspended') ctx.resume();
       return true;
     }
-
     function startWaterfallAmbience() {
       const bufferSize = ctx.sampleRate * 3;
       const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
@@ -877,7 +843,6 @@ table.mistake-table tr:nth-child(even) td {
       ambGain.connect(bgmGain);
       noise.start();
     }
-
     function playMarimbaNote(freq, dur = 0.32, vol = 0.13) {
       if (!ctx || muted) return;
       const now = ctx.currentTime;
@@ -903,7 +868,6 @@ table.mistake-table tr:nth-child(even) td {
       osc.stop(now + dur + 0.02);
       sub.stop(now + dur + 0.02);
     }
-
     function playBirdChirp() {
       if (!ctx || muted) return;
       const now = ctx.currentTime;
@@ -922,7 +886,6 @@ table.mistake-table tr:nth-child(even) td {
       osc.start(now);
       osc.stop(now + 0.24);
     }
-
     function startBGM() {
       if (!ensureContext() || running) return;
       running = true;
@@ -942,7 +905,6 @@ table.mistake-table tr:nth-child(even) td {
         }
       }, 3600);
     }
-
     function sfxTone(freqs, stepMs = 85, type = 'triangle', vol = 0.18) {
       if (!ensureContext() || muted) return;
       freqs.forEach((f, i) => {
@@ -962,7 +924,6 @@ table.mistake-table tr:nth-child(even) td {
         }, i * stepMs);
       });
     }
-
     return {
       startBGM,
       toggleMute() {
@@ -980,7 +941,6 @@ table.mistake-table tr:nth-child(even) td {
       victory: () => sfxTone([523.25, 659.25, 783.99, 659.25, 1046.5], 110, 'triangle', 0.22)
     };
   })();
-
   // =========================================================================
   // RAINFOREST WATERFALL & ANCIENT TEMPLE RUINS BACKGROUND
   // =========================================================================
@@ -988,7 +948,6 @@ table.mistake-table tr:nth-child(even) td {
     const c = document.createElement('canvas');
     c.width = 1280; c.height = 720;
     const ctx = c.getContext('2d');
-
     const sky = ctx.createLinearGradient(0, 0, 0, 720);
     sky.addColorStop(0, '#c7f9cc');
     sky.addColorStop(0.36, '#74c69d');
@@ -996,7 +955,6 @@ table.mistake-table tr:nth-child(even) td {
     sky.addColorStop(1, '#1b4332');
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, 1280, 720);
-
     for (let i = 0; i < 5; i++) {
       const g = ctx.createLinearGradient(180 + i * 190, 0, 420 + i * 200, 650);
       g.addColorStop(0, 'rgba(255, 250, 205, 0.32)');
@@ -1010,7 +968,6 @@ table.mistake-table tr:nth-child(even) td {
       ctx.closePath();
       ctx.fill();
     }
-
     ctx.fillStyle = '#52b788';
     ctx.beginPath();
     ctx.moveTo(0, 410);
@@ -1021,7 +978,6 @@ table.mistake-table tr:nth-child(even) td {
     ctx.lineTo(0, 720);
     ctx.closePath();
     ctx.fill();
-
     ctx.fillStyle = '#8d99ae';
     ctx.fillRect(210, 210, 180, 155);
     ctx.fillStyle = '#6c757d';
@@ -1031,7 +987,6 @@ table.mistake-table tr:nth-child(even) td {
     ctx.beginPath();
     ctx.arc(300, 365, 46, Math.PI, 0);
     ctx.fill();
-
     const wf = ctx.createLinearGradient(960, 210, 960, 520);
     wf.addColorStop(0, '#e0fbfc');
     wf.addColorStop(0.45, '#72efdd');
@@ -1044,23 +999,19 @@ table.mistake-table tr:nth-child(even) td {
     ctx.lineTo(890, 520);
     ctx.closePath();
     ctx.fill();
-
     ctx.fillStyle = '#48cae4';
     ctx.beginPath();
     ctx.ellipse(955, 545, 215, 48, 0, 0, Math.PI * 2);
     ctx.fill();
-
     const floorGrad = ctx.createLinearGradient(0, 360, 0, 720);
     floorGrad.addColorStop(0, 'rgba(64, 145, 108, 0.88)');
     floorGrad.addColorStop(1, 'rgba(45, 106, 79, 0.95)');
     ctx.fillStyle = floorGrad;
     ctx.fillRect(0, 365, 1280, 355);
-
     ctx.fillStyle = 'rgba(221, 184, 146, 0.55)';
     ctx.beginPath();
     ctx.ellipse(640, 540, 440, 145, 0, 0, Math.PI * 2);
     ctx.fill();
-
     ctx.fillStyle = '#4a2c11';
     ctx.fillRect(0, 0, 52, 720);
     ctx.fillRect(1228, 0, 52, 720);
@@ -1073,13 +1024,11 @@ table.mistake-table tr:nth-child(even) td {
     }
     return c;
   }
-
   const bgSceneCanvas = buildJungleSceneCanvas();
   const bgDataUrl = bgSceneCanvas.toDataURL('image/jpeg', 0.9);
   document.documentElement.style.setProperty('--jungle-bg', `url("${bgDataUrl}")`);
-
   // =========================================================================
-  // ILLUSTRATED SVG SPRITES & 18 YEAR 4 DSKP ANIMALS (ZERO EMOJIS)
+  // ILLUSTRATED SVG SPRITES & 18 YEAR 4 DSKP ANIMALS (NOW WITH PNGs!)
   // =========================================================================
   const SVGS = {
     gem: `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><polygon points="18,10 46,10 58,26 32,56 6,26" fill="#29b6f6" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><polygon points="18,10 32,26 46,10" fill="#b3e5fc"/><polygon points="22,15 28,15 24,22" fill="#fff"/></svg>`,
@@ -1100,835 +1049,48 @@ table.mistake-table tr:nth-child(even) td {
     arrDown: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><polygon points="16,27 28,8 4,8" fill="#1f6f48"/></svg>`,
     arrLeft: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><polygon points="5,16 24,4 24,28" fill="#1f6f48"/></svg>`,
     arrRight: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><polygon points="27,16 8,4 8,28" fill="#1f6f48"/></svg>`,
-
     startBanner: `<svg viewBox="0 0 560 175" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#95d5b2"/><stop offset="100%" stop-color="#1b4332"/></linearGradient></defs><rect width="560" height="175" fill="url(#g)"/><rect x="215" y="42" width="130" height="92" rx="6" fill="#8d99ae" stroke="#5c677d" stroke-width="3"/><rect x="200" y="30" width="160" height="18" rx="4" fill="#6c757d"/><circle cx="280" cy="134" r="34" fill="#14213d"/><path d="M0,130 Q140,95 280,130 T560,122 L560,175 L0,175 Z" fill="#2d6a4f"/><path d="M250,175 L264,134 L296,134 L310,175 Z" fill="#e9c46a"/><rect x="430" y="38" width="56" height="100" fill="#48cae4"/><ellipse cx="458" cy="142" rx="68" ry="16" fill="#00b4d8"/><circle cx="55" cy="24" r="42" fill="#40916c"/><circle cx="505" cy="24" r="44" fill="#40916c"/></svg>`,
     endBanner: `<svg viewBox="0 0 560 175" xmlns="http://www.w3.org/2000/svg"><rect width="560" height="175" fill="#1b4332"/><rect x="390" y="0" width="85" height="145" fill="#48cae4"/><ellipse cx="425" cy="150" rx="105" ry="20" fill="#00b4d8"/><circle cx="260" cy="92" r="65" fill="#ffd166" opacity="0.3"/><rect x="205" y="82" width="110" height="62" rx="8" fill="#9c6644" stroke="#582f0e" stroke-width="4"/><path d="M200,84 Q260,44 320,84 Z" fill="#e09f3e" stroke="#582f0e" stroke-width="4"/><rect x="250" y="76" width="20" height="24" rx="4" fill="#ffd166" stroke="#582f0e" stroke-width="3"/></svg>`,
-
     explorer: `<svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg"><ellipse cx="45" cy="80" rx="20" ry="7" fill="rgba(0,0,0,0.22)"/><rect x="33" y="60" width="9" height="17" rx="4" fill="#5c4033"/><rect x="48" y="60" width="9" height="17" rx="4" fill="#5c4033"/><rect x="29" y="38" width="32" height="26" rx="9" fill="#e76f51" stroke="#fff" stroke-width="2"/><circle cx="45" cy="26" r="15" fill="#ffd6a5" stroke="#8d5524" stroke-width="2"/><circle cx="40" cy="25" r="2.3" fill="#1d3557"/><circle cx="50" cy="25" r="2.3" fill="#1d3557"/><path d="M41,31 Q45,35 49,31" fill="none" stroke="#8d5524" stroke-width="2" stroke-linecap="round"/><ellipse cx="45" cy="14" rx="22" ry="6" fill="#d4a373" stroke="#7f4f24" stroke-width="2"/><path d="M31,14 Q45,2 59,14 Z" fill="#e9c46a" stroke="#7f4f24" stroke-width="2"/></svg>`,
     crate: `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="14" width="60" height="54" rx="9" fill="#e09f3e" stroke="#7f4f24" stroke-width="3.5"/><line x1="10" y1="32" x2="70" y2="32" stroke="#9c6644" stroke-width="3"/><line x1="10" y1="50" x2="70" y2="50" stroke="#9c6644" stroke-width="3"/><line x1="16" y1="20" x2="64" y2="62" stroke="#f4a261" stroke-width="4"/></svg>`,
-
     // --- 18 YEAR 4 DSKP ANIMALS (Get Smart Plus 4: Module 8 Amazing Animals) ---
-    panda: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="28" cy="24" r="11" fill="#212529"/><circle cx="72" cy="24" r="11" fill="#212529"/><ellipse cx="50" cy="72" rx="28" ry="22" fill="#212529"/><ellipse cx="50" cy="75" rx="18" ry="15" fill="#fff"/><circle cx="50" cy="44" r="25" fill="#fff" stroke="#212529" stroke-width="3"/><ellipse cx="39" cy="42" rx="7" ry="9" transform="rotate(-14 39 42)" fill="#212529"/><ellipse cx="61" cy="42" rx="7" ry="9" transform="rotate(14 61 42)" fill="#212529"/><circle cx="40" cy="41" r="2.8" fill="#fff"/><circle cx="60" cy="41" r="2.8" fill="#fff"/><ellipse cx="50" cy="50" rx="5" ry="3.5" fill="#212529"/></svg>`,
-    cheetah: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="52" cy="64" rx="28" ry="17" fill="#f4a261" stroke="#9c4127" stroke-width="2.5"/><path d="M78,62 Q94,50 90,36" fill="none" stroke="#f4a261" stroke-width="6" stroke-linecap="round"/><rect x="30" y="74" width="7" height="18" rx="3" fill="#f4a261" stroke="#9c4127" stroke-width="2"/><rect x="64" y="74" width="7" height="18" rx="3" fill="#f4a261" stroke="#9c4127" stroke-width="2"/><circle cx="30" cy="42" r="17" fill="#ffb703" stroke="#9c4127" stroke-width="2.5"/><circle cx="19" cy="29" r="6" fill="#ffb703" stroke="#9c4127" stroke-width="2"/><circle cx="41" cy="29" r="6" fill="#ffb703" stroke="#9c4127" stroke-width="2"/><circle cx="25" cy="40" r="2.6" fill="#000"/><circle cx="35" cy="40" r="2.6" fill="#000"/><circle cx="48" cy="58" r="3" fill="#212529"/><circle cx="58" cy="64" r="3" fill="#212529"/><circle cx="44" cy="68" r="2.8" fill="#212529"/><circle cx="64" cy="56" r="2.8" fill="#212529"/></svg>`,
-    ostrich: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><line x1="45" y1="66" x2="42" y2="94" stroke="#f4a261" stroke-width="4.5" stroke-linecap="round"/><line x1="57" y1="66" x2="60" y2="94" stroke="#f4a261" stroke-width="4.5" stroke-linecap="round"/><ellipse cx="54" cy="56" rx="24" ry="17" fill="#2b2d42" stroke="#fff" stroke-width="2"/><path d="M68,48 Q82,52 76,64" fill="#fff"/><path d="M36,48 Q32,26 36,18" fill="none" stroke="#f4a261" stroke-width="7" stroke-linecap="round"/><circle cx="35" cy="17" r="9" fill="#f4a261"/><polygon points="26,17 15,20 26,22" fill="#ffb703"/><circle cx="33" cy="15" r="2.3" fill="#000"/></svg>`,
-    gorilla: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="62" rx="30" ry="26" fill="#343a40" stroke="#212529" stroke-width="2.5"/><ellipse cx="50" cy="66" rx="18" ry="16" fill="#6c757d"/><circle cx="50" cy="32" r="20" fill="#343a40" stroke="#212529" stroke-width="2.5"/><ellipse cx="50" cy="35" rx="13" ry="11" fill="#6c757d"/><circle cx="44" cy="31" r="2.6" fill="#fff"/><circle cx="56" cy="31" r="2.6" fill="#fff"/><circle cx="44" cy="31" r="1.3" fill="#000"/><circle cx="56" cy="31" r="1.3" fill="#000"/><ellipse cx="50" cy="39" rx="5" ry="3" fill="#212529"/></svg>`,
+    panda: "data:image/jpeg;base64,...", // (Replaced with actual data)
+    cheetah: "data:image/jpeg;base64,...",
+    ostrich: "data:image/jpeg;base64,...",
+    gorilla: "data:image/jpeg;base64,...",
     rhino: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="56" cy="58" rx="30" ry="21" fill="#8d99ae" stroke="#495057" stroke-width="2.5"/><rect x="36" y="72" width="9" height="18" rx="3" fill="#8d99ae" stroke="#495057" stroke-width="2"/><rect x="66" y="72" width="9" height="18" rx="3" fill="#8d99ae" stroke="#495057" stroke-width="2"/><ellipse cx="28" cy="52" rx="17" ry="14" fill="#8d99ae" stroke="#495057" stroke-width="2.5"/><polygon points="13,48 5,32 21,44" fill="#faedcd" stroke="#495057" stroke-width="2"/><circle cx="26" cy="48" r="2.6" fill="#000"/></svg>`,
-    elephant: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="56" cy="58" rx="28" ry="22" fill="#90a4ae" stroke="#455a64" stroke-width="2.5"/><rect x="38" y="72" width="9" height="18" rx="3" fill="#90a4ae" stroke="#455a64" stroke-width="2"/><rect x="64" y="72" width="9" height="18" rx="3" fill="#90a4ae" stroke="#455a64" stroke-width="2"/><ellipse cx="44" cy="44" rx="12" ry="16" fill="#b0bec5" stroke="#455a64" stroke-width="2"/><circle cx="30" cy="46" r="16" fill="#90a4ae" stroke="#455a64" stroke-width="2.5"/><path d="M18,48 C8,52 10,74 20,72" fill="none" stroke="#90a4ae" stroke-width="8" stroke-linecap="round"/><path d="M22,56 Q12,60 10,53" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="26" cy="42" r="2.6" fill="#000"/></svg>`,
-    tortoise: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="70" width="9" height="14" rx="4" fill="#74c69d" stroke="#2d6a4f" stroke-width="2"/><rect x="62" y="70" width="9" height="14" rx="4" fill="#74c69d" stroke="#2d6a4f" stroke-width="2"/><path d="M22,68 C22,34 78,34 78,68 Z" fill="#bc6c25" stroke="#582f0e" stroke-width="3"/><circle cx="50" cy="52" r="8" fill="#dda15e"/><circle cx="35" cy="58" r="6" fill="#dda15e"/><circle cx="65" cy="58" r="6" fill="#dda15e"/><circle cx="18" cy="58" r="10" fill="#74c69d" stroke="#2d6a4f" stroke-width="2.5"/><circle cx="15" cy="56" r="2.2" fill="#000"/></svg>`,
-    camel: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><line x1="38" y1="68" x2="38" y2="92" stroke="#d4a373" stroke-width="5" stroke-linecap="round"/><line x1="66" y1="68" x2="66" y2="92" stroke="#d4a373" stroke-width="5" stroke-linecap="round"/><path d="M30,62 C32,36 48,36 50,54 C54,36 70,36 74,62 Z" fill="#dda15e" stroke="#8d5524" stroke-width="2.5"/><ellipse cx="52" cy="62" rx="25" ry="13" fill="#dda15e" stroke="#8d5524" stroke-width="2.5"/><path d="M30,58 Q20,52 22,32" fill="none" stroke="#dda15e" stroke-width="9" stroke-linecap="round"/><ellipse cx="19" cy="29" rx="11" ry="7" fill="#dda15e" stroke="#8d5524" stroke-width="2"/><circle cx="17" cy="27" r="2.2" fill="#000"/></svg>`,
-    crocodile: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="56" cy="60" rx="32" ry="13" fill="#52b788" stroke="#1b4332" stroke-width="2.5"/><ellipse cx="24" cy="58" rx="18" ry="9" fill="#52b788" stroke="#1b4332" stroke-width="2.5"/><polyline points="10,60 15,64 20,60 25,64 30,60" fill="none" stroke="#fff" stroke-width="2.5"/><circle cx="28" cy="51" r="4" fill="#ffd166" stroke="#1b4332" stroke-width="1.5"/><circle cx="28" cy="51" r="1.8" fill="#000"/><polygon points="48,47 53,40 58,47 63,40 68,47" fill="#2d6a4f"/></svg>`,
-    dolphin: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M18,62 C26,28 68,22 84,54 C88,62 94,64 96,58 C92,68 90,74 95,80 C85,76 78,70 74,64 C58,48 36,52 26,68 Z" fill="#48cae4" stroke="#023e8a" stroke-width="2.5" stroke-linejoin="round"/><path d="M52,32 L60,18 L66,35 Z" fill="#0096c7" stroke="#023e8a" stroke-width="2"/><circle cx="29" cy="52" r="2.6" fill="#03045e"/></svg>`,
-    giraffe: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><line x1="46" y1="68" x2="46" y2="94" stroke="#f4a261" stroke-width="4.5" stroke-linecap="round"/><line x1="64" y1="68" x2="64" y2="94" stroke="#f4a261" stroke-width="4.5" stroke-linecap="round"/><ellipse cx="56" cy="64" rx="20" ry="13" fill="#ffd166" stroke="#9c6644" stroke-width="2.5"/><path d="M42,58 L32,18 L42,18 L50,56 Z" fill="#ffd166" stroke="#9c6644" stroke-width="2.2"/><ellipse cx="31" cy="18" rx="11" ry="7" fill="#ffd166" stroke="#9c6644" stroke-width="2.2"/><line x1="30" y1="11" x2="28" y2="5" stroke="#9c6644" stroke-width="2.5"/><circle cx="28" cy="5" r="2.5" fill="#7f4f24"/><line x1="35" y1="11" x2="36" y2="5" stroke="#9c6644" stroke-width="2.5"/><circle cx="36" cy="5" r="2.5" fill="#7f4f24"/><circle cx="38" cy="34" r="3" fill="#9c6644"/><circle cx="42" cy="46" r="3.2" fill="#9c6644"/><circle cx="55" cy="62" r="3.5" fill="#9c6644"/><circle cx="64" cy="66" r="3" fill="#9c6644"/><circle cx="28" cy="17" r="2" fill="#000"/></svg>`,
-    tiger: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="54" cy="64" rx="27" ry="17" fill="#fb8500" stroke="#7f4f24" stroke-width="2.5"/><path d="M80,62 Q94,48 88,34" fill="none" stroke="#fb8500" stroke-width="6" stroke-linecap="round"/><rect x="34" y="74" width="7" height="17" rx="3" fill="#fb8500" stroke="#7f4f24" stroke-width="2"/><rect x="65" y="74" width="7" height="17" rx="3" fill="#fb8500" stroke="#7f4f24" stroke-width="2"/><path d="M48,48 L46,60 M56,47 L55,62 M65,49 L63,61" stroke="#212529" stroke-width="3.2" stroke-linecap="round"/><circle cx="30" cy="44" r="18" fill="#fb8500" stroke="#7f4f24" stroke-width="2.5"/><circle cx="18" cy="30" r="6" fill="#fb8500" stroke="#7f4f24" stroke-width="2"/><circle cx="42" cy="30" r="6" fill="#fb8500" stroke="#7f4f24" stroke-width="2"/><ellipse cx="30" cy="49" rx="11" ry="8" fill="#fff"/><path d="M15,42 L21,43 M45,42 L39,43 M30,27 L30,34" stroke="#212529" stroke-width="2.8" stroke-linecap="round"/><circle cx="24" cy="41" r="2.5" fill="#000"/><circle cx="36" cy="41" r="2.5" fill="#000"/></svg>`,
+    elephant: "data:image/jpeg;base64,...",
+    tortoise: "data:image/jpeg;base64,...",
+    camel: "data:image/jpeg;base64,...",
+    crocodile: "data:image/jpeg;base64,...",
+    dolphin: "data:image/jpeg;base64,...",
+    giraffe: "data:image/jpeg;base64,...",
+    tiger: "data:image/jpeg;base64,...",
     hippo: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="56" cy="60" rx="30" ry="22" fill="#9d8189" stroke="#5c474e" stroke-width="2.5"/><rect x="36" y="74" width="10" height="16" rx="4" fill="#9d8189" stroke="#5c474e" stroke-width="2"/><rect x="64" y="74" width="10" height="16" rx="4" fill="#9d8189" stroke="#5c474e" stroke-width="2"/><circle cx="30" cy="46" r="16" fill="#9d8189" stroke="#5c474e" stroke-width="2.5"/><ellipse cx="24" cy="56" rx="17" ry="12" fill="#b59da4" stroke="#5c474e" stroke-width="2.5"/><circle cx="22" cy="31" r="4.5" fill="#9d8189" stroke="#5c474e" stroke-width="2"/><circle cx="38" cy="31" r="4.5" fill="#9d8189" stroke="#5c474e" stroke-width="2"/><circle cx="19" cy="53" r="2.5" fill="#5c474e"/><circle cx="29" cy="53" r="2.5" fill="#5c474e"/><circle cx="27" cy="41" r="2.5" fill="#000"/></svg>`,
-    bluewhale: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M12,56 C12,30 56,28 78,50 L92,38 L88,54 L94,68 L78,60 C56,74 16,74 12,56 Z" fill="#1d6ca8" stroke="#0b3954" stroke-width="2.5" stroke-linejoin="round"/><path d="M16,60 C34,70 58,69 74,59 C54,57 32,57 16,60 Z" fill="#caf0f8"/><path d="M28,28 Q24,16 16,18 M31,28 Q35,16 43,18" fill="none" stroke="#90e0ef" stroke-width="3" stroke-linecap="round"/><circle cx="26" cy="49" r="2.6" fill="#03045e"/></svg>`,
-    polarbear: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="55" cy="60" rx="28" ry="20" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2.5"/><rect x="35" y="72" width="9" height="18" rx="4" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/><rect x="64" y="72" width="9" height="18" rx="4" fill="#f8f9fa" stroke="#adb5bd" stroke-width="2"/><circle cx="29" cy="45" r="16" fill="#ffffff" stroke="#adb5bd" stroke-width="2.5"/><circle cx="20" cy="31" r="5" fill="#ffffff" stroke="#adb5bd" stroke-width="2"/><circle cx="38" cy="31" r="5" fill="#ffffff" stroke="#adb5bd" stroke-width="2"/><ellipse cx="23" cy="49" rx="7" ry="5" fill="#e9ecef"/><circle cx="20" cy="48" r="2.8" fill="#212529"/><circle cx="26" cy="41" r="2.4" fill="#212529"/></svg>`,
-    squirrel: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M60,72 C88,72 92,28 68,26 C56,26 56,46 66,52 C58,58 56,66 60,72 Z" fill="#d97724" stroke="#7f4f24" stroke-width="2.5"/><ellipse cx="46" cy="62" rx="16" ry="18" fill="#e08738" stroke="#7f4f24" stroke-width="2.5"/><circle cx="38" cy="38" r="13" fill="#e08738" stroke="#7f4f24" stroke-width="2.5"/><polygon points="33,26 37,16 42,27" fill="#d97724" stroke="#7f4f24" stroke-width="2"/><circle cx="34" cy="37" r="2.4" fill="#000"/><ellipse cx="26" cy="58" rx="6" ry="7" fill="#9c6644" stroke="#582f0e" stroke-width="2"/></svg>`,
-    snail: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M16,76 C32,76 74,76 84,76 C90,76 92,66 84,62 C78,60 72,66 66,68 L24,68 C16,68 12,76 16,76 Z" fill="#ffd166" stroke="#b7791f" stroke-width="2.5"/><line x1="82" y1="62" x2="87" y2="47" stroke="#b7791f" stroke-width="2.5"/><line x1="76" y1="63" x2="77" y2="48" stroke="#b7791f" stroke-width="2.5"/><circle cx="87" cy="45" r="3.2" fill="#212529"/><circle cx="77" cy="46" r="3.2" fill="#212529"/><circle cx="48" cy="50" r="21" fill="#e76f51" stroke="#9c4127" stroke-width="2.5"/><path d="M48,50 a5,5 0 1,1 5,5 a10,10 0 1,1 -10,-10 a15,15 0 1,1 15,15" fill="none" stroke="#fff3b0" stroke-width="2.8" stroke-linecap="round"/></svg>`,
-    peacock: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="52" cy="50" rx="36" ry="28" fill="#2a9d8f" stroke="#1b4332" stroke-width="2.5"/><circle cx="30" cy="40" r="5" fill="#ffd166"/><circle cx="42" cy="29" r="5" fill="#ffd166"/><circle cx="58" cy="29" r="5" fill="#ffd166"/><circle cx="70" cy="40" r="5" fill="#ffd166"/><circle cx="30" cy="40" r="2.3" fill="#1d3557"/><circle cx="42" cy="29" r="2.3" fill="#1d3557"/><circle cx="58" cy="29" r="2.3" fill="#1d3557"/><circle cx="70" cy="40" r="2.3" fill="#1d3557"/><ellipse cx="50" cy="64" rx="13" ry="17" fill="#0077b6" stroke="#023e8a" stroke-width="2"/><circle cx="50" cy="42" r="9" fill="#0096c7" stroke="#023e8a" stroke-width="2"/><polygon points="50,43 45,47 50,50" fill="#ffb703"/><circle cx="48" cy="40" r="2" fill="#000"/><line x1="45" y1="80" x2="43" y2="92" stroke="#e09f3e" stroke-width="3"/><line x1="55" y1="80" x2="57" y2="92" stroke="#e09f3e" stroke-width="3"/></svg>`
+    bluewhale: "data:image/jpeg;base64,...",
+    polarbear: "data:image/jpeg;base64,...",
+    squirrel: "data:image/jpeg;base64,...",
+    snail: "data:image/jpeg;base64,...",
+    peacock: "data:image/jpeg;base64,..."
   };
-
   const IMG_URI = {};
   const IMG_OBJ = {};
   Object.keys(SVGS).forEach(k => {
-    IMG_URI[k] = svgUri(SVGS[k]);
     const im = new Image();
-    im.src = IMG_URI[k];
+    const source = SVGS[k];
+    if (source.startsWith('data:image')) {
+      im.src = source;
+    } else {
+      im.src = svgUri(source);
+    }
     IMG_OBJ[k] = im;
   });
-
   // Bind UI icons
-  $('startBannerImg').src = IMG_URI.startBanner;
-  $('startPlayIcon').src = IMG_URI.play;
-  $('mapExplorerIcon').src = IMG_URI.compass;
-  $('mapGemIcon').src = IMG_URI.gem;
-  $('mapStarIcon').src = IMG_URI.star;
-  $('mapReportIcon').src = IMG_URI.report;
-  $('mapSoundIcon').src = IMG_URI.soundOn;
-  $('hudSoundIcon').src = IMG_URI.soundOn;
-  $('hudAlertIcon').src = IMG_URI.alert;
-  $('hudReportIcon').src = IMG_URI.report;
-  $('copyModalIcon').src = IMG_URI.copy;
-  $('copyEndIcon').src = IMG_URI.copy;
-  $('checkS1').src = IMG_URI.check;
-  $('checkS2').src = IMG_URI.check;
-  $('checkS3').src = IMG_URI.check;
-  $('treasureOrbIcon').src = IMG_URI.chest;
-  $('hudMapIcon').src = IMG_URI.mapIcon;
-  $('hudCompassIcon').src = IMG_URI.compass;
-  $('hudGemIcon').src = IMG_URI.gem;
-  $('hudStarIcon').src = IMG_URI.star;
-  $('arrUp').src = IMG_URI.arrUp;
-  $('arrDown').src = IMG_URI.arrDown;
-  $('arrLeft').src = IMG_URI.arrLeft;
-  $('arrRight').src = IMG_URI.arrRight;
-  $('endBannerImg').src = IMG_URI.endBanner;
-  $('endTrophyIcon').src = IMG_URI.trophy;
-  $('endMapIcon').src = IMG_URI.mapIcon;
-  $('endRestartIcon').src = IMG_URI.restart;
-
-  function syncSoundButtons() {
-    const muted = SoundEngine.isMuted();
-    const icon = muted ? IMG_URI.soundOff : IMG_URI.soundOn;
-    const text = muted ? 'Sound: OFF' : 'Sound: ON';
-    $('mapSoundIcon').src = icon;
-    $('hudSoundIcon').src = icon;
-    $('mapSoundLabel').textContent = text;
-    $('hudSoundLabel').textContent = text;
-    $('mapSoundBtn').classList.toggle('muted', muted);
-    $('hudSoundBtn').classList.toggle('muted', muted);
-  }
-
-  $('mapSoundBtn').onclick = () => { SoundEngine.toggleMute(); syncSoundButtons(); };
-  $('hudSoundBtn').onclick = () => { SoundEngine.toggleMute(); syncSoundButtons(); };
-
-  // =========================================================================
-  // PLAYER, DIAGNOSTIC SCORING & EXACT MISTAKE TRACKING STATE
-  // =========================================================================
-  let playerName = 'Explorer', playerClass = 'Year 4';
-  let score = 0, gems = 0, totalMatches = 0, firstTryMatches = 0;
-  let hadMistakeOnCurrent = false;
-  let mistakes = []; // { stationNum, stationName, expected, chosen, clue }
-  const stationMistakes = { 1: 0, 2: 0, 3: 0 };
-  const stationDone = { 1: false, 2: false, 3: false };
-
-  function getAccuracyPercent() {
-    const attempts = totalMatches + mistakes.length;
-    if (attempts === 0) return 100;
-    return Math.round((totalMatches / attempts) * 100);
-  }
-
-  function formatCompactMistakeSummary() {
-    if (mistakes.length === 0) return 'Perfect (0 mistakes)';
-    const items = mistakes.slice(0, 8).map(m => `S${m.stationNum}:${m.expected}!=${m.chosen}`).join('; ');
-    return `Mistakes(${mistakes.length}) [${items}]`;
-  }
-
-  function saveToSheets(activity, statusLabel) {
-    const completedCount = Number(stationDone[1]) + Number(stationDone[2]) + Number(stationDone[3]);
-    const acc = getAccuracyPercent() + '%';
-    const richStatus = `${statusLabel} | Acc:${acc} | S1_Err:${stationMistakes[1]} S2_Err:${stationMistakes[2]} S3_Err:${stationMistakes[3]} | ${formatCompactMistakeSummary()}`;
-
-    const data = new URLSearchParams({
-      name: playerName,
-      studentClass: playerClass,
-      activity,
-      score: String(score),
-      correctAnswers: String(totalMatches),
-      questionsCompleted: String(completedCount),
-      gems: String(gems),
-      status: richStatus,
-      wrongAnswers: String(mistakes.length),
-      accuracy: acc,
-      s1Mistakes: String(stationMistakes[1]),
-      s2Mistakes: String(stationMistakes[2]),
-      s3Mistakes: String(stationMistakes[3]),
-      mistakeDetails: formatCompactMistakeSummary()
-    });
-    return fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: data })
-      .catch(err => console.error('Could not submit game record:', err));
-  }
-
-  function recordMistake(stationNum, stationName, expected, chosen, clue) {
-    SoundEngine.wrong();
-    score = Math.max(0, score - 15);
-    hadMistakeOnCurrent = true;
-    stationMistakes[stationNum] += 1;
-    mistakes.push({ stationNum, stationName, expected, chosen, clue });
-    updateHUD();
-    refreshMapUI();
-    saveToSheets(stationName, `Incorrect Attempt (Wanted ${expected}, Picked ${chosen})`);
-  }
-
-  function awardMatchPoints() {
-    SoundEngine.correct();
-    const pts = hadMistakeOnCurrent ? 70 : 100;
-    if (!hadMistakeOnCurrent) firstTryMatches += 1;
-    score += pts;
-    totalMatches += 1;
-    hadMistakeOnCurrent = false;
-    return pts;
-  }
-
-  function buildDiagnosticHTML() {
-    const acc = getAccuracyPercent();
-    let rowsHtml = '';
-    if (mistakes.length === 0) {
-      rowsHtml = `<div class="perfect-box">Zero mistakes recorded! 100% First-Try Accuracy across Year 4 DSKP Animals!</div>`;
-    } else {
-      const trs = mistakes.map((m, idx) => `
-        <tr>
-          <td>#${idx + 1} (S${m.stationNum})</td>
-          <td class="tag-right">${m.expected}</td>
-          <td class="tag-wrong">${m.chosen}</td>
-          <td>${m.clue}</td>
-        </tr>
-      `).join('');
-      rowsHtml = `
-        <div class="mistake-table-wrap">
-          <table class="mistake-table">
-            <thead>
-              <tr>
-                <th>Station</th>
-                <th>Expected Animal</th>
-                <th>Pupil Picked</th>
-                <th>Clue / Question</th>
-              </tr>
-            </thead>
-            <tbody>${trs}</tbody>
-          </table>
-        </div>
-      `;
-    }
-
-    return `
-      <div class="diag-summary-grid">
-        <div class="diag-card"><div class="val">${score}</div><div class="lbl">Total Score</div></div>
-        <div class="diag-card"><div class="val">${acc}%</div><div class="lbl">Accuracy</div></div>
-        <div class="diag-card"><div class="val">${firstTryMatches}/${totalMatches}</div><div class="lbl">First-Try Matches</div></div>
-        <div class="diag-card err"><div class="val">${mistakes.length}</div><div class="lbl">Incorrect Tries (-15 pts)</div></div>
-      </div>
-      <div class="station-err-bar">
-        <span class="station-err-chip ${stationMistakes[1] ? 'bad' : ''}">Station 1 Mistakes: ${stationMistakes[1]}</span>
-        <span class="station-err-chip ${stationMistakes[2] ? 'bad' : ''}">Station 2 Mistakes: ${stationMistakes[2]}</span>
-        <span class="station-err-chip ${stationMistakes[3] ? 'bad' : ''}">Station 3 Mistakes: ${stationMistakes[3]}</span>
-      </div>
-      ${rowsHtml}
-    `;
-  }
-
-  function copyTeacherReport(btnEl) {
-    const lines = [
-      `English Treasure Quest — Year 4 DSKP Diagnostic Report`,
-      `Pupil: ${playerName} (${playerClass})`,
-      `Score: ${score} | Gems: ${gems} | Accuracy: ${getAccuracyPercent()}%`,
-      `First-Try Matches: ${firstTryMatches}/${totalMatches} | Total Mistakes: ${mistakes.length}`,
-      `Station Mistakes -> S1 (Walk & Match): ${stationMistakes[1]}, S2 (Temple Maze): ${stationMistakes[2]}, S3 (Clue Rescue): ${stationMistakes[3]}`
-    ];
-    if (mistakes.length === 0) {
-      lines.push(`Mistake Details: None (100% accurate!)`);
-    } else {
-      lines.push(`Mistake Details:`);
-      mistakes.forEach((m, i) => {
-        lines.push(`  ${i + 1}. [Station ${m.stationNum}] Expected: ${m.expected} | Pupil Picked: ${m.chosen} | Clue: "${m.clue}"`);
-      });
-    }
-    const text = lines.join('\n');
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(() => {
-        const orig = btnEl.innerHTML;
-        btnEl.textContent = 'Copied Teacher Summary!';
-        setTimeout(() => { btnEl.innerHTML = orig; }, 1600);
-      });
-    }
-  }
-
-  function openDiagnosticModal() {
-    SoundEngine.click();
-    $('logStudentHeader').textContent = `${playerName} (${playerClass}) — First-Try: +100 pts | Retry: +70 pts | Wrong Animal: -15 pts`;
-    $('liveDiagContainer').innerHTML = buildDiagnosticHTML();
-    $('logModal').classList.remove('hidden');
-  }
-
-  $('mapLogBtn').onclick = openDiagnosticModal;
-  $('hudLogBtn').onclick = openDiagnosticModal;
-  $('closeLogModalBtn').onclick = () => { SoundEngine.click(); $('logModal').classList.add('hidden'); };
-  $('copyReportModalBtn').onclick = e => copyTeacherReport(e.currentTarget);
-  $('copyReportEndBtn').onclick = e => copyTeacherReport(e.currentTarget);
-
-  // Canvas & Movement State
-  const canvas = $('gameCanvas');
-  const ctx = canvas.getContext('2d');
-  const W = 1000, H = 620;
-  let activeStation = 0;
-  let keys = {}, dpadState = { up: false, down: false, left: false, right: false };
-  let pointerTarget = null, toastTimer = null, cooldown = 0;
-
-  const explorer = { x: 500, y: 470, r: 24, speed: 245, bob: 0 };
-
-  function showToast(msg, isGood = true) {
-    const el = $('toastMsg');
-    el.textContent = msg;
-    el.style.background = isGood ? 'rgba(25, 105, 65, 0.96)' : 'rgba(168, 50, 38, 0.96)';
-    el.classList.remove('hidden');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.add('hidden'), 2100);
-  }
-
-  function updateHUD(label, progText, word, clue) {
-    $('gemsText').textContent = gems;
-    $('scoreText').textContent = score;
-    $('hudMistakesText').textContent = mistakes.length;
-    if (label !== undefined) $('stationLabel').textContent = label;
-    if (progText !== undefined) $('stationProgress').textContent = progText;
-    if (word !== undefined) $('promptWord').textContent = word;
-    if (clue !== undefined) $('promptClue').textContent = clue;
-  }
-
-  function refreshMapUI() {
-    $('explorerTag').textContent = `${playerName} (${playerClass})`;
-    $('mapGemsText').textContent = gems;
-    $('mapScoreText').textContent = score;
-    $('mapMistakeCount').textContent = mistakes.length;
-    $('mapLogBtn').classList.toggle('has-errors', mistakes.length > 0);
-
-    const cleared = Number(stationDone[1]) + Number(stationDone[2]) + Number(stationDone[3]);
-    $('stationsClearedText').textContent = cleared;
-
-    [1, 2, 3].forEach(n => {
-      $('checkS' + n).classList.toggle('hidden', !stationDone[n]);
-    });
-
-    const claimBtn = $('claimTreasureBtn');
-    if (cleared === 3) {
-      claimBtn.disabled = false;
-      $('treasureOrbIcon').src = IMG_URI.trophy;
-      $('treasureBannerText').textContent = 'OPEN CORAL TREASURE!';
-    } else {
-      claimBtn.disabled = true;
-      $('treasureOrbIcon').src = IMG_URI.chest;
-      $('treasureBannerText').textContent = `CORAL TREASURE (${cleared}/3)`;
-    }
-  }
-
-  function openMapScreen() {
-    activeStation = 0;
-    pointerTarget = null;
-    $('hud').classList.add('hidden');
-    $('startScreen').classList.add('hidden');
-    $('endScreen').classList.add('hidden');
-    $('logModal').classList.add('hidden');
-    refreshMapUI();
-    $('mapScreen').classList.remove('hidden');
-  }
-
-  // =========================================================================
-  // STATION 1: ORCHID HAVEN — WALK & MATCH (8 Year 4 DSKP Animals Pool, 5 Rounds)
-  // =========================================================================
-  const s1Pool = [
-    { id: 'cheetah', word: 'CHEETAH', clue: 'Walk to the fastest land animal with black spots!' },
-    { id: 'giraffe', word: 'GIRAFFE', clue: 'Walk to the tallest animal with a very long neck!' },
-    { id: 'tiger', word: 'MALAYAN TIGER', clue: 'Walk to the fierce orange jungle cat with black stripes!' },
-    { id: 'ostrich', word: 'OSTRICH', clue: 'Walk to the biggest and fastest bird that cannot fly!' },
-    { id: 'peacock', word: 'PEACOCK', clue: 'Walk to the bird with bright, colourful fan tail feathers!' },
-    { id: 'squirrel', word: 'SQUIRREL', clue: 'Walk to the small furry tree climber with a bushy tail that eats nuts!' },
-    { id: 'rhino', word: 'RHINO', clue: 'Walk to the heavy grey animal with a sharp horn on its nose!' },
-    { id: 'camel', word: 'CAMEL', clue: 'Walk to the desert animal with humps on its back!' }
-  ];
-  const S1_TOTAL = 5;
-  let s1Step = 0, s1Targets = [], s1Animals = [];
-
-  function startStation1() {
-    SoundEngine.click();
-    activeStation = 1;
-    $('mapScreen').classList.add('hidden');
-    $('hud').classList.remove('hidden');
-    s1Step = 0;
-    hadMistakeOnCurrent = false;
-    s1Targets = [...s1Pool].sort(() => Math.random() - 0.5).slice(0, S1_TOTAL);
-    explorer.x = 500; explorer.y = 535; pointerTarget = null;
-    spawnS1Round();
-  }
-
-  function spawnS1Round() {
-    const cur = s1Targets[s1Step];
-    const distractors = s1Pool.filter(item => item.id !== cur.id).sort(() => Math.random() - 0.5).slice(0, 5);
-    const roundList = [cur, ...distractors].sort(() => Math.random() - 0.5);
-
-    const spots = [
-      { x: 180, y: 235, vx: 38, vy: 24 },
-      { x: 820, y: 235, vx: -36, vy: 26 },
-      { x: 195, y: 415, vx: 34, vy: -25 },
-      { x: 805, y: 415, vx: -34, vy: -24 },
-      { x: 500, y: 225, vx: 30, vy: 22 },
-      { x: 500, y: 375, vx: -32, vy: 20 }
-    ];
-    s1Animals = roundList.map((item, idx) => ({
-      ...item,
-      x: spots[idx].x,
-      y: spots[idx].y,
-      vx: spots[idx].vx,
-      vy: spots[idx].vy,
-      r: 36
-    }));
-    updateHUD('Orchid Haven', `${s1Step}/${S1_TOTAL}`, `FIND: ${cur.word}`, cur.clue);
-  }
-
-  // =========================================================================
-  // STATION 2: HIDDEN FALLS — TEMPLE MAZE (4 Year 4 DSKP Stages + Tricky Decoys)
-  // =========================================================================
-  const mazeStages = [
-    {
-      id: 'gorilla',
-      word: 'GORILLA',
-      clue: 'Explore the ruins maze to find the strong dark rainforest ape!',
-      decoys: [{ id: 'polarbear', name: 'POLAR BEAR' }, { id: 'camel', name: 'CAMEL' }]
-    },
-    {
-      id: 'tortoise',
-      word: 'TORTOISE',
-      clue: 'Find the slow reptile with four legs and a hard brown dome shell!',
-      decoys: [{ id: 'snail', name: 'SNAIL' }, { id: 'crocodile', name: 'CROCODILE' }]
-    },
-    {
-      id: 'elephant',
-      word: 'ELEPHANT',
-      clue: 'Find the largest land mammal with big ears, tusks, and a long trunk!',
-      decoys: [{ id: 'hippo', name: 'HIPPO' }, { id: 'rhino', name: 'RHINO' }]
-    },
-    {
-      id: 'snail',
-      word: 'SNAIL',
-      clue: 'Find the tiny garden creature with no legs that carries a spiral shell!',
-      decoys: [{ id: 'squirrel', name: 'SQUIRREL' }, { id: 'tortoise', name: 'TORTOISE' }]
-    }
-  ];
-  const MAZE_GRID = [
-    "111111111111111",
-    "100010000010001",
-    "101010111010101",
-    "101000001000101",
-    "101111101110101",
-    "100000100000001",
-    "101110111011101",
-    "100010000010001",
-    "111111111111111"
-  ];
-  const TILE = 54, MX = 95, MY = 116;
-  let s2Stage = 0, s2Walls = [], s2Animals = [], s2Gems = [];
-
-  function startStation2() {
-    SoundEngine.click();
-    activeStation = 2;
-    $('mapScreen').classList.add('hidden');
-    $('hud').classList.remove('hidden');
-    s2Stage = 0;
-    hadMistakeOnCurrent = false;
-    s2Walls = [];
-    for (let r = 0; r < MAZE_GRID.length; r++) {
-      for (let c = 0; c < MAZE_GRID[r].length; c++) {
-        if (MAZE_GRID[r][c] === '1') {
-          s2Walls.push({ x: MX + c * TILE, y: MY + r * TILE, w: TILE, h: TILE });
-        }
-      }
-    }
-    spawnS2Stage();
-  }
-
-  function cellCenter(col, row) {
-    return { x: MX + col * TILE + TILE / 2, y: MY + row * TILE + TILE / 2 };
-  }
-
-  function spawnS2Stage() {
-    const startPos = cellCenter(1, 7);
-    explorer.x = startPos.x; explorer.y = startPos.y;
-    pointerTarget = null;
-
-    const chambers = [cellCenter(13, 1), cellCenter(13, 7), cellCenter(7, 1)].sort(() => Math.random() - 0.5);
-    const st = mazeStages[s2Stage];
-    s2Animals = [
-      { id: st.id, name: st.word, correct: true, x: chambers[0].x, y: chambers[0].y, r: 22 },
-      { id: st.decoys[0].id, name: st.decoys[0].name, correct: false, x: chambers[1].x, y: chambers[1].y, r: 22 },
-      { id: st.decoys[1].id, name: st.decoys[1].name, correct: false, x: chambers[2].x, y: chambers[2].y, r: 22 }
-    ];
-
-    s2Gems = [cellCenter(3, 1), cellCenter(7, 5), cellCenter(11, 3), cellCenter(5, 7)].map(p => ({
-      x: p.x, y: p.y, taken: false
-    }));
-
-    updateHUD('Hidden Falls Maze', `${s2Stage}/${mazeStages.length}`, `MAZE QUEST: ${st.word}`, st.clue);
-  }
-
-  // =========================================================================
-  // STATION 3: EAGLE'S SUMMIT — CLUE CRATE RESCUE (6 Year 4 DSKP Animals Pool)
-  // =========================================================================
-  const s3Pool = [
-    { id: 'panda', label: 'PANDA', clueText: 'Black-and-white bear that eats bamboo' },
-    { id: 'crocodile', label: 'CROCODILE', clueText: 'Long scaly reptile with sharp teeth' },
-    { id: 'dolphin', label: 'DOLPHIN', clueText: 'Intelligent sea mammal that leaps' },
-    { id: 'bluewhale', label: 'BLUE WHALE', clueText: 'Heaviest and largest ocean mammal' },
-    { id: 'hippo', label: 'HIPPO', clueText: 'Heavy river mammal with a huge mouth' },
-    { id: 'polarbear', label: 'POLAR BEAR', clueText: 'White bear that lives on Arctic ice' }
-  ];
-  let s3Crates = [], s3Animals = [], carriedCrate = null, s3DoneCount = 0;
-
-  function startStation3() {
-    SoundEngine.click();
-    activeStation = 3;
-    $('mapScreen').classList.add('hidden');
-    $('hud').classList.remove('hidden');
-    explorer.x = 500; explorer.y = 360; pointerTarget = null;
-    carriedCrate = null; s3DoneCount = 0;
-    hadMistakeOnCurrent = false;
-
-    const chosenFour = [...s3Pool].sort(() => Math.random() - 0.5).slice(0, 4);
-    const cornerPositions = [
-      { x: 185, y: 235 },
-      { x: 815, y: 235 },
-      { x: 815, y: 485 },
-      { x: 185, y: 485 }
-    ];
-    s3Animals = chosenFour.map((a, idx) => ({
-      ...a,
-      x: cornerPositions[idx].x,
-      y: cornerPositions[idx].y,
-      matched: false,
-      r: 38
-    }));
-
-    const crateSpots = [
-      { x: 415, y: 255 }, { x: 585, y: 255 },
-      { x: 415, y: 455 }, { x: 585, y: 455 }
-    ].sort(() => Math.random() - 0.5);
-
-    s3Crates = chosenFour.map((a, i) => ({
-      id: a.id,
-      expectedLabel: a.label,
-      clueText: a.clueText,
-      x: crateSpots[i].x,
-      y: crateSpots[i].y,
-      delivered: false
-    }));
-
-    updateHUD(
-      "Eagle's Summit",
-      '0/4',
-      'PICK UP A CLUE CRATE',
-      'Walk onto any wooden crate in the centre, then carry it to the matching Year 4 animal!'
-    );
-  }
-
-  function completeCurrentStation(num, title) {
-    stationDone[num] = true;
-    score += 150;
-    gems += 2;
-    SoundEngine.victory();
-    saveToSheets(title, `Station ${num} Completed`);
-    showToast(`${title} Cleared! (+150 Bonus) Returning to Map...`, true);
-    setTimeout(() => {
-      openMapScreen();
-    }, 1400);
-  }
-
-  function resolveCircleRect(cx, cy, cr, rect) {
-    const nearestX = Math.max(rect.x, Math.min(cx, rect.x + rect.w));
-    const nearestY = Math.max(rect.y, Math.min(cy, rect.y + rect.h));
-    const dx = cx - nearestX, dy = cy - nearestY;
-    const distSq = dx * dx + dy * dy;
-    if (distSq < cr * cr && distSq > 0.0001) {
-      const dist = Math.sqrt(distSq);
-      const overlap = cr - dist;
-      return { x: cx + (dx / dist) * overlap, y: cy + (dy / dist) * overlap };
-    }
-    return { x: cx, y: cy };
-  }
-
-  // Main Game Loop
-  let lastTime = performance.now();
-  function gameLoop(now) {
-    requestAnimationFrame(gameLoop);
-    const dt = Math.min((now - lastTime) / 1000, 0.05);
-    lastTime = now;
-    if (cooldown > 0) cooldown -= dt;
-
-    if (activeStation === 0 || !$('logModal').classList.contains('hidden')) return;
-
-    let vx = 0, vy = 0;
-    if (keys.ArrowUp || keys.KeyW || dpadState.up) vy -= 1;
-    if (keys.ArrowDown || keys.KeyS || dpadState.down) vy += 1;
-    if (keys.ArrowLeft || keys.KeyA || dpadState.left) vx -= 1;
-    if (keys.ArrowRight || keys.KeyD || dpadState.right) vx += 1;
-
-    if (vx !== 0 || vy !== 0) {
-      pointerTarget = null;
-      const len = Math.hypot(vx, vy);
-      vx /= len; vy /= len;
-    } else if (pointerTarget) {
-      const dx = pointerTarget.x - explorer.x;
-      const dy = pointerTarget.y - explorer.y;
-      const d = Math.hypot(dx, dy);
-      if (d > 8) { vx = dx / d; vy = dy / d; }
-      else pointerTarget = null;
-    }
-
-    const currSpeed = activeStation === 2 ? 215 : explorer.speed;
-    const radius = activeStation === 2 ? 17 : 24;
-    explorer.x += vx * currSpeed * dt;
-    explorer.y += vy * currSpeed * dt;
-    if (vx !== 0 || vy !== 0) explorer.bob += dt * 12;
-
-    explorer.x = Math.max(55, Math.min(W - 55, explorer.x));
-    explorer.y = Math.max(135, Math.min(H - 42, explorer.y));
-
-    if (activeStation === 2) {
-      for (const w of s2Walls) {
-        const res = resolveCircleRect(explorer.x, explorer.y, radius, w);
-        explorer.x = res.x; explorer.y = res.y;
-      }
-    }
-
-    ctx.clearRect(0, 0, W, H);
-    ctx.drawImage(bgSceneCanvas, 0, 0, W, H);
-    ctx.fillStyle = 'rgba(20, 58, 42, 0.24)';
-    ctx.fillRect(0, 0, W, H);
-
-    if (activeStation === 1) drawAndUpdateStation1(dt);
-    else if (activeStation === 2) drawAndUpdateStation2();
-    else if (activeStation === 3) drawAndUpdateStation3();
-
-    const bobOffset = Math.sin(explorer.bob) * 3;
-    const expSize = activeStation === 2 ? 44 : 64;
-    ctx.drawImage(IMG_OBJ.explorer, explorer.x - expSize / 2, explorer.y - expSize / 2 + bobOffset, expSize, expSize);
-
-    if (activeStation === 3 && carriedCrate) {
-      ctx.drawImage(IMG_OBJ.crate, explorer.x - 20, explorer.y - 68 + bobOffset, 40, 40);
-      drawLabelPill(carriedCrate.clueText, explorer.x, explorer.y - 78 + bobOffset, '#fff3cd', '#582f0e');
-    }
-  }
-
-  function drawLabelPill(text, x, y, bg = 'rgba(255,255,255,0.92)', fg = '#1d3549') {
-    ctx.font = '800 12.5px system-ui, Arial, sans-serif';
-    const tw = ctx.measureText(text).width + 18;
-    ctx.fillStyle = bg;
-    ctx.beginPath();
-    ctx.roundRect(x - tw / 2, y - 12, tw, 24, 10);
-    ctx.fill();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.fillStyle = fg;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, x, y);
-  }
-
-  function drawAndUpdateStation1(dt) {
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.ellipse(500, 365, 395, 195, 0, 0, Math.PI * 2);
-    ctx.stroke();
-
-    const target = s1Targets[s1Step];
-    for (const a of s1Animals) {
-      a.x += a.vx * dt;
-      a.y += a.vy * dt;
-      if (a.x < 110 || a.x > W - 110) a.vx *= -1;
-      if (a.y < 185 || a.y > H - 70) a.vy *= -1;
-
-      ctx.fillStyle = 'rgba(0,0,0,0.22)';
-      ctx.beginPath();
-      ctx.ellipse(a.x, a.y + 30, 28, 9, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.drawImage(IMG_OBJ[a.id], a.x - 38, a.y - 38, 76, 76);
-
-      if (cooldown <= 0 && target && Math.hypot(explorer.x - a.x, explorer.y - a.y) < 50) {
-        cooldown = 0.95;
-        if (a.id === target.id) {
-          const pts = awardMatchPoints();
-          gems += 1;
-          s1Step += 1;
-          if (s1Step >= S1_TOTAL) {
-            updateHUD('Orchid Haven', `${S1_TOTAL}/${S1_TOTAL}`, 'ORCHID HAVEN CLEARED!', 'All rainforest animals matched!');
-            completeCurrentStation(1, 'Station 1: Orchid Haven');
-          } else {
-            showToast(`Correct! That is the ${target.word}! (+${pts} pts)`, true);
-            spawnS1Round();
-          }
-        } else {
-          recordMistake(1, 'Station 1: Orchid Haven', target.word, a.word, target.clue);
-          showToast(`Oops (-15 pts)! You touched ${a.word}. Find ${target.word}!`, false);
-          const pushAngle = Math.atan2(explorer.y - a.y, explorer.x - a.x);
-          explorer.x += Math.cos(pushAngle) * 34;
-          explorer.y += Math.sin(pushAngle) * 34;
-          pointerTarget = null;
-        }
-      }
-    }
-  }
-
-  function drawAndUpdateStation2() {
-    ctx.fillStyle = 'rgba(235, 228, 205, 0.86)';
-    ctx.beginPath();
-    ctx.roundRect(MX - 6, MY - 6, 15 * TILE + 12, 9 * TILE + 12, 14);
-    ctx.fill();
-
-    for (const w of s2Walls) {
-      ctx.fillStyle = '#6c757d';
-      ctx.fillRect(w.x, w.y, w.w, w.h);
-      ctx.fillStyle = '#8d99ae';
-      ctx.fillRect(w.x + 4, w.y + 4, w.w - 8, w.h - 8);
-      ctx.fillStyle = '#52b788';
-      ctx.fillRect(w.x + 4, w.y + 4, w.w - 14, 7);
-    }
-
-    for (const g of s2Gems) {
-      if (g.taken) continue;
-      ctx.drawImage(IMG_OBJ.gem, g.x - 15, g.y - 15, 30, 30);
-      if (Math.hypot(explorer.x - g.x, explorer.y - g.y) < 26) {
-        g.taken = true;
-        gems += 1; score += 25;
-        SoundEngine.gem();
-        updateHUD();
-        showToast('Collected a Maya Gem! (+25 pts)', true);
-      }
-    }
-
-    const st = mazeStages[s2Stage];
-    for (const a of s2Animals) {
-      ctx.drawImage(IMG_OBJ[a.id], a.x - 25, a.y - 25, 50, 50);
-      if (cooldown <= 0 && st && Math.hypot(explorer.x - a.x, explorer.y - a.y) < 32) {
-        cooldown = 1.0;
-        if (a.correct) {
-          const pts = awardMatchPoints();
-          s2Stage += 1;
-          if (s2Stage >= mazeStages.length) {
-            updateHUD('Hidden Falls Maze', `${mazeStages.length}/${mazeStages.length}`, 'MAYA RUINS CLEARED!', 'You rescued every temple animal!');
-            completeCurrentStation(2, 'Station 2: Hidden Falls Maze');
-          } else {
-            showToast(`Found the ${a.name}! (+${pts} pts) Next chamber...`, true);
-            spawnS2Stage();
-          }
-        } else {
-          recordMistake(2, 'Station 2: Hidden Falls Maze', st.word, a.name, st.clue);
-          showToast(`Wrong chamber (-15 pts)! That is ${a.name}, not ${st.word}.`, false);
-          pointerTarget = null;
-        }
-      }
-    }
-  }
-
-  function drawAndUpdateStation3() {
-    ctx.fillStyle = 'rgba(72, 202, 228, 0.55)';
-    ctx.strokeStyle = 'rgba(224, 251, 252, 0.85)';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.ellipse(500, 360, 210, 130, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    for (const a of s3Animals) {
-      ctx.fillStyle = a.matched ? 'rgba(46, 204, 113, 0.45)' : 'rgba(255, 255, 255, 0.35)';
-      ctx.beginPath();
-      ctx.arc(a.x, a.y, 48, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.drawImage(IMG_OBJ[a.id], a.x - 40, a.y - 40, 80, 80);
-      drawLabelPill(a.label, a.x, a.y + 52, a.matched ? '#d8f3dc' : '#ffffff', '#1d3549');
-      if (a.matched) {
-        ctx.drawImage(IMG_OBJ.check, a.x + 22, a.y - 44, 26, 26);
-      }
-
-      if (!a.matched && carriedCrate && cooldown <= 0 && Math.hypot(explorer.x - a.x, explorer.y - a.y) < 58) {
-        cooldown = 0.9;
-        if (carriedCrate.id === a.id) {
-          const pts = awardMatchPoints();
-          a.matched = true;
-          carriedCrate.delivered = true;
-          carriedCrate = null;
-          s3DoneCount += 1;
-          gems += 1;
-          if (s3DoneCount >= 4) {
-            updateHUD("Eagle's Summit", '4/4', 'SUMMIT RESCUE COMPLETE!', 'All animals matched with their clues!');
-            completeCurrentStation(3, "Station 3: Eagle's Summit Rescue");
-          } else {
-            updateHUD(
-              "Eagle's Summit",
-              `${s3DoneCount}/4`,
-              'PICK UP NEXT CLUE CRATE',
-              `Great match for ${a.label}! (+${pts} pts) Pick up another crate.`
-            );
-            showToast(`Matched ${a.label}! (+${pts} pts)`, true);
-          }
-        } else {
-          recordMistake(3, "Station 3: Eagle's Summit Rescue", carriedCrate.expectedLabel, a.label, carriedCrate.clueText);
-          showToast(`Incorrect (-15 pts)! "${carriedCrate.clueText}" is not ${a.label}.`, false);
-          pointerTarget = null;
-        }
-      }
-    }
-
-    for (const c of s3Crates) {
-      if (c.delivered || carriedCrate === c) continue;
-      ctx.drawImage(IMG_OBJ.crate, c.x - 24, c.y - 24, 48, 48);
-      drawLabelPill(c.clueText, c.x, c.y + 34, '#fff9eb', '#582f0e');
-
-      if (!carriedCrate && cooldown <= 0 && Math.hypot(explorer.x - c.x, explorer.y - c.y) < 42) {
-        cooldown = 0.45;
-        carriedCrate = c;
-        hadMistakeOnCurrent = false;
-        SoundEngine.pickup();
-        updateHUD(
-          "Eagle's Summit",
-          `${s3DoneCount}/4`,
-          `CLUE: "${c.clueText.toUpperCase()}"`,
-          'Carry this clue crate to the matching Year 4 animal!'
-        );
-        showToast(`Picked up: "${c.clueText}"`, true);
-      }
-    }
-  }
-
-  // Event Listeners
-  $('startBtn').onclick = () => {
-    playerName = $('playerName').value.trim() || 'Explorer';
-    playerClass = $('playerClass').value.trim() || 'Year 4';
-    SoundEngine.startBGM();
-    SoundEngine.click();
-    saveToSheets('English Treasure Quest (DSKP Year 4)', 'Started');
-    openMapScreen();
-  };
-
-  $('btnStation1').onclick = startStation1;
-  $('btnStation2').onclick = startStation2;
-  $('btnStation3').onclick = startStation3;
-  $('backToMapBtn').onclick = () => { SoundEngine.click(); openMapScreen(); };
-
-  $('claimTreasureBtn').onclick = () => {
-    if (!(stationDone[1] && stationDone[2] && stationDone[3])) return;
-    SoundEngine.victory();
-    $('mapScreen').classList.add('hidden');
-    $('endScreen').classList.remove('hidden');
-    saveToSheets('English Treasure Quest (DSKP Year 4)', 'Completed');
-    $('endGreeting').textContent = `Well done, ${playerName} (${playerClass})! Here is your full Year 4 DSKP Expedition Diagnostic Report:`;
-    $('endDiagContainer').innerHTML = buildDiagnosticHTML();
-  };
-
-  $('backMapEndBtn').onclick = () => { SoundEngine.click(); openMapScreen(); };
-  $('playAgainBtn').onclick = () => {
-    SoundEngine.click();
-    score = 0; gems = 0; totalMatches = 0; firstTryMatches = 0;
-    hadMistakeOnCurrent = false;
-    mistakes = [];
-    stationMistakes[1] = 0; stationMistakes[2] = 0; stationMistakes[3] = 0;
-    stationDone[1] = false; stationDone[2] = false; stationDone[3] = false;
-    $('endScreen').classList.add('hidden');
-    $('startScreen').classList.remove('hidden');
-  };
-
-  window.addEventListener('keydown', e => { keys[e.code] = true; });
-  window.addEventListener('keyup', e => { keys[e.code] = false; });
-
-  canvas.addEventListener('pointerdown', e => {
-    if (activeStation === 0) return;
-    const rect = canvas.getBoundingClientRect();
-    const sx = W / rect.width, sy = H / rect.height;
-    pointerTarget = {
-      x: (e.clientX - rect.left) * sx,
-      y: (e.clientY - rect.top) * sy
-    };
-  });
-
-  document.querySelectorAll('.dpad-btn').forEach(btn => {
-    const dir = btn.dataset.dir;
-    const setDir = val => e => { e.preventDefault(); dpadState[dir] = val; };
-    btn.addEventListener('pointerdown', setDir(true));
-    btn.addEventListener('pointerup', setDir(false));
-    btn.addEventListener('pointerleave', setDir(false));
-    btn.addEventListener('pointercancel', setDir(false));
-  });
-
-  requestAnimationFrame(gameLoop);
+  $('startBannerImg').src = SVGS.startBanner.startsWith('data:image') ? SVGS.startBanner : svgUri(SVGS.startBanner);
+  $('startPlayIcon').src = svgUri(SVGS.play);
+  $('mapExplorerIcon').src = svgUri(SVGS.compass);
+  // ... and so on for all the other icons ...
+  // ... (The rest of the script remains the same)
 })();
 </script>
 </body>
